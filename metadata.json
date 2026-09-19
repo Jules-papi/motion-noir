@@ -1,0 +1,6 @@
+{
+  "name": "Maison Noir — Private Members Club",
+  "description": "Exclusive private social club, curated evenings, private salons, digital vaults, and confidential society directory.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,299 @@
+Bence mevcut **neon + pill button + yoğun glow** yaklaşımından biraz çıkmak lazım. Senin ürünün için daha güçlü yön **“premium private social club / luxury dating platform”** hissi olur.
+
+### Ben olsam UI temasını şöyle kurardım
+
+**Ana karakter:**
+
+> **Dark Luxury + Editorial + Soft Glass**
+
+Ne tamamen siyah-neon cyberpunk, ne de klasik dating-app pembe/mor tasarımı.
+
+![Image](https://images.openai.com/static-rsc-4/HrVOjS7qn4pQi7A4oUNN-N2Tk-S6BoCueSnn4m_Uij5Ya4Trrd0P4Bb4ZoHmJHFTPAyTTqyTHOMyupNEWIhhrC1TsiikfjmxOVMG3AjpkuRIWgTgLOmEMJ7KymZ4mVrYRsgcvapBCftZdECy0NwSvxgNOsw0f7coNf2mjUEDfGkjUX-Dgz1ARkNZQD_Jb2-U?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/Ytrer88eVyTAD7HDFbdzLoxA_GBBpwLsTCdM5Z0WLPQbd2rtFP9cOVNm8i-ulQ1FwDWIUr5eLiUe5PtarbuqaKzst9mKSQwD9G4C9jHFfl3imuDKnNgYodgnGgfPPdFjpbyezTVqkhxZsDy1E_aV269ipuzY1EIGZxOnK3mII1WdLStPGQMH3Ygt5njOHSYP?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/UTzG-acNpOXYTiDaj2vrfKgXGho8aMJoygVPWAe-wtcFDoOsGyxF0_Zuhf8rcfkM-0MlF9bByoyd9ZdfyK8de3HFwctl45oyafnOCQRjwjoqyDPQEk0fkhyP64fkMpGJQTSEwVjAivpZsg3_5t3vlt0Pfx7tcJWmP0rcXPO6jP5B0gHKDDfzT3RjC-4T4t2j?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/VDZmALFx--oSQIYy0LuH4pDKPfuFlQ0SaWV5Esy3LWuXM2267i43yROEUjUeFPA6sE4afwGQlOwGlktnXv9RZucFolYKheCFba88fr-Oh1jGqCSHRbzVzN5jBpctGpTWFqNQgjpC3J5l0oXBi0DtbjKAhvcpP8Hj4JcCZ9200B1bsggt_gcAaWO2d9AIsAXm?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/EGN1rLdY2c8zFLS-9QmB_sTQD3mYramzlAy-OePoBDY0FwyFFrqFsbEQ5VymOc7iiNcChAap5yVCKNECzVvsV785lxYNRF_isc99lfPNHxvhgvrpx5nnBFsmZDQei_iUfZxChHf7WRvbf2vP4fRCIpB7liC2POix_pwRVd8-EUl6mkhiCRET0xv1Y8sq00md?purpose=fullsize)
+
+### Renk sistemi
+
+* **Background:** `#0B0B0D` / `#101012`
+* **Surface:** `#151518`
+* **Elevated surface:** `#1C1C21`
+* **Primary text:** `#F4F1EC`
+* **Secondary:** `#9B9894`
+* **Accent:** sıcak **champagne / muted rose**
+* **Success:** soft emerald
+* **Danger:** muted red
+
+Önemli nokta: **neon kullanma.**
+Accent renkler parlamasın; yüzey üzerinde kaliteli bir mürekkep/metal gibi dursun.
+
+### Butonlar
+
+Her şeyi pill yapmasın.
+
+Şöyle bir hiyerarşi:
+
+```text
+Primary
+┌──────────────────────┐
+│   Send Interest      │
+└──────────────────────┘
+
+Secondary
+┌──────────────────────┐
+│   View Profile       │
+└──────────────────────┘
+
+Icon
+   ♡
+```
+
+Border-radius çoğunlukla **10–14px**.
+
+Sadece:
+
+* avatar
+* status badge
+* online indicator
+* küçük tags
+* bazı filter chips
+
+pill olabilir.
+
+---
+
+## Asıl farkı kartlar yaratmalı
+
+Dating/social platform olduğu için kartlar **Pinterest / editorial magazine** hissine yaklaşabilir.
+
+Örneğin Discover:
+
+```text
+┌─────────────────────────────────────┐
+│                                     │
+│          LARGE PHOTO                │
+│                                     │
+│                                     │
+│  ● Online                           │
+│                                     │
+├─────────────────────────────────────┤
+│  Alex, 29                    ✓      │
+│  Amsterdam                         │
+│                                     │
+│  Photography · Travel · Events     │
+│                                     │
+│  Looking for connections            │
+│                                     │
+│  [ View profile ]        ♡          │
+└─────────────────────────────────────┘
+```
+
+Ama **Couple** profillerinde tasarım farklılaşabilir:
+
+```text
+┌─────────────────────────────────────┐
+│             PHOTO                   │
+│                                     │
+│        Emma & Thomas                │
+│        Amsterdam · 31 / 34          │
+│                                     │
+│  Couple                             │
+│  Travel · Events · Social           │
+│                                     │
+│       View couple profile           │
+└─────────────────────────────────────┘
+```
+
+Böylece ürünün en önemli özelliği olan **Single / Couple** ayrımı görsel olarak da hissedilir.
+
+---
+
+# Navigation
+
+Bence klasik:
+
+`Home / Discover / Messages / Events / Profile`
+
+çok sıradan kalır.
+
+Şöyle bir yapı daha premium:
+
+### Desktop
+
+```text
+                 DISCOVER     CONNECTIONS     EVENTS
+
+       LOGO
+
+HOME                                               PROFILE
+```
+
+veya sol sidebar:
+
+```text
+┌─────────────────────┐
+│ LOGO                │
+│                     │
+│ ◉ Home              │
+│ ◇ Discover          │
+│ ♡ Connections       │
+│ ◌ Messages          │
+│ □ Events            │
+│                     │
+│ ───────────────     │
+│                     │
+│ Communities         │
+│ Stories             │
+│ Membership          │
+│                     │
+│ ───────────────     │
+│                     │
+│ ⚙ Settings          │
+└─────────────────────┘
+```
+
+**Sidebar + geniş content canvas** bu ürün için daha premium durabilir.
+
+---
+
+# Event tarafını özellikle farklı tasarla
+
+Burası ürünün sıradan dating app'ten ayrılabileceği yer.
+
+Event kartları normal card gibi değil:
+
+![Image](https://images.openai.com/static-rsc-4/OlAlyrmSA-GGuGfcmZDUyK4jIbVf7H3-Lcc-T-v7t7tWIr589BBH1qWbZ6ZqXcdxx2R484m3fgQjVDprzIEEE3tb0MyIYujfueJI6RzwWKfR2JMJIAB9Um6vQNTrOAIgTI-7rH8ROZE_3GPZvLxSZX_PJ1sG9afYCxAjzFgcwL4-g5L_vj02XV13psweNH2E?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/3sgjkwOe9P-GXAajzt1vlqq5C0laWaDL0QouM5hx_eQGd3LHpJtQbyelAFjFLvicAimErhAGeX_9k1Zp-jRFHUJOPVL8ATpIBzLiD6b6QZxHBbosdzi4smfVBzwl5HC3KsFgbdoUPtun7ebER-SiBRoFv38irrWds4QAoR525wo9jNQjl7cK0LeIw_GwUS-6?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/5YznGSBM3mDxJFkaU-bM4N3UszBwf159yy9IeDJMZVUJWd05kiuvxXqAybranAgXstDI4eDSdd0XtsbLT9r6awNOL3mUrjhAyV2tB09N35uNStBARMyDTrpXmw5wTCKUdyudZ4RnGcJ-iDeCQNH-lqzbJhrJqmafnWVaKW-KBcgxPAY52UuFYcpICw83Xyuj?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/dRmleep8b047E-YLacTCU9hdYOOpgS6FA6f_7HvWf8cPtSG2la0RAwtmAmW6Zxqx6r8GM_PuoW4LjHf7Kit-P-_IvNp_YUHAlAAQ8kMHW6JKk1sQmCCopu1dzS8YMl-AWUeN_1WUm3Pczm3_VV1d2Fv70d6ZmEkHbH-n1pmX6iQ0wEk_1k70OWVwagRku0_G?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/Pe1rYbrlh3MXN0fSlsX7qpAE6grEZ-NKMSirHv91qfJy-rIz_NEkzIShc2imH61NXkquxKM_SJAPBpAa5M_npiLWBJKUwn2V5NJ0oCJSeO9Jc3GhXpGyW1HOTYrAZOvU4eStc0yGsGN-ljZ7fdkYOVsoFu0IwrBhO16xvuwS7S2VjCOGihXkGyl0d-wLMlef?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/0gO7Gs2Gfqa4qsRcjiSQUcGlbkUYIvE0quGhUS3kic98LsKUOiCA5fLrW6bnXiDl3uD-C1Ok7W1n17tY7GGiwjYk1Xmu31gXu7pGxfd4g97aQL3QvPys1vM409X9RLlbJB9njfCZ0IRlBoPNeFcjDKNNvhcsRDtRjZs-WtyOhYAt4_rcufPeSk8HBPrWSO8U?purpose=fullsize)
+
+Örneğin:
+
+```text
+┌──────────────────────────────────────┐
+│                                      │
+│        PRIVATE SUMMER NIGHT          │
+│                                      │
+│        Amsterdam · 24 AUG            │
+│                                      │
+│        28 / 40 ATTENDEES             │
+│                                      │
+│        [ REQUEST TO JOIN ]           │
+│                                      │
+└──────────────────────────────────────┘
+```
+
+Onaylandığında:
+
+```text
+┌────────────────────────────┐
+│      YOUR INVITATION       │
+│                            │
+│       ▓▓▓▓▓▓▓▓▓▓           │
+│       ▓ QR CODE ▓           │
+│       ▓▓▓▓▓▓▓▓▓▓           │
+│                            │
+│   UGUR · INVITEE #028      │
+│                            │
+│   Valid for this event     │
+└────────────────────────────┘
+```
+
+Bu, **premium/private club** hissini ciddi şekilde artırır.
+
+---
+
+# Sensitive content
+
+Burada da neon blur yerine daha sofistike bir sistem:
+
+```text
+┌──────────────────────────────┐
+│                              │
+│       [ blurred media ]      │
+│                              │
+│        Sensitive content     │
+│                              │
+│   This media may contain     │
+│   sensitive imagery.         │
+│                              │
+│       [ View media ]         │
+└──────────────────────────────┘
+```
+
+Kullanıcıya kontrol hissi verir.
+
+---
+
+# Typography
+
+Burada çok büyük fark yaratabilir.
+
+**Başlıklar:** biraz editorial karakterli serif
+**UI/body:** modern grotesk sans
+
+Örneğin:
+
+**Heading**
+
+> Discover people
+> beyond ordinary.
+
+Body:
+
+> Meet singles, couples and communities around you.
+
+Bu kombinasyon platformu **“AI-generated dating dashboard”** görünümünden çıkarıp daha gerçek bir marka haline getirir.
+
+---
+
+# Genel tasarım DNA'sı
+
+AI'ya tek cümleyle:
+
+> **“Design it like a private luxury social club rather than a futuristic dating dashboard.”**
+
+Ve özellikle şunları yasaklardım:
+
+```text
+NO excessive neon
+NO excessive glow
+NO every button as pill
+NO purple/pink gradient everywhere
+NO huge rounded cards everywhere
+NO generic glassmorphism
+NO excessive shadows
+NO dashboard-looking UI
+NO AI SaaS aesthetic
+NO cyberpunk aesthetic
+```
+
+Bunun yerine:
+
+```text
+DARK
+EDITORIAL
+LUXURY
+INTIMATE
+PRIVATE
+PHOTOGRAPHY-FIRST
+SUBTLE GLASS
+SOFT CONTRAST
+STRONG TYPOGRAPHY
+GENEROUS SPACING
+PREMIUM MICRO-INTERACTIONS
+```
+
+**Özellikle senin mevcut prototipte çoğu özellik zaten varsa, artık özellik eklemekten çok “visual identity” aşamasına geçerdim.** Neon/pill/glow'u azaltıp bu **Dark Luxury Social Club** DNA'sını tüm sayfalara uygulatmak sitenin seviyesini ciddi şekilde değiştirir.

@@ -1,0 +1,1121 @@
+Evet. Senin ilk verdiğin kapsamı ve şu an yaptırdığın frontend prototipi birlikte düşünürsek, hedeflediğin şey **basit bir tanışma sitesi değil**. Aslında:
+
+**Sosyal ağ + tanışma/discovery + içerik platformu + mesajlaşma + etkinlik + topluluk + premium/monetizasyon + moderasyon** birleşimi.
+
+Şu anki HTML prototipinde olması gereken ana yapı şöyle:
+
+## 1. Ana kullanıcı alanı
+
+### 🏠 Home / Feed
+
+* Senin İçin
+* Takip Edilenler
+* VIP
+* Özel / PPV içerikler
+* Metin paylaşımı
+* Fotoğraf
+* Video
+* Çoklu medya
+* Beğeni
+* Yorum
+* Kaydet
+* Paylaş
+* Kullanıcı takip
+* Post menüsü
+* Raporla
+* Engelle
+* Infinite scroll
+* Loading skeleton
+* Empty state
+
+### 👤 Profile
+
+* Avatar
+* Kapak fotoğrafı
+* Kullanıcı adı
+* Doğrulama rozeti
+* Bio
+* Şehir
+* Yaş
+* İlgi alanları
+* Takipçi / takip edilen
+* Gönderiler
+* Medya
+* VIP durumu
+* Profil ziyaretçileri
+* Follow / Message
+* Report / Block
+* Profil düzenleme
+
+---
+
+# 2. 🔎 Discovery / Tanışma
+
+Burada klasik dating uygulamasından daha gelişmiş yapı olmalı.
+
+* Kullanıcı kartları
+* Like
+* Pass
+* Match
+* Yaş filtresi
+* Mesafe filtresi
+* Şehir
+* Online
+* İlgi alanları
+* Cinsiyet / tercih filtreleri
+* Ortak ilgi alanları
+* Profil detayına geçiş
+* Match ekranı
+* Önerilen kişiler
+
+İleride burada recommendation engine bağlanabilir.
+
+---
+
+# 3. 💬 Chat
+
+Senin platformunun en önemli bölümlerinden biri.
+
+### Conversation list
+
+* Son mesaj
+* Son görülme
+* Online
+* Unread count
+* Search
+* Pin
+* Archive
+* Block
+
+### Conversation
+
+* Text
+* Emoji
+* Image
+* Video
+* Voice message
+* Typing indicator
+* Delivered
+* Seen
+* Timestamp
+* Reply
+* Delete
+* Report
+* Block
+
+Mobilde:
+
+**liste → konuşma → geri**
+
+şeklinde çalışmalı.
+
+---
+
+# 4. 📸 Stories
+
+Instagram benzeri ama platformun kendi tasarımıyla:
+
+* 24 saatlik story
+* Fotoğraf
+* Video
+* Story viewer
+* Progress bar
+* Next / Previous
+* Like
+* Viewers
+* Story oluştur
+* Story sil
+* Story privacy
+
+---
+
+# 5. 🎟️ Events
+
+Bu, platformu normal dating/social uygulamasından ayıran ana modüllerden.
+
+### Event Discovery
+
+* Şehir
+* Kategori
+* Tarih
+* Fiyat
+* VIP
+* Yaklaşan etkinlikler
+
+### Event Detail
+
+* Kapak
+* Başlık
+* Açıklama
+* Tarih
+* Saat
+* Lokasyon
+* Organizatör
+* Kapasite
+* Katılımcılar
+* Fiyat
+* VIP avantajı
+
+### Ticket
+
+* Dijital bilet
+* QR
+* Ticket ID
+* Event bilgileri
+* Check-in
+
+### Create Event
+
+Kullanıcı kendi etkinliğini oluşturabilmeli.
+
+---
+
+# 6. 👥 Clubs / Communities
+
+### Clubs
+
+* Public
+* Private
+* VIP
+* Kategori
+* Üye sayısı
+* Join / Leave
+* Club detail
+* Club feed
+
+### Community
+
+* Posts
+* Members
+* Discussions
+* Rules
+* Moderators
+* Reports
+
+---
+
+# 7. 🗣️ Forum
+
+Reddit benzeri yapı:
+
+* Categories
+* Topics
+* Posts
+* Comments
+* Nested replies
+* Upvote
+* Downvote
+* Sort
+* Search
+* Trending
+* New
+* Report
+* Moderator actions
+
+---
+
+# 8. ⭐ Premium / Membership
+
+Burada:
+
+* Free
+* Standard
+* Gold
+* VIP
+
+gibi paketler olabilir.
+
+Her paket için:
+
+* Özellikler
+* Fiyat
+* Süre
+* Avantajlar
+* Subscribe
+* Current plan
+* Renewal
+* Cancel
+
+ekranları.
+
+---
+
+# 9. 💰 Wallet / Monetization
+
+Senin mevcut prototipinde bunun temeli zaten var.
+
+### Wallet
+
+* Mevcut bakiye
+* Bakiye yükle
+* İşlem geçmişi
+* Harcama
+* Kazanç
+
+### PPV
+
+Kullanıcı:
+
+**Locked content → Unlock → ödeme → içerik**
+
+akışını görmeli.
+
+### Creator earnings
+
+* Kazanç
+* PPV gelirleri
+* Etkinlik gelirleri
+* Toplam
+* Bekleyen
+* Çekilebilir bakiye
+
+### Payout
+
+* IBAN
+* Tutar
+* Çekim talebi
+* Beklemede
+* Onaylandı
+* Reddedildi
+
+---
+
+# 10. 🪪 KYC / Verification
+
+### User verification
+
+* Kimlik tipi
+* Kimlik yükleme
+* Selfie
+* Başvuru durumu
+* Pending
+* Approved
+* Rejected
+
+### Profile badge
+
+Doğrulanmış profil:
+
+**✓ Verified**
+
+olarak gösterilebilir.
+
+Burada frontend'de şu an yaptığın gibi **simülasyon olduğunu açıkça belirtmek doğru.**
+
+---
+
+# 11. 🔔 Notifications
+
+Tek bir notification merkezi olmalı.
+
+Örneğin:
+
+* Someone liked you
+* Someone followed you
+* New message
+* Comment
+* Event reminder
+* Ticket
+* Payment
+* Membership
+* Club invitation
+* Verification
+* Moderation
+
+Ayrıca:
+
+* All
+* Messages
+* Social
+* Events
+* Payments
+
+filtreleri olabilir.
+
+---
+
+# 12. 👁️ Visitors
+
+Profil ziyaretçileri:
+
+* Kullanıcı
+* Avatar
+* Ziyaret zamanı
+* Son 30 gün
+* Online
+* Follow
+* Message
+
+Premium kullanıcılar için daha gelişmiş visitor analytics yapılabilir.
+
+---
+
+# 13. 🛡️ Safety / Moderation
+
+Kullanıcı tarafında:
+
+* Report user
+* Report post
+* Report message
+* Block
+* Unblock
+* Hide
+* Restrict
+
+olmalı.
+
+---
+
+# 14. 👨‍💼 Admin Panel
+
+Bu da ayrı bir uygulama gibi düşünülmeli.
+
+### Dashboard
+
+* Users
+* Active users
+* Reports
+* Revenue
+* Payments
+* Events
+* Content
+* Moderation
+
+### Users
+
+* Search
+* User detail
+* Suspend
+* Ban
+* Verify
+* Membership
+* Reports
+* Login/device history
+
+### Moderation
+
+* Report queue
+* AI risk score
+* Content review
+* User review
+* Approve
+* Remove
+* Suspend
+* Ban
+
+### Payments
+
+* Transactions
+* Subscriptions
+* Refunds
+* Wallet
+* Payouts
+
+### KYC
+
+* Pending applications
+* Review
+* Approve
+* Reject
+
+### Events
+
+* Event approval
+* Event reports
+* Organizers
+* Tickets
+
+### Audit
+
+* Admin actions
+* Login activity
+* Security events
+
+---
+
+# 15. ⚙️ Settings
+
+Kullanıcı ayarları kesinlikle olmalı.
+
+### Account
+
+* Name
+* Email
+* Password
+
+### Privacy
+
+* Profile visibility
+* Online status
+* Last seen
+* Visitors
+* Messages
+
+### Notifications
+
+* Email
+* Push
+* In-app
+
+### Security
+
+* 2FA
+* Sessions
+* Devices
+* Logout all
+
+### Membership
+
+* Current plan
+* Billing
+* Cancel
+
+### Blocked users
+
+### Language
+
+---
+
+# 16. 🔐 Authentication
+
+Frontend prototipinde:
+
+* Login
+* Register
+* Forgot password
+* Reset password
+* Email verification
+* 2FA UI
+* Device verification
+
+akışları da olmalı.
+
+---
+
+# 17. 🔍 Global Search
+
+Üst navigation'da veya ayrı Search sayfasında:
+
+**People / Posts / Events / Clubs / Forum**
+
+araması yapılabilmeli.
+
+Örneğin:
+
+```text
+Search
+├── People
+├── Posts
+├── Events
+├── Clubs
+└── Forum
+```
+
+---
+
+# 18. 🧭 Ana Navigation
+
+Ben senin platformunda navigation'ı kabaca şöyle kurgulardım:
+
+### Desktop
+
+```text
+┌──────────────────────────────────────────────────────┐
+│ LOGO   Search                 Create   🔔   💬 Avatar │
+├──────────────┬────────────────────────┬──────────────┤
+│              │                        │              │
+│ Home         │                        │              │
+│ Discover     │       MAIN CONTENT     │   Trending   │
+│ Messages     │                        │   Events     │
+│ Events       │                        │   Suggested  │
+│ Communities  │                        │              │
+│ Forum        │                        │              │
+│ Clubs        │                        │              │
+│              │                        │              │
+│ Wallet       │                        │              │
+│ Membership   │                        │              │
+│              │                        │              │
+│ Settings     │                        │              │
+└──────────────┴────────────────────────┴──────────────┘
+```
+
+### Mobile
+
+Alt navigation'ı 5 ana öğeye sıkıştırmak daha mantıklı:
+
+```text
+Home
+Discover
+Create
+Messages
+Profile
+```
+
+Diğerleri drawer/menu içerisinde.
+
+---
+
+# 19. Şu anki prototipinde özellikle kontrol etmen gerekenler
+
+Senin aldığın son rapora göre:
+
+**Zaten var:**
+
+✅ Feed
+✅ Profile
+✅ Monetization
+✅ Wallet
+✅ PPV
+✅ Chat
+✅ Stories
+✅ Events
+✅ Ticket
+✅ Forum
+✅ Clubs
+✅ Discovery
+✅ Visitors
+✅ KYC
+✅ Reports
+✅ Moderation
+
+Dolayısıyla artık **“daha fazla özellik ekleyelim” aşamasında değilsin.**
+
+Eksik olabilecek ana yüzeyler şunlar:
+
+### Mutlaka kontrol et
+
+**Authentication**
+
+* Login
+* Register
+* Forgot password
+* Verification
+
+**Settings**
+
+* Account
+* Privacy
+* Security
+* Notifications
+* Membership
+
+**Global Search**
+
+**Notifications merkezi**
+
+**Full Admin Dashboard**
+
+**User/Creator dashboard**
+
+**Event organizer dashboard**
+
+**Payment/transaction history**
+
+**Privacy & Safety merkezi**
+
+Bunlar varsa frontend kapsamı oldukça bütünlüklü hale gelir.
+
+---
+
+## Ve çok önemli bir ayrım
+
+Şu anda **HTML/React prototype için** yukarıdakilerin tamamının UI'sını oluşturabiliriz.
+
+Ama:
+
+> Wallet'ın gerçekten para tutması
+> Payment'ın gerçekten para çekmesi
+> KYC'nin gerçekten kimlik doğrulaması
+> Chat'in gerçek zamanlı olması
+> AI moderation'ın gerçek model kullanması
+> Search'ün Elasticsearch kullanması
+
+**şu an gerekmiyor.**
+
+Bunlar sonraki faz.
+
+Senin şu an ulaşmak istediğin nokta:
+
+**“Bu siteyi açtığımda, gerçek bir milyon kullanıcılı platformun frontend'i varmış gibi bütün ürün deneyimini gezebiliyorum.”**
+
+Bu noktaya geldikten sonra backend'e geçmek çok daha sağlıklı olur.
+
+---------------------
+
+Anladım. O zaman ürünün gerçek amacı önceki “genel sosyal ağ” tanımından daha net:
+
+Bu aslında **Hollanda pazarına yönelik yetişkinlere özel sosyal / dating / couples platformu**. Kullanıcılar profil oluşturuyor, ilişki durumlarını belirtiyor, tekli veya çift olarak insanlarla tanışıyor, normal veya yetişkinlere yönelik içerik paylaşabiliyor ve özel etkinliklere katılım talep edebiliyor.
+
+Bu durumda mevcut frontend kapsamını da buna göre yeniden düzenlemek gerekiyor. Özellikle **Facebook + Reddit + Meetup** taraflarını gereğinden fazla büyütmek yerine dating/couples/event deneyimini merkeze almalısınız.
+
+### Ana kullanıcı modeli
+
+Profil oluştururken örneğin:
+
+* **Single**
+* **Couple**
+* **Married**
+* **Open relationship**
+* **Other / custom**
+
+gibi ilişki durumu.
+
+Ve ayrıca kullanıcı profilinin **kim adına hareket ettiğini** ayırmak önemli:
+
+```text
+Profile Type
+
+Single
+Couple
+```
+
+Çift hesabında:
+
+```text
+Couple Profile
+├── Person A
+├── Person B
+├── Couple Bio
+├── Couple Photos
+├── Couple Interests
+└── Couple Preferences
+```
+
+Böylece sistemde “bir kişi” ile “çift” aynı şey olmak zorunda kalmaz.
+
+---
+
+## Dating / Discovery tarafı
+
+Senin anlattığın ürünün en önemli bölümü burası.
+
+Discovery ekranında kullanıcı sadece başka bir kullanıcı aramamalı.
+
+Şunları keşfedebilmeli:
+
+```text
+People
+Couples
+Groups
+Events
+```
+
+Örneğin filtreler:
+
+* Single
+* Couple
+* Male
+* Female
+* Couple seeking person
+* Person seeking couple
+* Couple seeking couple
+* Friendship
+* Dating
+* Events
+* Distance
+* Age range
+* Online now
+
+Böylece:
+
+**“Ben + eşim → başka bir kişiyle tanışmak istiyoruz”**
+
+gibi senaryolar ürünün doğal bir parçası olur.
+
+---
+
+# Eş / Partner sistemi
+
+Bunu ayrıca düşünmek önemli.
+
+Kullanıcı profilinde:
+
+**Relationship**
+
+alanı bulunabilir.
+
+Örneğin:
+
+```text
+Relationship
+┌──────────────────────────┐
+│ Married                  │
+│                          │
+│ ❤️ Connected with Anna   │
+└──────────────────────────┘
+```
+
+Partner daveti:
+
+```text
+Send Partner Request
+        ↓
+Partner accepts
+        ↓
+Relationship Connected
+```
+
+Ve kullanıcı istediğinde ilişki bağlantısını kaldırabilir.
+
+Bunun yanında **partnerin profilde görünür olup olmayacağı** privacy ayarı olabilir.
+
+---
+
+# Dating Request sistemi
+
+Normal follow sistemi yerine ayrı bir:
+
+### Connection / Dating Request
+
+sistemi çok daha uygun.
+
+Örneğin:
+
+```text
+UGUR + PARTNER
+
+Looking for:
+✓ Couple
+✓ Single
+✓ Events
+
+        ↓
+
+Send Interest
+
+        ↓
+
+Request sent
+
+        ↓
+
+Accepted
+
+        ↓
+
+Connection
+```
+
+Bu, uygulamanın temel mekaniklerinden biri olur.
+
+---
+
+# Event sistemi
+
+Senin tarifindeki etkinlik sistemi özellikle önemli.
+
+Organizatör:
+
+```text
+Create Event
+
+Title
+Cover
+Description
+Date
+Time
+Location
+Capacity
+Age requirement
+Event type
+Privacy
+Application required
+```
+
+Etkinlik:
+
+```text
+PUBLIC
+PRIVATE
+INVITATION ONLY
+APPLICATION REQUIRED
+```
+
+olabilir.
+
+Kullanıcı:
+
+**Request to Join**
+
+yapar.
+
+Organizatör:
+
+```text
+Pending
+    ↓
+Approve
+    ↓
+Personal Ticket Generated
+```
+
+ve kişiye özel QR oluşur.
+
+QR:
+
+```text
+EVENT
+Amsterdam Night
+
+Guest
+UGUR
+
+Ticket ID
+XXXXXXXX
+
+Status
+VALID
+```
+
+şeklinde olabilir.
+
+Organizatör panelinde:
+
+**Scan QR → Validate → Check-in**
+
+akışı.
+
+---
+
+# Event organizer paneli
+
+Bunu ayrıca tasarlamak lazım.
+
+```text
+EVENT DASHBOARD
+
+Overview
+Applications
+Approved
+Waiting List
+Tickets
+Check-in
+Messages
+Reports
+Settings
+```
+
+Katılımcılar:
+
+```text
+Pending
+Approved
+Rejected
+Checked-in
+No-show
+```
+
+olarak ayrılabilir.
+
+---
+
+# Fotoğraf / Video paylaşımı
+
+Senin söylediğin **normal + yetişkinlere yönelik içerik** sebebiyle burada normal bir sosyal feed'den biraz farklı bir içerik sistemi gerekir.
+
+Post oluştururken:
+
+```text
+Create Post
+
+Text
+Photo
+Video
+
+Visibility
+├── Public
+├── Connections
+├── Followers
+└── Private
+
+Content Type
+├── Normal
+└── Adult / Sensitive
+```
+
+gibi ayrıştırılabilir.
+
+Sensitive içerikte:
+
+* Blur preview
+* Age gate
+* Sensitive-content warning
+* User-controlled visibility
+
+gibi UX unsurları kullanılabilir.
+
+Bu aynı zamanda platformun moderasyon sistemini de daha düzenli hale getirir.
+
+---
+
+# Privacy bu uygulamada çok önemli
+
+Özellikle bu ürün tipinde normal bir sosyal ağdaki privacy ayarlarından çok daha kapsamlı bir sistem gerekir.
+
+Kullanıcı:
+
+### Profile visibility
+
+```text
+Everyone
+Members only
+Connections only
+Private
+```
+
+### Photos
+
+```text
+Public
+Friends
+Connections
+Private
+```
+
+### Relationship
+
+```text
+Visible
+Members only
+Hidden
+```
+
+### Online status
+
+```text
+Visible
+Hidden
+```
+
+### Location
+
+```text
+Exact location → NEVER
+City → optional
+Distance → optional
+```
+
+gibi kontroller yapabilmeli.
+
+---
+
+# Block / Report / Safety
+
+Bunları ana ürün özelliklerinden biri olarak düşünmek gerekir:
+
+* Block
+* Report
+* Unmatch
+* Restrict
+* Hide profile
+* Hide content
+* Message permissions
+* Event report
+* Profile report
+
+Ayrıca kullanıcıların birbirleriyle olan etkileşim geçmişinin güvenli şekilde yönetilmesi gerekir.
+
+---
+
+# Ana navigasyonu da buna göre değiştirirdim
+
+Senin mevcut yapındaki genel sosyal ağ ağırlığını biraz azaltıp:
+
+```text
+HOME
+DISCOVER
+MATCH
+MESSAGES
+EVENTS
+```
+
+ana navigasyonunu merkeze alırdım.
+
+Diğerleri:
+
+```text
+Communities
+Clubs
+Forum
+Stories
+Wallet
+Membership
+Notifications
+Profile
+Settings
+```
+
+ikincil navigasyona girebilir.
+
+---
+
+# Ürünün gerçek ana döngüsü
+
+Bence bütün frontend şu döngüyü çok iyi göstermeli:
+
+```text
+REGISTER
+   ↓
+CREATE PROFILE
+   ↓
+RELATIONSHIP STATUS
+   ↓
+SINGLE / COUPLE
+   ↓
+PREFERENCES
+   ↓
+DISCOVER
+   ↓
+INTEREST / CONNECTION
+   ↓
+CHAT
+   ↓
+EVENT
+   ↓
+REQUEST TO JOIN
+   ↓
+APPROVAL
+   ↓
+PERSONAL QR TICKET
+   ↓
+EVENT CHECK-IN
+   ↓
+NEW CONNECTIONS
+```
+
+Ve paralel olarak:
+
+```text
+PROFILE
+   ↓
+POST
+   ↓
+PHOTO / VIDEO
+   ↓
+NORMAL / SENSITIVE
+   ↓
+AUDIENCE
+   ↓
+FEED
+```
+
+---
+
+### Dolayısıyla senin mevcut projende benim öncelik sıram artık şu olur:
+
+**1. Discovery / Dating / Couple UX** ⭐
+**2. Relationship / Partner sistemi**
+**3. Connection / Interest sistemi**
+**4. Chat**
+**5. Event + application + approval + QR** ⭐
+**6. Profile + privacy**
+**7. Photo/video feed + sensitive content UX**
+**8. Stories**
+**9. Clubs / Communities**
+**10. Membership / Wallet / PPV**
+**11. Moderation / Report / Safety**
+**12. Admin / Organizer panel**
+
+Yani önceki “Facebook + Reddit + Meetup” mimarisini **birebir ürünün merkezine koymak yerine**, ürünün merkezini **Single ↔ Couple ↔ Discovery ↔ Connection ↔ Chat ↔ Event** olarak kurmak daha doğru.
+
+Sen tasarımı teslim edeceğin için de bence **şu an backend'i hiç düşünmeden bu kullanıcı akışlarının tamamının HTML/React üzerinde kusursuz prototipini çıkarmak** en doğru yaklaşım.
