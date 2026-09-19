@@ -70,13 +70,14 @@ export const MediaModal: React.FC<MediaModalProps> = ({
     setTouchStartY(null);
   };
 
-  const isSubscriptionLocked = post.isSubscribersOnly && !isUserSubscribed;
-  const isPPVLocked = post.isPPV && !post.isUnlocked;
-  const isLocked = isSubscriptionLocked || isPPVLocked;
+  const isSubscriptionLocked = false;
+  const isPPVLocked = false;
+  const isLocked = false;
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 overflow-hidden transition-all duration-200"
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 overflow-hidden transition-all duration-200 cursor-pointer"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -100,7 +101,10 @@ export const MediaModal: React.FC<MediaModalProps> = ({
         <X className="w-5 h-5" />
       </button>
 
-      <div className="bg-[#0C0D11] border border-white/[0.12] rounded-2xl w-full max-w-5xl h-[85vh] max-h-[800px] flex flex-col md:flex-row overflow-hidden shadow-2xl">
+      <div 
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0C0D11] border border-white/[0.12] rounded-2xl w-full max-w-5xl h-[85vh] max-h-[800px] flex flex-col md:flex-row overflow-hidden shadow-2xl cursor-default"
+      >
         {/* Media Left Section */}
         <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden min-h-[300px]">
           {isLocked ? (

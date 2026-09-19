@@ -15,12 +15,26 @@ export const MatchCelebrationModal: React.FC<MatchCelebrationModalProps> = ({
   onClose,
   onStartChat,
 }) => {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#0c0c0e] border border-amber-600/30 rounded-xs p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-150"
+    >
+      <div 
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0c0c0e] border border-amber-600/30 rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative cursor-default"
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-xs text-stone-400 hover:text-stone-200 border border-white/[0.06] hover:border-white/20 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-stone-400 hover:text-stone-200 border border-white/[0.06] hover:border-white/20 transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>

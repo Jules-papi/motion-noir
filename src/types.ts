@@ -21,6 +21,9 @@ export interface UserProfile {
   membershipTier: MembershipTier;
   isSubscribed: boolean;
   isFollowing: boolean;
+  age?: number;
+  gender?: string;
+  orientation?: string;
   dualVerifiedCouple?: boolean;
   partnerName?: string;
   partnerUsername?: string;
@@ -284,7 +287,7 @@ export interface ReportItem {
   targetType: 'user' | 'post' | 'message' | 'event';
   targetTitle: string;
   targetId: string;
-  reason: 'Spam / Reklam' | 'Taciz / Zorbalık' | 'Sahte Hesap' | 'Uygunsuz NSFW' | 'Dolandırıcılık';
+  reason: string;
   description: string;
   aiRiskScore: number; // 0 - 100
   aiFlagReason: string;

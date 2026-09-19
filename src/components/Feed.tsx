@@ -31,14 +31,14 @@ interface FeedProps {
   onOpenCreateStory?: () => void;
   onNavigateToProfile: (userId?: string) => void;
   onReportPost?: (post: Post) => void;
+  onRefresh?: () => Promise<void> | void;
 }
 
-type FeedFilter = 'for_you' | 'following' | 'vip' | 'ppv';
+type FeedFilter = 'for_you' | 'following';
 
 export const Feed: React.FC<FeedProps> = ({
   currentUser,
   posts,
-  stories = [],
   isUserSubscribed,
   walletBalance,
   onLike,
@@ -50,37 +50,34 @@ export const Feed: React.FC<FeedProps> = ({
   onShare,
   onTip,
   onOpenCreatePost,
-  onOpenCreateStory,
   onNavigateToProfile,
   onReportPost,
+  onRefresh,
 }) => {
   const [activeFilter, setActiveFilter] = useState<FeedFilter>('for_you');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setIsRefreshing(true);
+    if (onRefresh) {
+      await onRefresh();
+    }
     setTimeout(() => {
       setIsRefreshing(false);
-    }, 600);
+    }, 500);
   };
 
   const displayedPosts = posts.filter(post => {
     if (activeFilter === 'for_you') return true;
-    if (activeFilter === 'following') return true;
-    if (activeFilter === 'vip') return post.isSubscribersOnly;
-    if (activeFilter === 'ppv') return post.isPPV;
+    if (activeFilter === 'following') {
+      // Circles filter: Verified patrons or dispatches from other patrons
+      return post.author.isVerified || post.author.id !== currentUser.id;
+    }
     return true;
   });
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-7 pb-24">
-      {/* Photography Vignette Bar */}
-      <StoriesBar
-        stories={stories}
-        currentUser={currentUser}
-        onAddStory={onOpenCreateStory || onOpenCreatePost}
-      />
-
       {/* Editorial Dispatch Entry Box */}
       <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-3.5 sm:p-4 shadow-xl">
         <div className="flex items-center gap-3">
@@ -91,9 +88,9 @@ export const Feed: React.FC<FeedProps> = ({
           />
           <button
             onClick={onOpenCreatePost}
-            className="flex-1 text-left px-4 py-2.5 rounded-full bg-[#181B22] hover:bg-[#1F232C] border border-white/[0.06] hover:border-white/15 text-zinc-400 text-xs transition-colors font-sans truncate"
+            className="flex-1 text-left px-4 py-2.5 rounded-full bg-[#181B22] hover:bg-[#1F232C] border border-white/[0.06] hover:border-white/15 text-zinc-400 text-xs transition-colors font-sans truncate cursor-pointer"
           >
-            Compose a dispatch or confidential vignette, {currentUser.name.split(' ')[0]}...
+            Compose a dispatch, {currentUser.name.split(' ')[0]}...
           </button>
         </div>
 
@@ -104,21 +101,14 @@ export const Feed: React.FC<FeedProps> = ({
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors text-[11px] font-sans whitespace-nowrap cursor-pointer"
             >
               <ImageIcon className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Plates</span>
+              <span>Photo</span>
             </button>
             <button
               onClick={onOpenCreatePost}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors text-[11px] font-sans whitespace-nowrap cursor-pointer"
             >
               <VideoIcon className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Cinema</span>
-            </button>
-            <button
-              onClick={onOpenCreatePost}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-zinc-400 hover:text-[#E5C590] hover:bg-white/[0.04] transition-colors text-[11px] font-sans whitespace-nowrap cursor-pointer"
-            >
-              <Crown className="w-3.5 h-3.5 text-[#E5C590]" />
-              <span>Privé</span>
+              <span>Video</span>
             </button>
           </div>
 
@@ -142,7 +132,7 @@ export const Feed: React.FC<FeedProps> = ({
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            For You
+            All Dispatches
           </button>
 
           <button
@@ -154,30 +144,6 @@ export const Feed: React.FC<FeedProps> = ({
             }`}
           >
             Circles
-          </button>
-
-          <button
-            onClick={() => setActiveFilter('vip')}
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-              activeFilter === 'vip'
-                ? 'bg-[#222631] text-white font-medium shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Crown className="w-3 h-3 text-[#E5C590]" />
-            <span>Privé</span>
-          </button>
-
-          <button
-            onClick={() => setActiveFilter('ppv')}
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-              activeFilter === 'ppv'
-                ? 'bg-[#222631] text-white font-medium shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <KeyRound className="w-3 h-3 text-zinc-400" />
-            <span>Vault</span>
           </button>
         </div>
 

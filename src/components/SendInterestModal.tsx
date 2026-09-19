@@ -23,14 +23,28 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
     'Hope to cross paths during upcoming private chapter salons. 🏛️',
   ];
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSend(profile, note);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#0c0c0e] border border-white/[0.12] rounded-xs max-w-md w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-150"
+    >
+      <div 
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0c0c0e] border border-white/[0.12] rounded-2xl max-w-md w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative cursor-default"
+      >
         {/* Header */}
         <div className="p-5 border-b border-white/[0.08] flex items-center justify-between shrink-0">
           <div>

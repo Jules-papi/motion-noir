@@ -21,6 +21,7 @@ interface ProfileHeaderProps {
   onSubscribe: () => void;
   onOpenWallet: () => void;
   onOpenCreatePost: () => void;
+  onEditProfile?: () => void;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -30,6 +31,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onSubscribe,
   onOpenWallet,
   onOpenCreatePost,
+  onEditProfile,
 }) => {
   return (
     <div className="w-full space-y-6">
@@ -46,24 +48,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           {/* Deep Cinematic Gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#07080A] via-[#07080A]/50 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#07080A]/80 via-transparent to-black/30" />
-
-          {/* Top Quick Status & Vault Info */}
-          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2.5 z-10">
-            <button
-              onClick={onOpenWallet}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono bg-black/60 backdrop-blur-md text-white border border-white/10 hover:border-white/25 transition-all cursor-pointer"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-[#E5C590]" />
-              <span>Vault: {walletBalance} €</span>
-            </button>
-
-            {user.membershipTier === 'vip' && (
-              <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-sans uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E5C590] border border-[#E5C590]/30">
-                <Crown className="w-3 h-3 text-[#E5C590]" />
-                <span>Privé Patron</span>
-              </span>
-            )}
-          </div>
 
           {/* Hero Bottom Overlay: Integrated Portrait & Moniker */}
           <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 flex flex-col sm:flex-row sm:items-end justify-between gap-6 z-10">
@@ -111,17 +95,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <span>New Dispatch</span>
               </button>
 
-              <button
-                onClick={onSubscribe}
-                className={`py-2.5 px-5 rounded-full text-xs font-sans transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-                  isUserSubscribed
-                    ? 'bg-[#151a16] text-emerald-300 border border-emerald-600/30'
-                    : 'bg-white text-black hover:bg-zinc-200 font-medium'
-                }`}
-              >
-                <Crown className="w-3.5 h-3.5" />
-                <span>{isUserSubscribed ? 'Privé Active' : `Subscribe (${user.subscriptionPrice} €)`}</span>
-              </button>
+              {onEditProfile && (
+                <button
+                  onClick={onEditProfile}
+                  className="py-2.5 px-5 rounded-full text-xs font-sans bg-white hover:bg-zinc-200 text-black font-medium transition-all cursor-pointer shadow-xs"
+                >
+                  Edit Dossier
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -143,37 +124,37 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/[0.06] text-xs">
           <div>
             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-              Relationship Status
+              Age
             </span>
             <span className="font-sans font-medium text-zinc-200 mt-1 block">
-              Open Dynamic · Couple
+              {user.age || 29} Years
             </span>
           </div>
 
           <div>
             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-              Attested Provenance
+              Gender
             </span>
             <span className="font-sans font-medium text-zinc-200 mt-1 block">
-              Amsterdam & Côte d'Azur
+              {user.gender || 'Individual'}
             </span>
           </div>
 
           <div>
             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-              Seeking In Salons
+              Orientation
             </span>
             <span className="font-sans font-medium text-zinc-200 mt-1 block">
-              Couples & Solo Femme
+              {user.orientation || 'Hetero / Bi-Curious'}
             </span>
           </div>
 
           <div>
             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-              Chapter Induction
+              Location
             </span>
             <span className="font-sans font-medium text-zinc-200 mt-1 block">
-              {user.joinDate || 'September 2023'}
+              {user.location || 'Amsterdam Chapter'}
             </span>
           </div>
         </div>

@@ -322,19 +322,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
               <Lock className="w-3 h-3 text-[#E5C590]" />
               <span>End-to-End Encrypted</span>
             </div>
-
-            <button 
-              title="Secure Audio Dispatch" 
-              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
-            >
-              <Phone className="w-4 h-4" />
-            </button>
-            <button 
-              title="Encrypted Video Salon" 
-              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
-            >
-              <Video className="w-4 h-4" />
-            </button>
             
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -382,29 +369,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Concierge Suggested Quick Prompts */}
-        {activeConversation.id === 'conv-concierge' && (
-          <div className="px-4 py-2 bg-[#0e1014] border-t border-white/[0.04] flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
-            <span className="text-[10px] font-mono text-[#E5C590] shrink-0">Concierge Quick Inquiries:</span>
-            {[
-              '🍸 Bu Hafta Sonu Etkinlikleri Neler?',
-              '🗝️ Gizli Kulüp & Loca Tavsiyesi',
-              '✨ Profil & Fotoğraf Stil Önerisi',
-              '📜 NDA & Güvenli Buluşma Protokolü',
-              '💎 VIP & Privé Üyelik Ayrıcalıkları'
-            ].map((prompt, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => onSendMessage(selectedConvId, prompt)}
-                className="px-3 py-1 rounded-full bg-[#181B22] hover:bg-[#222631] text-zinc-300 hover:text-white border border-white/10 text-[11px] font-sans whitespace-nowrap cursor-pointer transition-colors shadow-xs"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Message Input Box */}
         <div className="p-3.5 bg-[#121419] border-t border-white/[0.08] shrink-0 pb-[max(0.85rem,env(safe-area-inset-bottom))] relative">
           {/* Emoji Picker Popover */}
@@ -435,85 +399,59 @@ export const ChatView: React.FC<ChatViewProps> = ({
             onChange={handleImageFileSelected}
           />
 
-          {isRecordingAudio ? (
-            /* Live Audio Note Recorder */
-            <AudioRecorder
-              onSendAudio={handleLiveAudioRecorded}
-              onCancel={() => setIsRecordingAudio(false)}
-            />
-          ) : (
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex items-center gap-2"
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="flex items-center gap-2"
+          >
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className={`p-2 rounded-full transition-colors cursor-pointer ${
+                showEmojiPicker ? 'text-[#E5C590] bg-[#E5C590]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+              title="Salon Emotes"
             >
-              <button
-                type="button"
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className={`p-2 rounded-full transition-colors cursor-pointer ${
-                  showEmojiPicker ? 'text-[#E5C590] bg-[#E5C590]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                }`}
-                title="Salon Emotes"
-              >
-                <Smile className="w-4 h-4" />
-              </button>
+              <Smile className="w-4 h-4" />
+            </button>
 
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
-                title="Attach Confidential Plate from Device"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
+              title="Attach Photo from Device"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
 
-              {/* 1x Ephemeral View-Once Dispatch Trigger */}
-              <button
-                type="button"
-                onClick={handleSendViewOnceMock}
-                title="Attach Confidential Ephemeral Plate (Auto-destructs after 5s)"
-                className="px-3 py-1.5 rounded-full bg-[#181B22] hover:bg-[#20242e] text-[#E5C590] border border-[#E5C590]/30 text-xs font-mono flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
-              >
-                <Flame className="w-3.5 h-3.5 text-[#E5C590]" />
-                <span className="font-bold text-[11px]">1x</span>
-                <span className="hidden sm:inline text-[10px] text-zinc-400 font-sans">Ephemeral</span>
-              </button>
+            <input
+              type="text"
+              value={inputText}
+              onChange={e => {
+                setInputText(e.target.value);
+                if (!isTyping && e.target.value) {
+                  setIsTyping(true);
+                  setTimeout(() => setIsTyping(false), 3000);
+                }
+              }}
+              placeholder="Compose confidential dispatch..."
+              className="flex-1 px-4 py-2.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 outline-none font-sans"
+            />
 
-              <input
-                type="text"
-                value={inputText}
-                onChange={e => {
-                  setInputText(e.target.value);
-                  if (!isTyping && e.target.value) {
-                    setIsTyping(true);
-                    setTimeout(() => setIsTyping(false), 3000);
-                  }
-                }}
-                placeholder="Compose confidential dispatch..."
-                className="flex-1 px-4 py-2.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 outline-none font-sans"
-              />
-
-              {inputText.trim() ? (
-                <button
-                  type="submit"
-                  className="p-2.5 rounded-full bg-[#E5C590] hover:bg-[#d9b880] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsRecordingAudio(true)}
-                  title="Record Encrypted Voice Note (Mic)"
-                  className="p-2.5 rounded-full bg-[#181B22] border border-white/10 text-zinc-300 hover:text-[#E5C590] hover:border-[#E5C590]/40 transition-colors cursor-pointer group"
-                >
-                  <Mic className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                </button>
-              )}
-            </form>
-          )}
+            <button
+              type="submit"
+              disabled={!inputText.trim()}
+              className={`p-2.5 rounded-full font-semibold shadow-md active:scale-95 transition-all cursor-pointer ${
+                inputText.trim()
+                  ? 'bg-[#E5C590] hover:bg-[#d9b880] text-black'
+                  : 'bg-white/5 text-zinc-600 cursor-not-allowed'
+              }`}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
         </div>
       </div>
     </div>

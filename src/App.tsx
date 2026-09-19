@@ -7,236 +7,84 @@ import { RightBar } from './components/RightBar';
 import { Feed } from './components/Feed';
 import { Profile } from './components/Profile';
 import { ChatView } from './components/ChatView';
-import { EventsView } from './components/EventsView';
-import { ClubsView } from './components/ClubsView';
-import { ForumView } from './components/ForumView';
 import { DiscoveryView } from './components/DiscoveryView';
-import { AdminPanelView } from './components/AdminPanelView';
 import { AppModals } from './components/AppModals';
 import { PrototypeBanner } from './components/PrototypeBanner';
-import { INITIAL_FORUM_CATEGORIES } from './data/initialData';
-import { Post, PlatformEvent, ForumTopic, ChatMessage } from './types';
+import { Post, ChatMessage } from './types';
 import { SupportedCurrency, SupportedLanguage } from './types/anlatiTypes';
+import { noirApi } from './services/noirApi';
 
 export function App() {
   const p = useSocialPlatform();
-  const [language, setLanguage] = useState<SupportedLanguage>('tr');
+  const [language, setLanguage] = useState<SupportedLanguage>('en');
   const [currency, setCurrency] = useState<SupportedCurrency>('EUR');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // P0-3: Scroll Reset strictly on primary navigation page change
+  // Scroll Reset strictly on primary navigation page change
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [p.currentView]);
 
-  // Chat message sender
-  const handleSendMessage = (
+  // V1 Direct Messaging (Dispatches) — 100% Realtime Database & WebSockets
+  const handleSendMessage = async (
     conversationId: string, 
-    text: string, 
-    isAudio?: boolean,
-    audioDetails?: { blobUrl?: string; duration?: string; waveform?: number[] }
+    text: string
   ) => {
     const targetId = conversationId || p.activeConversationId;
-    const newMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
+    if (!targetId || !text.trim()) return;
+
+    // Optimistic local state update for instant UI feedback
+    const tempMsg: ChatMessage = {
+      id: `temp-${Date.now()}`,
       conversationId: targetId,
       senderId: p.currentUser.id,
       text,
-      isAudio,
-      audioDuration: audioDetails?.duration || (isAudio ? '0:07' : undefined),
-      audioBlobUrl: audioDetails?.blobUrl,
-      audioWaveform: audioDetails?.waveform,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'delivered',
     };
+
     p.setConversations(prev => prev.map(c => c.id === targetId ? {
       ...c,
-      messages: [...c.messages, newMsg],
-      lastMessage: text || (isAudio ? '🎙️ Encrypted Voice Note' : 'Confidential Plate'),
+      messages: [...c.messages, tempMsg],
+      lastMessage: text,
       lastMessageTime: 'Just now',
     } : c));
 
-    setTimeout(() => {
-      let autoReply = '';
-      let replySenderId = 'partner';
+    try {
+      // Send directly to PostgreSQL noir_messages table via Supabase
+      await noirApi.sendMessage(targetId, p.currentUser.id, text);
+    } catch (err) {
+      console.error('Failed to deliver dispatch to Supabase:', err);
+      p.showToast('Dispatch failed to transmit to the salon server.', 'error');
+    }
+  };
 
-      if (targetId === 'conv-concierge') {
-        replySenderId = 'concierge-bot';
-        const lower = text.toLowerCase();
-        if (lower.includes('etkinlik') || lower.includes('hafta sonu') || lower.includes('event')) {
-          autoReply = `🍸 **Bu Hafta Sonu Küratör Seçkisi:**\n\n1. **Amsterdam Secret Villa — Eşli Lifestyle & Swinger Party** (Noord, Isıtmalı Havuz, 38 Çift + 10 Tek Kadın, Başvuru Onaylı)\n2. **Berlin Privé Masquerade & Dark Romanticism** (Mitte, Siyah İpek & Maske, Canlı DJ)\n3. **Rotterdam Sensual Noir Penthouse** (Erasmusbrug manzaralı, 25 seçkin üye)\n\nEtkinlikler sekmesinden başvurunuzu yapabilir, onaylandıktan sonra QR biletinizi cüzdanınıza alabilirsiniz.`;
-        } else if (lower.includes('kulüp') || lower.includes('loca') || lower.includes('club')) {
-          autoReply = `🗝️ **Özel Kulüp & Loca Tavsiyesi:**\n\nAmsterdam Nocturne Club ve Amsterdam Darkroom & Fetish Circle üyelerimize özel VIP localar sunmaktadır. Masaya şampanya servisi ve özel oda erişimi için profilinizin doğrulanmış olması ve dijital NDA onayınız gereklidir.`;
-        } else if (lower.includes('stil') || lower.includes('profil') || lower.includes('fotoğraf')) {
-          autoReply = `✨ **Kişisel Profil Kürasyon Önerileri:**\n\n• Profil fotoğrafınızda monokrom / loş ışık estetiği etkileşimi %40 artırıyor.\n• Özel ve mahrem fotoğraflarınızı "Intimate / Confidential" olarak işaretleyip PPV (Confidential Plate) kilidi koyabilirsiniz.\n• KYC kimlik doğrulamanızı tamamlayarak Gold/VIP rozetine geçiş yapmanızı öneririm.`;
-        } else if (lower.includes('nda') || lower.includes('güvenlik') || lower.includes('gizlilik')) {
-          autoReply = `📜 **Maison Noir Gizlilik & NDA Güvencesi:**\n\n• Tüm salon etkinliklerinde dijital NDA sözleşmesi zorunludur.\n• Mekan kapılarında kamera mühürleme ve sıfır fotoğraf kuralı uygulanır.\n• Sohbette paylaştığınız "1x Ephemeral" fotoğraflar 5 saniye sonra kalıcı olarak imha edilir.`;
-        } else if (lower.includes('vip') || lower.includes('üyelik') || lower.includes('ayrıcalık')) {
-          autoReply = `💎 **VIP & Privé Üyelik Ayrıcalıkları:**\n\n• Seçkin kulüp etkinliklerine %100 ücretsiz VIP katılım hakkı\n• Sınırsız PPV ve kilitli patron hikayeleri\n• 7/24 Öncelikli Concierge Masa Desteği\n• Sıfır komisyonlu IBAN banka transfer çekimleri.`;
-        } else if (isAudio) {
-          autoReply = `🎙️ Sesli kaydınızı dinledim. Talebinizi salon arşivine kaydettim. Özel rezervasyonunuz ve tercih ettiğiniz etkinlik türü için en uygun davetiyeleri hazırlıyorum.`;
-        } else {
-          autoReply = `Talebinizi aldım sayın ${p.currentUser.name}. Maison Noir salonlarında kusursuz bir deneyim yaşamanız için buradayım. Size etkinlik davetiyesi, özel kulüp locası veya üyelik konusunda nasıl yardımcı olabilirim?`;
-        }
-      } else {
-        autoReply = isAudio 
-          ? 'Voice note deciphered. Elegant resonance. Looking forward to our encounter.'
-          : 'Delighted to receive your dispatch in the salon. Discretion assured.';
+  // V1 Create Post (The Gazette) — 100% Realtime PostgreSQL Insertion
+  const handleSubmitNewPost = async (postData: Partial<Post>) => {
+    if (!postData.content && !postData.mediaUrl) return;
+
+    try {
+      p.showToast('Transmitting dispatch to the Gazette...', 'info');
+      const created = await noirApi.createPost({
+        authorId: p.currentUser.id,
+        content: postData.content || '',
+        type: postData.type || (postData.mediaUrl ? 'photo' : 'text'),
+        mediaUrl: postData.mediaUrl,
+      });
+
+      if (created) {
+        p.setPosts(prev => [created, ...prev.filter(x => x.id !== created.id)]);
+        p.setIsCreatePostOpen(false);
+        p.showToast('Your dispatch was archived in The Gazette.', 'success');
       }
-
-      const replyMsg: ChatMessage = {
-        id: `msg-rep-${Date.now()}`,
-        conversationId: targetId,
-        senderId: replySenderId,
-        text: autoReply,
-        createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'seen',
-      };
-      p.setConversations(prev => prev.map(c => c.id === targetId ? {
-        ...c,
-        messages: [...c.messages, replyMsg],
-        lastMessage: autoReply.substring(0, 45) + '...',
-        lastMessageTime: 'Just now',
-      } : c));
-    }, 1200);
-  };
-
-  // Event lifecycle handlers: Apply -> Approval & Notification -> Payment (if paid) / Direct QR (if free)
-  const handleApplyToEvent = (ev: PlatformEvent, data: { participationType: string; note: string }) => {
-    p.setEvents(prev => prev.map(e => e.id === ev.id ? {
-      ...e,
-      applicationStatus: 'pending',
-    } : e));
-    p.showToast(`"${ev.title}" için katılma isteğiniz alındı. İncelendikten sonra bildirim alacaksınız.`, 'success');
-  };
-
-  const handleApproveEventApplication = (eventId: string, applicantName?: string) => {
-    const targetEv = p.events.find(e => e.id === eventId);
-    if (!targetEv) return;
-
-    const finalPrice = (targetEv.vipFree && p.effectiveIsSubscribed) ? 0 : targetEv.price;
-    const isFree = finalPrice === 0;
-
-    p.setEvents(prev => prev.map(e => e.id === eventId ? {
-      ...e,
-      applicationStatus: isFree ? 'paid' : 'approved_unpaid',
-      isUserRegistered: isFree ? true : e.isUserRegistered,
-      ticketCode: isFree ? `VIP-AMS-${Math.floor(1000 + Math.random() * 9000)}` : e.ticketCode,
-      attendeesCount: isFree ? e.attendeesCount + 1 : e.attendeesCount,
-    } : e));
-
-    // Send notification to user
-    p.setNotifications(prev => [
-      {
-        id: `notif-appr-${Date.now()}`,
-        type: 'event_approval',
-        title: '🎉 Başvurunuz Onaylandı!',
-        message: `"${targetEv.title}" etkinliği için katılım başvurunuz onaylandı. ${isFree ? 'Ücretsiz biletiniz ve QR kodunuz hazır!' : `Bilet ücretini (${finalPrice} ₺) ödeyerek QR kodunuzu hemen alabilirsiniz.`}`,
-        isRead: false,
-        createdAt: 'Az önce',
-      },
-      ...prev,
-    ]);
-
-    p.showToast(`🎉 "${targetEv.title}" başvurusu onaylandı ve bildirim gönderildi!`, 'success');
-  };
-
-  const handlePayForTicket = (ev: PlatformEvent) => {
-    if (ev.applicationStatus === 'pending') {
-      // Demo convenience: allow instant approval
-      handleApproveEventApplication(ev.id);
-      return;
+    } catch (err) {
+      console.error('Error submitting dispatch:', err);
+      p.showToast('Could not save dispatch to database.', 'error');
     }
-
-    const finalPrice = (ev.vipFree && p.effectiveIsSubscribed) ? 0 : ev.price;
-    if (finalPrice > 0 && p.walletBalance < finalPrice) {
-      p.showToast(`Yetersiz bakiye! Bilet için ${finalPrice} ₺ gerekiyor.`, 'error');
-      p.setIsWalletOpen(true);
-      return;
-    }
-
-    if (finalPrice > 0) {
-      p.setWalletBalance(prev => prev - finalPrice);
-    }
-
-    p.setEvents(prev => prev.map(e => e.id === ev.id ? {
-      ...e,
-      applicationStatus: 'paid',
-      isUserRegistered: true,
-      attendeesCount: e.attendeesCount + 1,
-      ticketCode: `VIP-AMS-${Math.floor(1000 + Math.random() * 9000)}`,
-    } : e));
-
-    p.setNotifications(prev => [
-      {
-        id: `notif-pay-${Date.now()}`,
-        type: 'event_approval',
-        title: '🎟️ Bilet Temin Edildi',
-        message: `"${ev.title}" etkinliği için giriş QR kodunuz hazırlandı. Giriş ekranından görüntüleyebilirsiniz.`,
-        isRead: false,
-        createdAt: 'Az önce',
-      },
-      ...prev,
-    ]);
-
-    p.showToast(`🎟️ "${ev.title}" biletiniz temin edildi! QR kodunuz hazır.`, 'success');
-  };
-
-  const handleSignNdaForEvent = (eventId: string) => {
-    p.setEvents(prev => prev.map(e => e.id === eventId ? {
-      ...e,
-      isNdaSigned: true,
-    } : e));
-    p.setNotifications(prev => [
-      {
-        id: `notif-nda-${Date.now()}`,
-        type: 'event_approval',
-        title: '✍️ Dijital Rıza Sözleşmesi İmzalandı',
-        message: 'Hollanda Yetişkin Etkinlikleri mevzuatına uygun Dijital Gizlilik & Rıza Sözleşmesi (NDA) onayınız sisteme kaydedildi.',
-        isRead: false,
-        createdAt: 'Az önce',
-      },
-      ...prev,
-    ]);
-  };
-
-  // Create post
-  const handleSubmitNewPost = (postData: Partial<Post>) => {
-    const newPost: Post = {
-      id: `post-${Date.now()}`,
-      author: p.currentUser,
-      content: postData.content || '',
-      type: postData.type || 'text',
-      mediaUrl: postData.mediaUrl,
-      isSubscribersOnly: !!postData.isSubscribersOnly,
-      isPPV: !!postData.isPPV,
-      unlockPrice: postData.unlockPrice,
-      isUnlocked: true,
-      likesCount: 0,
-      commentsCount: 0,
-      sharesCount: 0,
-      isLiked: false,
-      isSaved: false,
-      createdAt: 'Az önce',
-    };
-    p.setPosts(prev => [newPost, ...prev]);
-    p.setIsCreatePostOpen(false);
-    p.showToast('Yeni gönderiniz yayınlandı!', 'success');
-  };
-
-  const handleTipPost = (post: Post, amount: number) => {
-    if (p.walletBalance < amount) {
-      p.showToast(`Yetersiz bakiye! Bahşiş göndermek için kasaya en az ${amount} € yükleyin.`, 'error');
-      p.setIsWalletOpen(true);
-      return;
-    }
-    p.setWalletBalance(prev => prev - amount);
-    p.showToast(`✨ ${post.author.name} adlı üyeye ${amount} € bahşiş iletildi!`, 'success');
   };
 
   return (
     <div className="min-h-screen bg-[#07080A] text-[#F3F4F6] antialiased overflow-x-hidden w-full max-w-full selection:bg-white/20">
-      {/* Interactive Prototype Banner */}
       <PrototypeBanner />
 
       {/* Top Navigation */}
@@ -255,6 +103,7 @@ export function App() {
         onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
         onOpenMembershipModal={() => p.setIsMembershipModalOpen(true)}
         onOpenNotifications={() => p.setIsNotificationsOpen(true)}
+        onOpenAuth={() => p.setIsAuthOpen(true)}
         onNavigate={p.setCurrentView}
         isDarkMode={p.isDarkMode}
         onToggleDarkMode={() => p.setIsDarkMode(!p.isDarkMode)}
@@ -279,47 +128,66 @@ export function App() {
         />
 
         <main className="flex-1 min-w-0 p-3 sm:p-5 pb-24 md:pb-8">
+          {/* V1: The Gazette Feed */}
           {p.currentView === 'feed' && (
             <Feed
               currentUser={p.currentUser}
               posts={p.posts}
-              stories={p.stories}
               isUserSubscribed={p.effectiveIsSubscribed}
               walletBalance={p.walletBalance}
               onLike={p.handleLike}
               onSave={p.handleSave}
               onOpenComments={(post) => p.setSelectedCommentsPost(post)}
               onOpenMedia={(post) => p.setSelectedMediaPost(post)}
-              onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
-              onUnlockPPV={p.handleUnlockPPV}
-              onShare={() => p.showToast('Bağlantı kopyalandı!', 'success')}
-              onTip={handleTipPost}
+              onSubscribeClick={() => {}}
+              onUnlockPPV={() => {}}
+              onShare={() => p.showToast('Dispatch link copied.', 'success')}
               onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
-              onOpenCreateStory={() => p.setIsCreateStoryOpen(true)}
-              onNavigateToProfile={() => p.setCurrentView('profile')}
+              onNavigateToProfile={(userId) => {
+                if (userId && userId !== p.currentUser.id) {
+                  const target = p.discoveryProfiles.find(x => x.id === userId);
+                  if (target) {
+                    p.handleStartConversationWithProfile(target);
+                    return;
+                  }
+                }
+                p.setCurrentView('profile');
+              }}
               onReportPost={(post) => p.setReportingTarget({ type: 'post', title: post.content, id: post.id })}
+              onRefresh={async () => {
+                const fresh = await noirApi.getPosts();
+                p.setPosts(fresh);
+                p.showToast('The Gazette refreshed from cloud archives.', 'success');
+              }}
             />
           )}
 
+          {/* V1: Member Dossier Profile */}
           {p.currentView === 'profile' && (
             <Profile
               user={p.currentUser}
               posts={p.posts.filter(item => item.author.id === p.currentUser.id)}
               walletBalance={p.walletBalance}
               isUserSubscribed={p.effectiveIsSubscribed}
-              onSubscribe={() => p.setIsMembershipModalOpen(true)}
-              onOpenWallet={() => p.setIsWalletOpen(true)}
+              onSubscribe={() => {}}
+              onOpenWallet={() => {}}
               onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
               onLike={p.handleLike}
               onSave={p.handleSave}
               onOpenComments={(post) => p.setSelectedCommentsPost(post)}
               onOpenMedia={(post) => p.setSelectedMediaPost(post)}
-              onUnlockPPV={p.handleUnlockPPV}
-              onShare={() => p.showToast('Bağlantı kopyalandı!', 'success')}
+              onUnlockPPV={() => {}}
+              onShare={() => p.showToast('Dossier link copied.', 'success')}
               onToast={(msg) => p.showToast(msg.text, msg.type)}
+              onUpdateUser={async (updated) => {
+                p.setCurrentUser(prev => ({ ...prev, ...updated }));
+                await noirApi.updateProfile(p.currentUser.id, updated);
+                p.showToast('Dossier updated in salon archives.', 'success');
+              }}
             />
           )}
 
+          {/* V1: Direct Messaging Dispatches */}
           {p.currentView === 'chat' && (
             <ChatView
               currentUser={p.currentUser}
@@ -330,98 +198,7 @@ export function App() {
             />
           )}
 
-          {p.currentView === 'events' && (
-            <EventsView
-              events={p.events}
-              currentUser={p.currentUser}
-              walletBalance={p.walletBalance}
-              isUserSubscribed={p.effectiveIsSubscribed}
-              currency={currency}
-              language={language}
-              onApplyToEvent={handleApplyToEvent}
-              onPayForTicket={handlePayForTicket}
-              onSignNdaForEvent={handleSignNdaForEvent}
-              onApproveEventApplication={handleApproveEventApplication}
-              onToast={(msg) => p.showToast(msg.text, msg.type)}
-              onCheckIn={(id) => {
-                p.setEvents(prev => prev.map(e => e.id === id ? { ...e, isCheckedIn: true } : e));
-                p.showToast('Giriş QR check-in yapıldı!', 'success');
-              }}
-              onCreateEvent={(ev) => {
-                const newEv: PlatformEvent = {
-                  id: `ev-${Date.now()}`,
-                  title: ev.title || 'Yeni Buluşma',
-                  description: ev.description || '',
-                  category: ev.category || 'party',
-                  city: ev.city || 'Amsterdam',
-                  venue: ev.venue || 'Mekan',
-                  address: ev.address || 'Amsterdam Centrum',
-                  coverImage: ev.coverImage || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&auto=format&fit=crop&q=80',
-                  capacity: 80,
-                  attendeesCount: 1,
-                  price: ev.price || 0,
-                  vipFree: true,
-                  startsAt: 'Cuma, 22:00',
-                  endsAt: 'Cumartesi, 04:00',
-                  isUserRegistered: false,
-                  applicationStatus: 'none',
-                  participationTarget: 'all',
-                  isNetherlandsHosted: true,
-                  orientationNotice: 'Çiftler, Tekil Kadın & Erkek ve Üçlü Katılıma Açık',
-                  isCheckedIn: false,
-                  organizer: { name: p.currentUser.name, username: p.currentUser.username, avatar: p.currentUser.avatar, isVerified: true },
-                };
-                p.setEvents(prev => [newEv, ...prev]);
-                p.showToast('Etkinliğiniz yayınlandı!', 'success');
-              }}
-            />
-          )}
-
-          {p.currentView === 'clubs' && (
-            <ClubsView
-              clubs={p.clubs}
-              currentUser={p.currentUser}
-              onToggleJoin={p.handleToggleClubJoin}
-              onOpenClubChat={(club) => {
-                p.setCurrentView('chat');
-                p.showToast(`"${club.name}" grup sohbetine bağlandınız.`, 'info');
-              }}
-            />
-          )}
-
-          {p.currentView === 'forum' && (
-            <ForumView
-              categories={INITIAL_FORUM_CATEGORIES}
-              topics={p.forumTopics}
-              currentUser={p.currentUser}
-              onUpvoteTopic={(id) => p.setForumTopics(prev => prev.map(t => t.id === id ? { ...t, upvotes: t.upvotes + 1 } : t))}
-              onAddReply={(topicId, content) => {
-                const rep = { id: `rep-${Date.now()}`, topicId, author: p.currentUser, content, createdAt: 'Şimdi', upvotes: 0 };
-                p.setForumTopics(prev => prev.map(t => t.id === topicId ? { ...t, replies: [...t.replies, rep], repliesCount: t.repliesCount + 1 } : t));
-                p.showToast('Yanıtınız eklendi!', 'success');
-              }}
-              onCreateTopic={(tp) => {
-                const newTopic: ForumTopic = {
-                  id: `top-${Date.now()}`,
-                  categoryId: tp.categoryId,
-                  title: tp.title,
-                  content: tp.content,
-                  author: p.currentUser,
-                  tags: tp.tags,
-                  createdAt: 'Şimdi',
-                  upvotes: 1,
-                  downvotes: 0,
-                  repliesCount: 0,
-                  viewsCount: 1,
-                  replies: [],
-                };
-                p.setForumTopics(prev => [newTopic, ...prev]);
-                p.showToast('Forum konusu açıldı!', 'success');
-              }}
-              onReportTopic={(t) => p.setReportingTarget({ type: 'post', title: t.title, id: t.id })}
-            />
-          )}
-
+          {/* V1: The Registry Discovery */}
           {p.currentView === 'discovery' && (
             <DiscoveryView
               profiles={p.discoveryProfiles}
@@ -434,49 +211,33 @@ export function App() {
               onViewProfile={() => p.setCurrentView('profile')}
             />
           )}
-
-          {p.currentView === 'admin' && (
-            <AdminPanelView
-              reports={p.reports}
-              onTakeAction={(id, actionType) => {
-                p.setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'action_taken' } : r));
-                const report = p.reports.find(r => r.id === id);
-                if (report) {
-                  if (report.targetType === 'post') {
-                    p.setPosts(prev => prev.filter(post => post.id !== report.targetId));
-                  } else if (report.targetType === 'user') {
-                    p.setDiscoveryProfiles(prev => prev.filter(prof => prof.id !== report.targetId));
-                  }
-                }
-                p.showToast(
-                  actionType === 'ban' 
-                    ? 'Patron excommunicated & dossiers quarantined.' 
-                    : 'Content censored and record updated.', 
-                  'success'
-                );
-              }}
-              onDismissReport={(id) => {
-                p.setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'dismissed' } : r));
-                p.showToast('Report dismissed as unfounded.', 'info');
-              }}
-            />
-          )}
         </main>
 
         <RightBar
           walletBalance={p.walletBalance}
           isUserSubscribed={p.effectiveIsSubscribed}
           currentUser={p.currentUser}
-          registeredEvents={p.events.filter(e => e.isUserRegistered)}
-          onOpenWallet={() => p.setIsWalletOpen(true)}
-          onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
-          onNavigateToProfile={() => p.setCurrentView('profile')}
-          onNavigateToEvents={() => p.setCurrentView('events')}
-          onNavigateToForum={() => p.setCurrentView('forum')}
+          onOpenWallet={() => {}}
+          onSubscribeClick={() => {}}
+          onNavigateToProfile={(userId) => {
+            if (userId && userId !== p.currentUser.id) {
+              const target = p.discoveryProfiles.find(x => x.id === userId);
+              if (target) {
+                p.handleStartConversationWithProfile(target);
+                return;
+              }
+            }
+            p.setCurrentView('profile');
+          }}
+          onTopicClick={(tag) => {
+            setSearchQuery(tag);
+            p.setCurrentView('feed');
+            p.showToast(`Exploring #${tag} dispatches.`, 'info');
+          }}
         />
       </div>
 
-      {/* Floating Toast Notification (P0-2: mobile top safe-area, desktop bottom-right) */}
+      {/* Floating Toast Notification */}
       {p.toastMessage && (
         <div
           role="status"

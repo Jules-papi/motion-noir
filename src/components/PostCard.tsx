@@ -73,10 +73,10 @@ export const PostCard: React.FC<PostCardProps> = ({
     setIsMuted(!isMuted);
   };
 
-  const isSubscriptionLocked = post.isSubscribersOnly && !isUserSubscribed;
-  const isPPVLocked = post.isPPV && !post.isUnlocked;
-  const isContentLocked = isSubscriptionLocked || isPPVLocked;
-  const showSensitiveOverlay = Boolean(post.isSensitive && !isSensitiveRevealed);
+  const isSubscriptionLocked = false;
+  const isPPVLocked = false;
+  const isContentLocked = false;
+  const showSensitiveOverlay = false;
 
   return (
     <article 

@@ -11,7 +11,9 @@ import {
   ArrowRight,
   Calendar,
   ShieldCheck,
-  Heart
+  Heart,
+  Grid,
+  List
 } from 'lucide-react';
 import { DiscoveryProfile, UserProfile } from '../types';
 import { DiscoveryProfileCard } from './DiscoveryProfileCard';
@@ -44,7 +46,8 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
     setInternalSearchQuery(val);
     if (onSearchQueryChange) onSearchQueryChange(val);
   };
-  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'couples' | 'singles' | 'vip'>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'women' | 'men' | 'non_binary' | 'couples'>('all');
   const [selectedCity, setSelectedCity] = useState('all');
   const [maxDistance, setMaxDistance] = useState<number>(150);
   const [minAge, setMinAge] = useState<number>(20);
@@ -82,7 +85,6 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
 
   const clearFilters = () => {
     setSearchQuery('');
-    setActiveCategoryTab('all');
     setSelectedCity('all');
     setMaxDistance(150);
     setMinAge(20);
@@ -94,7 +96,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
 
   // Find a featured duo/profile for the spotlight
   const featuredProfile = useMemo(() => {
-    return profiles.find(p => p.gender === 'couple_mf') || profiles[0];
+    return profiles.find(p => p.gender === 'couple_mf' || p.gender === 'couple') || profiles[0];
   }, [profiles]);
 
   // Online active members for the horizontal strip
@@ -104,9 +106,11 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
 
   const filteredProfiles = useMemo(() => {
     return profiles.filter(p => {
-      if (activeCategoryTab === 'couples' && p.gender !== 'couple_mf') return false;
-      if (activeCategoryTab === 'singles' && p.gender === 'couple_mf') return false;
-      if (activeCategoryTab === 'vip' && p.membershipTier !== 'vip') return false;
+      const g = (p.gender || '').toLowerCase();
+      if (activeCategoryTab === 'women' && g !== 'woman' && g !== 'female') return false;
+      if (activeCategoryTab === 'men' && g !== 'man' && g !== 'male') return false;
+      if (activeCategoryTab === 'non_binary' && g !== 'non_binary' && g !== 'non-binary') return false;
+      if (activeCategoryTab === 'couples' && g !== 'couple' && g !== 'couple_mf') return false;
 
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch = !q || 
@@ -172,7 +176,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="İsim, ilgi alanı, şehir veya stil ara..."
+                  placeholder="Search dossiers by moniker, ethos, chapter..."
                   className="w-full pl-9 pr-8 py-2 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-white/25 font-sans"
                 />
                 {searchQuery && (
@@ -188,9 +192,11 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                   onChange={e => setSelectedCity(e.target.value)}
                   className="w-full py-2 px-3.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white focus:outline-none focus:border-white/25 font-sans"
                 >
-                  <option value="all">Tüm Şehirler & Localar</option>
+                  <option value="all">All Chapters & Salons</option>
                   <option value="Amsterdam">Amsterdam Chapter</option>
                   <option value="Rotterdam">Rotterdam Chapter</option>
+                  <option value="Paris">Paris Chapter</option>
+                  <option value="London">London Chapter</option>
                   <option value="İstanbul">İstanbul Salon</option>
                   <option value="İzmir">İzmir / Aegean</option>
                 </select>
@@ -204,7 +210,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                     onChange={e => setOnlineOnly(e.target.checked)}
                     className="w-3.5 h-3.5 rounded accent-[#E5C590]"
                   />
-                  <span>Şu an Aktif Üyeler</span>
+                  <span>Active in Salon Now</span>
                 </label>
                 <label className="text-xs text-zinc-300 cursor-pointer flex items-center gap-2">
                   <input
@@ -215,7 +221,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                   />
                   <span className="flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-[#E5C590]" />
-                    <span>Onaylı</span>
+                    <span>Attested</span>
                   </span>
                 </label>
               </div>
@@ -228,7 +234,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-[#E5C590]" />
-                    Maksimum Mesafe
+                    Maximum Distance
                   </span>
                   <span className="font-mono text-white font-medium">{maxDistance} km</span>
                 </div>
@@ -248,9 +254,9 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-[#E5C590]" />
-                    Yaş Aralığı
+                    Age Span
                   </span>
-                  <span className="font-mono text-white font-medium">{minAge} - {maxAge} yaş</span>
+                  <span className="font-mono text-white font-medium">{minAge} - {maxAge} yrs</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -276,7 +282,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
             {/* Interest Tags Filter */}
             <div className="pt-2 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mr-1">İlgi Alanı:</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mr-1">Ethos Matrix:</span>
                 {['all', 'Sensual', 'Cocktails', 'Exhibitionism', 'BDSM', 'Tantra', 'Fine Dining', 'Art'].map(tag => (
                   <button
                     key={tag}
@@ -287,18 +293,18 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                         : 'bg-[#181B22] text-zinc-400 hover:text-white border border-white/[0.06]'
                     }`}
                   >
-                    {tag === 'all' ? 'Tümü' : tag}
+                    {tag === 'all' ? 'All' : tag}
                   </button>
                 ))}
               </div>
 
               <div className="flex items-center gap-3">
                 <span className="text-xs font-mono text-[#E5C590]">
-                  {filteredProfiles.length} profil bulundu
+                  {filteredProfiles.length} dossiers indexed
                 </span>
                 {(searchQuery || selectedCity !== 'all' || onlineOnly || verifiedOnly || selectedInterest !== 'all' || maxDistance !== 150) && (
                   <button onClick={clearFilters} className="text-xs font-sans text-zinc-400 hover:text-white underline cursor-pointer">
-                    Filtreleri Sıfırla
+                    Reset Filters
                   </button>
                 )}
               </div>
@@ -306,54 +312,96 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
           </div>
         )}
 
-        {/* Quiet Luxury Pill Capsule Segment Tabs */}
-        <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] overflow-x-auto no-scrollbar max-w-full">
-          <button
-            onClick={() => setActiveCategoryTab('all')}
-            className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
-              activeCategoryTab === 'all'
-                ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            All Dossiers ({profiles.length})
-          </button>
+        {/* Quiet Luxury Pill Capsule Segment Tabs & Grid/List Switcher */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] overflow-x-auto no-scrollbar max-w-full">
+            <button
+              onClick={() => setActiveCategoryTab('all')}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
+                activeCategoryTab === 'all'
+                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              All Dossiers ({profiles.length})
+            </button>
 
-          <button
-            onClick={() => setActiveCategoryTab('couples')}
-            className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-              activeCategoryTab === 'couples'
-                ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>Couples</span>
-          </button>
+            <button
+              onClick={() => setActiveCategoryTab('women')}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                activeCategoryTab === 'women'
+                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Women</span>
+            </button>
 
-          <button
-            onClick={() => setActiveCategoryTab('singles')}
-            className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-              activeCategoryTab === 'singles'
-                ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>Singles</span>
-          </button>
+            <button
+              onClick={() => setActiveCategoryTab('men')}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                activeCategoryTab === 'men'
+                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Men</span>
+            </button>
 
-          <button
-            onClick={() => setActiveCategoryTab('vip')}
-            className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-              activeCategoryTab === 'vip'
-                ? 'bg-[#181B22] text-[#E5C590] font-medium border border-[#E5C590]/25 shadow-xs'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Crown className="w-3.5 h-3.5 text-[#E5C590]" />
-            <span>Privé Circle</span>
-          </button>
+            <button
+              onClick={() => setActiveCategoryTab('non_binary')}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                activeCategoryTab === 'non_binary'
+                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Non-Binary</span>
+            </button>
+
+            <button
+              onClick={() => setActiveCategoryTab('couples')}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                activeCategoryTab === 'couples'
+                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Couples</span>
+            </button>
+          </div>
+
+          {/* Grid / List Switcher */}
+          <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] shrink-0 self-start sm:self-auto">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-[#181B22] text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+              title="Grid View"
+              aria-label="Grid View"
+            >
+              <Grid className="w-4 h-4 stroke-[1.5]" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-[#181B22] text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+              title="List View"
+              aria-label="List View"
+            >
+              <List className="w-4 h-4 stroke-[1.5]" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -477,48 +525,74 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
             onAction={clearFilters}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredProfiles.map(profile => (
-              <DiscoveryProfileCard
-                key={profile.id}
-                profile={profile}
-                isFollowed={followedIds.includes(profile.id)}
-                isInterestSent={sentInterestIds.includes(profile.id)}
-                onToggleFollow={toggleFollow}
-                onStartChat={onStartChat}
-                onOpenInterestModal={p => setInterestModalProfile(p)}
-                onLikeProfile={handleLikeProfile}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+          viewMode === 'list' ? (
+            <div className="space-y-4 max-w-3xl mx-auto">
+              {filteredProfiles.map(profile => (
+                <div 
+                  key={profile.id}
+                  className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] flex items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <img 
+                      src={profile.avatar} 
+                      alt={profile.name} 
+                      className="w-14 h-14 rounded-2xl object-cover border border-white/15 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-serif text-base text-white font-medium truncate">
+                          {profile.name}
+                        </h4>
+                        <span className="text-xs font-mono text-zinc-400">· {profile.age}</span>
+                        {profile.isVerified && (
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#E5C590] shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-xs text-zinc-400 font-sans flex items-center gap-2 mt-0.5">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-[#E5C590]" />
+                          <span>{profile.city}</span>
+                        </span>
+                        <span>·</span>
+                        <span className="truncate">{profile.bio.slice(0, 60)}...</span>
+                      </div>
+                    </div>
+                  </div>
 
-      {/* 5. EXCLUSIVE SALONS & COMMUNITIES PREVIEW */}
-      <section className="p-6 sm:p-8 rounded-2xl bg-[#121419] border border-white/[0.08] relative overflow-hidden shadow-xl">
-        <div className="max-w-xl space-y-3 relative z-10">
-          <span className="text-[10px] font-mono tracking-[0.25em] text-[#E5C590] uppercase block">
-            Exclusive Gatherings
-          </span>
-          <h3 className="font-serif text-2xl sm:text-3xl text-white font-normal tracking-tight">
-            Upcoming Private Salons & Nocturnes
-          </h3>
-          <p className="text-xs sm:text-sm text-zinc-400 font-sans font-light leading-relaxed">
-            Attend invitation-only evenings with vetted guests, strict NDA protocol, and sealed-camera villas across Amsterdam and the Riviera.
-          </p>
-          <div className="pt-2">
-            <button
-              onClick={() => {
-                const eventTab = document.querySelector('[data-nav-id="events"]') as HTMLButtonElement;
-                if (eventTab) eventTab.click();
-              }}
-              className="py-2.5 px-5 rounded-full text-xs font-sans bg-[#181B22] hover:bg-[#222631] text-white border border-white/[0.12] hover:border-white/30 flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <span>Explore Salon Evenings</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#E5C590]" />
-            </button>
-          </div>
-        </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => onStartChat(profile)}
+                      className="py-2 px-4 rounded-full text-xs font-sans bg-[#181B22] hover:bg-[#222631] text-white border border-white/15 transition-colors cursor-pointer"
+                    >
+                      Message
+                    </button>
+                    <button
+                      onClick={() => setInterestModalProfile(profile)}
+                      className="py-2 px-3.5 rounded-full text-xs font-sans bg-white hover:bg-zinc-200 text-black font-medium transition-colors cursor-pointer"
+                    >
+                      Introduce
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {filteredProfiles.map(profile => (
+                <DiscoveryProfileCard
+                  key={profile.id}
+                  profile={profile}
+                  isFollowed={followedIds.includes(profile.id)}
+                  isInterestSent={sentInterestIds.includes(profile.id)}
+                  onToggleFollow={toggleFollow}
+                  onStartChat={onStartChat}
+                  onOpenInterestModal={p => setInterestModalProfile(p)}
+                  onLikeProfile={handleLikeProfile}
+                />
+              ))}
+            </div>
+          )
+        )}
       </section>
 
       {/* Modals */}

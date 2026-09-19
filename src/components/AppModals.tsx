@@ -1,17 +1,13 @@
 import React from 'react';
 import { CreatePostModal } from './CreatePostModal';
-import { CreateStoryModal } from './CreateStoryModal';
 import { MediaModal } from './MediaModal';
 import { CommentsModal } from './CommentsModal';
-import { WalletModal } from './WalletModal';
-import { MembershipModal } from './MembershipModal';
 import { ReportModal } from './ReportModal';
-import { KYCModal } from './KYCModal';
-import { VisitorsModal } from './VisitorsModal';
 import { NotificationsDrawer } from './NotificationsDrawer';
-import { PayoutModal } from './PayoutModal';
-import { Post, Comment, MembershipTier } from '../types';
+import { AuthModal } from './AuthModal';
+import { Post, Comment } from '../types';
 import { useSocialPlatform } from '../hooks/useSocialPlatform';
+import { noirApi } from '../services/noirApi';
 
 interface AppModalsProps {
   p: ReturnType<typeof useSocialPlatform>;
@@ -21,18 +17,23 @@ interface AppModalsProps {
 export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
   return (
     <>
+      <AuthModal
+        isOpen={p.isAuthOpen}
+        onClose={() => p.setIsAuthOpen(false)}
+        onAuthSuccess={(user) => {
+          p.setCurrentUser(user);
+          p.setIsAuthOpen(false);
+        }}
+        onToast={(msg) => p.showToast(msg.text, msg.type)}
+      />
+
       <CreatePostModal
         currentUser={p.currentUser}
         isOpen={p.isCreatePostOpen}
         onClose={() => p.setIsCreatePostOpen(false)}
         onSubmitPost={onSubmitPost}
       />
-      <CreateStoryModal
-        currentUser={p.currentUser}
-        isOpen={p.isCreateStoryOpen}
-        onClose={() => p.setIsCreateStoryOpen(false)}
-        onAddStory={p.handleAddStory}
-      />
+
       <MediaModal
         post={p.selectedMediaPost}
         isOpen={!!p.selectedMediaPost}
@@ -41,59 +42,38 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
         walletBalance={p.walletBalance}
         onLike={p.handleLike}
         onSave={p.handleSave}
-        onSubscribeClick={() => {}}
-        onUnlockPPV={p.handleUnlockPPV}
+        onSubscribeClick={() => {
+          p.showToast('Patron privileges are fully active on your dossier.', 'info');
+        }}
+        onUnlockPPV={(post) => {
+          p.setPosts(prev => prev.map(pt => pt.id === post.id ? { ...pt, isPPV: false } : pt));
+          p.setSelectedMediaPost(prev => prev && prev.id === post.id ? { ...prev, isPPV: false } : prev);
+          p.showToast('Archive plate unsealed.', 'success');
+        }}
       />
+
       <CommentsModal
         post={p.selectedCommentsPost}
         isOpen={!!p.selectedCommentsPost}
         onClose={() => p.setSelectedCommentsPost(null)}
         currentUser={p.currentUser}
-        onAddComment={(postId, text) => {
-          const newComment: Comment = {
-            id: `c-${Date.now()}`,
-            author: {
-              id: p.currentUser.id,
-              name: p.currentUser.name,
-              username: p.currentUser.username,
-              avatar: p.currentUser.avatar,
-              isVerified: p.currentUser.isVerified,
-            },
-            text,
-            createdAt: 'Şimdi',
-            likes: 0,
-            isLiked: false,
-          };
-          p.setPosts(prev => prev.map(post => post.id === postId ? {
-            ...post,
-            commentsCount: post.commentsCount + 1,
-            comments: [...(post.comments || []), newComment],
-          } : post));
-          p.showToast('Yorumunuz paylaşıldı!', 'success');
+        onAddComment={async (postId, text) => {
+          try {
+            const added = await noirApi.addComment(postId, p.currentUser.id, text);
+            if (added) {
+              p.setPosts(prev => prev.map(post => post.id === postId ? {
+                ...post,
+                commentsCount: post.commentsCount + 1,
+                comments: [...(post.comments || []), added],
+              } : post));
+              p.showToast('Your comment was preserved in the salon records.', 'success');
+            }
+          } catch (err) {
+            console.error('Error adding comment:', err);
+          }
         }}
       />
-      <WalletModal
-        isOpen={p.isWalletOpen}
-        onClose={() => p.setIsWalletOpen(false)}
-        walletBalance={p.walletBalance}
-        onAddBalance={(amt) => {
-          p.setWalletBalance(prev => prev + amt);
-          p.showToast(`${amt} ₺ cüzdana yüklendi!`, 'success');
-        }}
-      />
-      <MembershipModal
-        isOpen={p.isMembershipModalOpen}
-        onClose={() => p.setIsMembershipModalOpen(false)}
-        currentTier={p.currentUser.membershipTier || 'standard'}
-        walletBalance={p.walletBalance}
-        onSelectTier={(tier: MembershipTier, price: number) => {
-          p.setWalletBalance(prev => prev - price);
-          p.setCurrentUser(prev => ({ ...prev, membershipTier: tier }));
-          p.setIsMembershipModalOpen(false);
-          p.showToast(`${tier.toUpperCase()} üyelik aktif edildi!`, 'success');
-        }}
-        onOpenWallet={() => p.setIsWalletOpen(true)}
-      />
+
       {p.reportingTarget && (
         <ReportModal
           isOpen={!!p.reportingTarget}
@@ -109,45 +89,22 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
               reason: reportData.reason,
               description: reportData.description,
               aiRiskScore: 88,
-              aiFlagReason: 'Yeni bildirim moderasyon kuyruğuna alındı.',
+              aiFlagReason: 'Report submitted to moderation queue.',
               status: 'pending',
-              createdAt: 'Şimdi',
+              createdAt: 'Just now',
             }, ...prev]);
             p.setReportingTarget(null);
-            p.showToast('Şikayetiniz moderasyon kuyruğuna iletildi.', 'success');
+            p.showToast('Your report was forwarded to moderation.', 'success');
           }}
         />
       )}
-      <KYCModal
-        isOpen={p.isKYCModalOpen}
-        onClose={() => p.setIsKYCModalOpen(false)}
-        currentUser={p.currentUser}
-        onCompleteVerification={p.handleCompleteKYC}
-      />
-      <VisitorsModal
-        isOpen={p.isVisitorsModalOpen}
-        onClose={() => p.setIsVisitorsModalOpen(false)}
-        visitors={p.visitors}
-        currentUser={p.currentUser}
-        onUpgradeToVip={() => {
-          p.setIsVisitorsModalOpen(false);
-          p.setIsMembershipModalOpen(true);
-        }}
-      />
+
       <NotificationsDrawer
         isOpen={p.isNotificationsOpen}
         onClose={() => p.setIsNotificationsOpen(false)}
         notifications={p.notifications}
         onMarkAllAsRead={p.handleMarkAllNotificationsRead}
         onSelectNotification={() => p.setIsNotificationsOpen(false)}
-      />
-      <PayoutModal
-        isOpen={p.isPayoutModalOpen}
-        onClose={() => p.setIsPayoutModalOpen(false)}
-        currentUser={p.currentUser}
-        totalEarnings={3850}
-        payouts={p.payouts}
-        onRequestPayout={p.handleRequestPayout}
       />
     </>
   );

@@ -20,6 +20,7 @@ interface RightBarProps {
   onNavigateToProfile: (userId?: string) => void;
   onNavigateToEvents?: () => void;
   onNavigateToForum?: () => void;
+  onTopicClick?: (tag: string) => void;
 }
 
 export const RightBar: React.FC<RightBarProps> = ({
@@ -32,6 +33,7 @@ export const RightBar: React.FC<RightBarProps> = ({
   onNavigateToProfile,
   onNavigateToEvents,
   onNavigateToForum,
+  onTopicClick,
 }) => {
   const [creators, setCreators] = React.useState(OTHER_SUGGESTED_CREATORS);
 
@@ -48,111 +50,16 @@ export const RightBar: React.FC<RightBarProps> = ({
 
   return (
     <aside className="hidden xl:block w-80 shrink-0 h-screen sticky top-0 px-4 py-7 space-y-4 overflow-y-auto no-scrollbar border-l border-white/[0.08] bg-[#07080A]">
-      {/* Member Vault Card */}
-      <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-4 space-y-3.5 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-zinc-400 font-sans text-xs font-medium">
-            <KeyRound className="w-3.5 h-3.5 text-[#E5C590]" />
-            <span>Member Ledger</span>
-          </div>
-          <button
-            onClick={onOpenWallet}
-            className="text-[11px] font-sans text-zinc-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            <span>Deposit</span>
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
-
-        <div className="flex items-baseline justify-between pt-0.5">
-          <div className="flex items-baseline gap-1">
-            <span className="font-sans text-2xl font-bold tracking-tight text-white">
-              {walletBalance}
-            </span>
-            <span className="text-xs font-mono text-zinc-400">
-              €
-            </span>
-          </div>
-          <span className="text-[10px] font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-[#181B22] text-[#E5C590] border border-[#E5C590]/20 uppercase">
-            Available
-          </span>
-        </div>
-
-        <button
-          onClick={onOpenWallet}
-          className="w-full py-2.5 px-3 rounded-full text-xs font-sans font-medium bg-white hover:bg-zinc-200 text-black transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-        >
-          <span>Credit Member Ledger</span>
-        </button>
-      </div>
-
-      {/* Privé Membership Card */}
+      {/* Editorial Welcome Card */}
       <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-4 space-y-3 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white font-sans text-xs font-medium">
-            <Crown className="w-3.5 h-3.5 text-[#E5C590]" />
-            <span>Privé Patronage</span>
-          </div>
-          {(currentUser.membershipTier === 'vip' || isUserSubscribed) && (
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
-              ACTIVE
-            </span>
-          )}
+        <div className="flex items-center gap-2 text-white font-sans text-xs font-medium">
+          <KeyRound className="w-3.5 h-3.5 text-[#E5C590]" />
+          <span>Maison Noir Chapter</span>
         </div>
         <p className="text-xs text-zinc-400 leading-relaxed font-sans font-normal">
-          {currentUser.membershipTier === 'vip' || isUserSubscribed
-            ? 'Active Privé status. Full admission to confidential plates, private archives, and vernissages.'
-            : 'Access unrestricted member vaults, priority invitations, and confidential salons across chapters.'}
+          Welcome to the private society. Discover curated member dossiers, dispatch private visual journals, and connect discreetly.
         </p>
-        <button
-          onClick={onSubscribeClick}
-          className={`w-full py-2.5 px-3 rounded-full font-sans text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
-            currentUser.membershipTier === 'vip' || isUserSubscribed
-              ? 'bg-[#181B22] text-emerald-300 border border-emerald-500/30'
-              : 'bg-[#181B22] hover:bg-[#222631] text-[#E5C590] border border-[#E5C590]/30 hover:border-[#E5C590]/60'
-          }`}
-        >
-          <Crown className="w-3.5 h-3.5" />
-          <span>
-            {currentUser.membershipTier === 'vip' || isUserSubscribed
-              ? 'Patron Active'
-              : 'Acquire Privé Tier (99 € / mo)'}
-          </span>
-        </button>
       </div>
-
-      {/* Upcoming Event Invitation */}
-      {registeredEvents.length > 0 && (
-        <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-4 space-y-3 shadow-xl">
-          <div className="flex items-center justify-between">
-            <h4 className="font-sans text-xs font-medium text-white flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-[#E5C590]" />
-              <span>Confirmed Soirée</span>
-            </h4>
-            {onNavigateToEvents && (
-              <button
-                onClick={onNavigateToEvents}
-                className="text-[11px] font-sans text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              >
-                All
-              </button>
-            )}
-          </div>
-
-          <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1 text-xs">
-            <div className="font-sans font-medium text-white truncate">
-              {registeredEvents[0].title}
-            </div>
-            <div className="text-[11px] font-sans text-zinc-400">
-              {registeredEvents[0].startsAt}
-            </div>
-            <div className="text-[11px] font-sans text-emerald-400 pt-0.5 flex items-center gap-1.5">
-              <span>✓</span>
-              <span>Encrypted QR Token Sealed</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Society Curators & Hosts */}
       <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-4 space-y-3.5 shadow-xl">
@@ -219,10 +126,11 @@ export const RightBar: React.FC<RightBarProps> = ({
           {trendingTopics.map(t => (
             <div 
               key={t.tag} 
-              onClick={onNavigateToForum}
-              className="p-2 -mx-2 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer group"
+              onClick={() => onTopicClick && onTopicClick(t.tag)}
+              className="p-2 -mx-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer group"
+              title={`Explore #${t.tag}`}
             >
-              <span className="text-xs font-sans font-medium text-zinc-300 group-hover:text-white transition-colors block">
+              <span className="text-xs font-sans font-medium text-zinc-300 group-hover:text-[#E5C590] transition-colors block">
                 #{t.tag}
               </span>
               <span className="text-[11px] font-sans text-zinc-500">

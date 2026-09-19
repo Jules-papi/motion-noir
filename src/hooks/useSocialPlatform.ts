@@ -1,50 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Post, 
   UserProfile, 
   Conversation, 
   PlatformEvent, 
-  ForumCategory, 
-  ForumTopic, 
   DiscoveryProfile, 
-  ReportItem,
-  Story,
-  ProfileVisitor,
-  AppNotification,
-  ClubCommunity,
-  PayoutRecord
+  ReportItem, 
+  AppNotification, 
+  ChatMessage 
 } from '../types';
-import { 
-  INITIAL_POSTS, 
-  CURRENT_USER, 
-  INITIAL_CONVERSATIONS, 
-  INITIAL_EVENTS, 
-  INITIAL_FORUM_CATEGORIES, 
-  INITIAL_FORUM_TOPICS, 
-  INITIAL_DISCOVERY_PROFILES, 
-  INITIAL_REPORTS,
-  INITIAL_STORIES,
-  INITIAL_VISITORS,
-  INITIAL_NOTIFICATIONS,
-  INITIAL_CLUBS,
-  INITIAL_PAYOUTS
-} from '../data/initialData';
 import { ActiveViewType } from '../components/Sidebar';
-import { loadPersistentState, savePersistentState } from '../utils/storage';
+import { noirApi } from '../services/noirApi';
+import { supabase } from '../lib/supabase';
+
+// Default initial patron fallback before first DB load
+const DEFAULT_PATRON: UserProfile = {
+  id: '44444444-4444-4444-4444-444444444444',
+  name: 'Julian Vane',
+  username: 'julian_v',
+  avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+  coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
+  bio: 'Founder & Senior Curator at Maison Noir. Discretion is paramount.',
+  location: 'Amsterdam Oud-Zuid',
+  website: '',
+  joinDate: 'Oct 2024',
+  isVerified: true,
+  followersCount: 1420,
+  followingCount: 380,
+  postsCount: 18,
+  totalLikes: 4200,
+  subscriptionPrice: 0,
+  membershipTier: 'standard',
+  isSubscribed: false,
+  isFollowing: false,
+  age: 31,
+  gender: 'male',
+  orientation: 'Straight',
+};
 
 export function useSocialPlatform() {
-  const savedState = typeof window !== 'undefined' ? loadPersistentState() : null;
-
   // Navigation & UI state
   const [currentView, setCurrentView] = useState<ActiveViewType>('feed');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   // Modals state
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isMembershipModalOpen, setIsMembershipModalOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
-  const [isCreateStoryOpen, setIsCreateStoryOpen] = useState(false);
   const [isKYCModalOpen, setIsKYCModalOpen] = useState(false);
   const [isVisitorsModalOpen, setIsVisitorsModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -53,51 +57,147 @@ export function useSocialPlatform() {
   const [selectedCommentsPost, setSelectedCommentsPost] = useState<Post | null>(null);
   const [reportingTarget, setReportingTarget] = useState<{ type: 'user' | 'post' | 'message' | 'event'; title: string; id: string } | null>(null);
 
-  // Core Data state with LocalStorage persistence hydration
-  const [currentUser, setCurrentUser] = useState<UserProfile>(() => savedState?.currentUser || CURRENT_USER);
-  const [posts, setPosts] = useState<Post[]>(() => savedState?.posts || INITIAL_POSTS);
-  const [stories, setStories] = useState<Story[]>(INITIAL_STORIES);
-  const [visitors, setVisitors] = useState<ProfileVisitor[]>(INITIAL_VISITORS);
-  const [notifications, setNotifications] = useState<AppNotification[]>(INITIAL_NOTIFICATIONS);
-  const [clubs, setClubs] = useState<ClubCommunity[]>(() => savedState?.clubs || INITIAL_CLUBS);
-  const [payouts, setPayouts] = useState<PayoutRecord[]>(INITIAL_PAYOUTS);
-  const [walletBalance, setWalletBalance] = useState<number>(() => savedState?.walletBalance ?? 350);
-  const [conversations, setConversations] = useState<Conversation[]>(() => savedState?.conversations || INITIAL_CONVERSATIONS);
-  const [activeConversationId, setActiveConversationId] = useState<string>('conv-1');
-  const [events, setEvents] = useState<PlatformEvent[]>(() => savedState?.events || INITIAL_EVENTS);
-  const [forumTopics, setForumTopics] = useState<ForumTopic[]>(() => savedState?.forumTopics || INITIAL_FORUM_TOPICS);
-  const [discoveryProfiles, setDiscoveryProfiles] = useState<DiscoveryProfile[]>(() => savedState?.discoveryProfiles || INITIAL_DISCOVERY_PROFILES);
-  const [reports, setReports] = useState<ReportItem[]>(INITIAL_REPORTS);
-
-  // Automatically sync changed state to localStorage
-  useEffect(() => {
-    savePersistentState({
-      walletBalance,
-      posts,
-      clubs,
-      events,
-      forumTopics,
-      conversations,
-      currentUser,
-      discoveryProfiles,
-    });
-  }, [walletBalance, posts, clubs, events, forumTopics, conversations, currentUser, discoveryProfiles]);
+  // Core Data state (Live Supabase)
+  const [currentUser, setCurrentUser] = useState<UserProfile>(DEFAULT_PATRON);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [discoveryProfiles, setDiscoveryProfiles] = useState<DiscoveryProfile[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string>('');
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
 
   const showToast = (text: string, type: 'success' | 'info' | 'error' = 'info') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Toast and actions
-  const effectiveIsSubscribed = currentUser.membershipTier === 'vip' || currentUser.membershipTier === 'gold';
+  // 1. Initial Load from Supabase Live Database
+  const loadInitialData = useCallback(async () => {
+    try {
+      setIsLoadingInitial(true);
 
-  // Feed interactions
-  const handleLike = (postId: string) => {
+      // Check current auth session
+      const { data: sessionData } = await supabase.auth.getSession();
+      const authUser = sessionData.session?.user;
+
+      // Load all live profiles
+      const dbProfiles = await noirApi.getProfiles();
+
+      if (dbProfiles.length > 0) {
+        // Map to DiscoveryProfile format
+        const mappedDiscovery: DiscoveryProfile[] = dbProfiles.map(p => ({
+          id: p.id,
+          name: p.name,
+          username: p.username,
+          avatar: p.avatar,
+          bio: p.bio,
+          age: p.age || 28,
+          gender: (p.gender as any) || 'woman',
+          city: p.location || 'Amsterdam',
+          distanceKm: Math.floor(2 + Math.random() * 8),
+          isOnline: true,
+          isVerified: p.isVerified,
+          membershipTier: p.membershipTier,
+          interests: ['Art', 'Noir', 'Private Salons'],
+          matchRate: 92,
+        }));
+        setDiscoveryProfiles(mappedDiscovery);
+
+        // Identify current user
+        if (authUser) {
+          const matched = dbProfiles.find(p => p.id === authUser.id);
+          if (matched) {
+            setCurrentUser(matched);
+          }
+        } else {
+          // If no auth, default to Julian Vane or first profile
+          const julian = dbProfiles.find(p => p.username === 'julian_v') || dbProfiles[0];
+          if (julian) setCurrentUser(julian);
+        }
+      }
+
+      // Load live posts
+      const dbPosts = await noirApi.getPosts();
+      setPosts(dbPosts);
+
+    } catch (err) {
+      console.error('Failed to load initial Supabase data:', err);
+      showToast('Connecting to Maison Noir cloud database...', 'info');
+    } finally {
+      setIsLoadingInitial(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
+
+  // 2. Load conversations when currentUser changes
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    noirApi.getConversations(currentUser.id).then(convs => {
+      setConversations(convs);
+      if (convs.length > 0 && !activeConversationId) {
+        setActiveConversationId(convs[0].id);
+      }
+    });
+  }, [currentUser?.id]);
+
+  // 3. Supabase Realtime WebSockets: Listen for new posts & messages
+  useEffect(() => {
+    // Realtime posts
+    const unsubscribePosts = noirApi.subscribeToPosts((newPost) => {
+      setPosts(prev => {
+        if (prev.some(p => p.id === newPost.id)) return prev;
+        return [newPost, ...prev];
+      });
+      showToast('New dispatch posted in The Gazette.', 'info');
+    });
+
+    // Realtime messages
+    const unsubscribeMessages = noirApi.subscribeToMessages((newMsg: ChatMessage) => {
+      setConversations(prev => {
+        return prev.map(c => {
+          if (c.id === newMsg.conversationId) {
+            // Check if message already exists
+            if (c.messages.some(m => m.id === newMsg.id)) return c;
+            return {
+              ...c,
+              messages: [...c.messages, newMsg],
+              lastMessage: newMsg.text || 'Photo Dispatch',
+              lastMessageTime: newMsg.createdAt,
+            };
+          }
+          return c;
+        });
+      });
+    });
+
+    return () => {
+      unsubscribePosts();
+      unsubscribeMessages();
+    };
+  }, []);
+
+  // Feed interactions (Live in Supabase)
+  const handleLike = async (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    const currentlyLiked = !!post.isLiked;
+
+    // Optimistic UI update
     setPosts(prev => prev.map(p => p.id === postId ? {
       ...p,
-      isLiked: !p.isLiked,
-      likesCount: p.isLiked ? p.likesCount - 1 : p.likesCount + 1,
+      isLiked: !currentlyLiked,
+      likesCount: currentlyLiked ? Math.max(0, p.likesCount - 1) : p.likesCount + 1,
     } : p));
+
+    try {
+      await noirApi.toggleLikePost(postId, currentUser.id, currentlyLiked);
+    } catch (err) {
+      console.error('Error liking post:', err);
+    }
   };
 
   const handleSave = (postId: string) => {
@@ -105,108 +205,21 @@ export function useSocialPlatform() {
     showToast('Dispatch preserved in private dossier.', 'success');
   };
 
-  const handleUnlockPPV = (post: Post) => {
-    if (post.isUnlocked) return;
-    if (currentUser.membershipTier === 'vip') {
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, isUnlocked: true } : p));
-      showToast('Privé Circle Privilege: Plate unsealed without fee.', 'success');
-      return;
-    }
-    const price = post.unlockPrice || 15;
-    if (walletBalance < price) {
-      showToast(`Insufficient treasury. Unsealing requires ${price} € or equivalent.`, 'error');
-      setIsWalletOpen(true);
-      return;
-    }
-    setWalletBalance(prev => Math.max(0, prev - price));
-    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, isUnlocked: true } : p));
-    showToast(`Confidential plate unsealed for ${price} €.`, 'success');
-  };
-
-  const handleToggleClubJoin = (clubId: string) => {
-    setClubs(prev => prev.map(c => {
-      if (c.id === clubId) {
-        const nextState = !c.isJoined;
-        showToast(nextState ? `Initiated into "${c.name}".` : `Departed from "${c.name}".`, 'info');
-        return {
-          ...c,
-          isJoined: nextState,
-          membersCount: nextState ? c.membersCount + 1 : Math.max(0, c.membersCount - 1),
-        };
-      }
-      return c;
-    }));
-  };
-
-  const handleCompleteKYC = () => {
-    setCurrentUser(prev => ({ ...prev, isVerified: true }));
-    showToast('Biometric attestation confirmed. Blue seal affixed to your dossier.', 'success');
-  };
-
-  const handleStartConversationWithProfile = (profile: DiscoveryProfile) => {
-    const existing = conversations.find(c => 
-      c.participant.id === profile.id || 
-      c.participant.username === profile.username ||
-      c.participant.name === profile.name
-    );
-
-    if (existing) {
-      setActiveConversationId(existing.id);
+  // Start or resume real conversation with profile in Supabase
+  const handleStartConversationWithProfile = async (profile: DiscoveryProfile) => {
+    try {
+      showToast(`Establishing encrypted channel with ${profile.name}...`, 'info');
+      const convId = await noirApi.getOrCreateConversation(currentUser.id, profile.id);
+      
+      // Refresh conversations
+      const updatedConvs = await noirApi.getConversations(currentUser.id);
+      setConversations(updatedConvs);
+      setActiveConversationId(convId);
       setCurrentView('chat');
-      showToast(`Resumed encrypted dispatch with ${profile.name}.`, 'info');
-      return;
+    } catch (err) {
+      console.error('Error starting conversation:', err);
+      showToast('Could not initiate conversation channel.', 'error');
     }
-
-    const newConvId = `conv-${Date.now()}`;
-    const newConv: Conversation = {
-      id: newConvId,
-      participant: {
-        id: profile.id,
-        name: profile.name,
-        username: profile.username,
-        avatar: profile.avatar,
-        isVerified: profile.isVerified,
-        membershipTier: profile.membershipTier || 'standard',
-        isOnline: true,
-      },
-      lastMessage: 'Encrypted salon initialized.',
-      lastMessageTime: 'Just now',
-      unreadCount: 0,
-      messages: [
-        {
-          id: `m-init-${Date.now()}`,
-          conversationId: newConvId,
-          senderId: profile.id,
-          text: `Salutations. I observed your interest in the Registry. Delighted to connect in confidence.`,
-          createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'seen',
-        }
-      ]
-    };
-
-    setConversations(prev => [newConv, ...prev]);
-    setActiveConversationId(newConvId);
-    setCurrentView('chat');
-    showToast(`Encrypted dispatch channel established with ${profile.name}.`, 'success');
-  };
-
-  const handleRequestPayout = (amount: number, iban: string, bankName: string) => {
-    const fee = Math.round(amount * 0.20);
-    const net = amount - fee;
-    const newRecord: PayoutRecord = {
-      id: `pay-${Date.now()}`,
-      amount,
-      netAmount: net,
-      platformFee: fee,
-      iban,
-      bankName,
-      accountHolder: currentUser.name,
-      status: 'processing',
-      createdAt: 'Just now',
-    };
-    setPayouts(prev => [newRecord, ...prev]);
-    setIsPayoutModalOpen(false);
-    showToast(`Wire transfer disbursement of €${net} queued for processing.`, 'success');
   };
 
   const handleMarkAllNotificationsRead = () => {
@@ -214,19 +227,14 @@ export function useSocialPlatform() {
     showToast('All notifications marked as reviewed.', 'info');
   };
 
-  const handleAddStory = (newStory: Story) => {
-    setStories(prev => [newStory, ...prev]);
-    showToast('24h Vignette published to member circle.', 'success');
-  };
-
   return {
     currentView, setCurrentView,
     isDarkMode, setIsDarkMode,
     toastMessage, showToast,
+    isAuthOpen, setIsAuthOpen,
     isWalletOpen, setIsWalletOpen,
     isMembershipModalOpen, setIsMembershipModalOpen,
     isCreatePostOpen, setIsCreatePostOpen,
-    isCreateStoryOpen, setIsCreateStoryOpen,
     isKYCModalOpen, setIsKYCModalOpen,
     isVisitorsModalOpen, setIsVisitorsModalOpen,
     isNotificationsOpen, setIsNotificationsOpen,
@@ -236,23 +244,16 @@ export function useSocialPlatform() {
     reportingTarget, setReportingTarget,
     currentUser, setCurrentUser,
     posts, setPosts,
-    stories, setStories,
-    visitors, setVisitors,
     notifications, setNotifications,
-    clubs, setClubs,
-    payouts, setPayouts,
-    walletBalance, setWalletBalance,
+    walletBalance: 0,
     conversations, setConversations,
     activeConversationId, setActiveConversationId,
-    events, setEvents,
-    forumTopics, setForumTopics,
     discoveryProfiles, setDiscoveryProfiles,
     reports, setReports,
-    effectiveIsSubscribed,
-    handleLike, handleSave, handleUnlockPPV,
-    handleToggleClubJoin, handleCompleteKYC,
-    handleRequestPayout, handleMarkAllNotificationsRead,
+    isLoadingInitial,
+    effectiveIsSubscribed: true,
+    handleLike, handleSave,
+    handleMarkAllNotificationsRead,
     handleStartConversationWithProfile,
-    handleAddStory,
   };
 }

@@ -119,9 +119,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn cursor-pointer"
+    >
       <div 
-        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -179,118 +182,6 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 <span>Epistle</span>
               </button>
             </div>
-
-            {/* Monetization & Access Toggles */}
-            {postType !== 'text' && (
-              <div className="bg-[#121419] border border-white/[0.06] rounded-xl p-3.5 space-y-3">
-                <span className="block text-[11px] font-mono text-[#E5C590]">Access & Privacy Tier</span>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#181B22] text-[#E5C590] border border-white/10 flex items-center justify-center">
-                      <Crown className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-serif text-zinc-100">Privé Patron Reserve</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Restricted strictly to active monthly patrons</div>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={isSubscribersOnly}
-                    onChange={(e) => {
-                      setIsSubscribersOnly(e.target.checked);
-                      if (e.target.checked) setIsPPV(false);
-                    }}
-                    className="w-4 h-4 rounded accent-[#E5C590] cursor-pointer"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-white/[0.06]">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#181B22] text-[#E5C590] border border-white/10 flex items-center justify-center">
-                      <Coins className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-serif text-zinc-100">Confidential Unseal (PPV)</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Pay-per-view access fee to reveal sealed plate</div>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={isPPV}
-                    onChange={(e) => {
-                      setIsPPV(e.target.checked);
-                      if (e.target.checked) setIsSubscribersOnly(false);
-                    }}
-                    className="w-4 h-4 rounded accent-[#E5C590] cursor-pointer"
-                  />
-                </label>
-
-                {isPPV && (
-                  <div className="pt-2 pl-9 flex items-center gap-3 text-xs">
-                    <span className="text-zinc-400">Unseal Price:</span>
-                    <div className="flex items-center gap-1.5">
-                      {[25, 50, 100, 200].map(val => (
-                        <button
-                          key={val}
-                          type="button"
-                          onClick={() => setUnlockPrice(val)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
-                            unlockPrice === val
-                              ? 'bg-[#E5C590] text-black font-semibold'
-                              : 'bg-white/5 text-zinc-300 hover:bg-white/10 border border-white/10'
-                          }`}
-                        >
-                          {val} ₺
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Intimate / Sensual Tag */}
-            <div className="p-3 bg-[#121419] border border-white/[0.06] rounded-xl font-mono">
-              <label className="flex items-center justify-between cursor-pointer gap-2">
-                <div>
-                  <span className="text-[11px] text-[#E5C590] block font-medium">
-                    Intimate / Confidential Visuals
-                  </span>
-                  <p className="text-[10px] font-sans text-zinc-400">
-                    Applies initial frosted scrim filter across member streams until tapped.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={isSensitive}
-                  onChange={e => setIsSensitive(e.target.checked)}
-                  className="w-4 h-4 rounded accent-[#E5C590] shrink-0 cursor-pointer"
-                />
-              </label>
-            </div>
-
-            {/* Discreet Face Mask Blur Toggle */}
-            {postType === 'photo' && (
-              <div className="p-3 bg-[#121419] border border-white/[0.06] rounded-xl font-mono">
-                <label className="flex items-center justify-between cursor-pointer gap-2">
-                  <div>
-                    <span className="text-[11px] text-zinc-200 block font-medium">
-                      🔏 Otomatik Yüz Maskeleme (Discreet Face Mask)
-                    </span>
-                    <p className="text-[10px] font-sans text-zinc-400">
-                      Görsel üzerindeki yüz bölgesine estetik siyah cemiyet bandı / buzlu cam efekti ekler.
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={hasFaceMask}
-                    onChange={e => setHasFaceMask(e.target.checked)}
-                    className="w-4 h-4 rounded accent-[#E5C590] shrink-0 cursor-pointer"
-                  />
-                </label>
-              </div>
-            )}
 
             {/* Caption */}
             <div>

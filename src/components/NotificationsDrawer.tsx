@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Bell, 
   Coins, 
@@ -25,6 +25,15 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   onMarkAllAsRead,
   onSelectNotification,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -47,8 +56,14 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex justify-end">
-      <div className="w-full max-w-sm bg-[#09090b] h-full shadow-2xl border-l border-white/[0.08] flex flex-col">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex justify-end animate-in fade-in duration-150"
+    >
+      <div 
+        onClick={e => e.stopPropagation()}
+        className="w-full max-w-sm bg-[#09090b] h-full shadow-2xl border-l border-white/[0.08] flex flex-col animate-in slide-in-from-right duration-200"
+      >
         {/* Header */}
         <div className="p-5 border-b border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-2.5">

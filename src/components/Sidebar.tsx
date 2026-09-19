@@ -14,7 +14,7 @@ import {
 import { UserProfile } from '../types';
 import { SupportedCurrency, SupportedLanguage } from '../types/anlatiTypes';
 
-export type ActiveViewType = 'feed' | 'profile' | 'chat' | 'events' | 'forum' | 'discovery' | 'clubs' | 'admin';
+export type ActiveViewType = 'feed' | 'profile' | 'chat' | 'discovery';
 
 interface SidebarProps {
   currentView: ActiveViewType;
@@ -65,35 +65,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: unreadChatCount 
     },
     { 
-      id: 'events' as const, 
-      label: 'Private Salons', 
-      sub: 'Curated Soirées',
-      icon: CalendarDays 
-    },
-    { 
-      id: 'clubs' as const, 
-      label: 'Circles', 
-      sub: 'Private Guilds',
-      icon: Users 
-    },
-    { 
-      id: 'forum' as const, 
-      label: 'The Smoking Room', 
-      sub: 'Salon Dialogue',
-      icon: FileText 
-    },
-    { 
       id: 'profile' as const, 
       label: 'Member Dossier', 
-      sub: 'Duo & Vault',
+      sub: 'Personal Profile',
       icon: KeyRound 
-    },
-    { 
-      id: 'admin' as const, 
-      label: 'Concierge', 
-      sub: 'Club Oversight',
-      icon: ShieldCheck, 
-      tag: 'Concierge' 
     },
   ];
 
@@ -249,14 +224,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <button
-          onClick={() => onNavigate('events')}
-          className={`flex-1 flex flex-col items-center justify-center py-1 gap-1 text-[10px] font-sans transition-colors cursor-pointer ${
-            currentView === 'events' ? 'text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
+          onClick={() => onNavigate('chat')}
+          className={`flex-1 flex flex-col items-center justify-center py-1 gap-1 text-[10px] font-sans transition-colors cursor-pointer relative ${
+            currentView === 'chat' ? 'text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <CalendarDays className="w-4 h-4 stroke-[1.75]" />
-          <span className="truncate">Salons</span>
-          {currentView === 'events' && (
+          <MessageSquare className="w-4 h-4 stroke-[1.75]" />
+          <span className="truncate">Chat</span>
+          {Boolean(unreadChatCount && unreadChatCount > 0) && (
+            <span className="absolute top-1 right-3 w-2 h-2 rounded-full bg-[#E5C590]" />
+          )}
+          {currentView === 'chat' && (
             <span className="w-1 h-1 rounded-full bg-white mt-0.5" />
           )}
         </button>

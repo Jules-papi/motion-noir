@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldAlert, X, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { ReportItem } from '../types';
 
@@ -19,8 +19,17 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   target,
   onSubmitReport,
 }) => {
-  const [reason, setReason] = useState<ReportItem['reason']>('Spam / Reklam');
+  const [reason, setReason] = useState<string>('Spam / Solicitation');
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !target) return null;
 
@@ -29,7 +38,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
     if (!description.trim()) return;
 
     onSubmitReport({
-      reporterName: 'Siz (Doğrulanmış Kullanıcı)',
+      reporterName: 'Attested Member',
       targetType: target.type,
       targetTitle: target.title,
       targetId: target.id,
@@ -41,54 +50,63 @@ export const ReportModal: React.FC<ReportModalProps> = ({
     onClose();
   };
 
-  const reasons: ReportItem['reason'][] = [
-    'Spam / Reklam',
-    'Taciz / Zorbalık',
-    'Sahte Hesap',
-    'Uygunsuz NSFW',
-    'Dolandırıcılık',
+  const reasons: string[] = [
+    'Spam / Solicitation',
+    'Harassment / Conduct Violation',
+    'Impersonation / Fake Dossier',
+    'Inappropriate Content',
+    'Deceptive / Fraudulent Activity',
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl relative">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-150"
+    >
+      <div 
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl relative cursor-default"
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center shrink-0">
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-extrabold text-base text-zinc-900 dark:text-white">
-              Şikayet Bildirimi Oluştur
+            <span className="text-[10px] font-mono tracking-widest uppercase text-rose-400 block">
+              Discretion & Trust
+            </span>
+            <h3 className="font-serif text-lg text-white font-medium tracking-tight">
+              File Confidential Report
             </h3>
-            <p className="text-xs text-zinc-400">
-              Hedef: <strong>{target.title}</strong>
+            <p className="text-xs text-zinc-400 font-sans mt-0.5">
+              Subject: <span className="text-zinc-200 font-medium">{target.title}</span>
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
           <div>
-            <label className="font-semibold block mb-1.5 text-zinc-700 dark:text-zinc-300">
-              İhlal Nedeni
+            <label className="font-mono text-[11px] uppercase tracking-wider text-zinc-400 block mb-2">
+              Infraction Category
             </label>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {reasons.map(r => (
                 <label
                   key={r}
-                  className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-colors ${
+                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                     reason === r
-                      ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 font-semibold'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-600 dark:text-zinc-400'
+                      ? 'border-rose-500/60 bg-rose-500/10 text-white font-medium'
+                      : 'border-white/[0.08] bg-[#14161C] hover:border-white/20 text-zinc-400 hover:text-white'
                   }`}
                 >
-                  <span>{r}</span>
+                  <span className="text-xs">{r}</span>
                   <input
                     type="radio"
                     name="reason"
@@ -102,29 +120,38 @@ export const ReportModal: React.FC<ReportModalProps> = ({
           </div>
 
           <div>
-            <label className="font-semibold block mb-1 text-zinc-700 dark:text-zinc-300">
-              Detaylı Açıklama
+            <label className="font-mono text-[11px] uppercase tracking-wider text-zinc-400 block mb-1.5">
+              Confidential Particulars
             </label>
             <textarea
               rows={3}
               required
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Gözlemlediğiniz ihlali veya rahatsız edici durumu açıklayın..."
-              className="w-full p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border-none text-zinc-900 dark:text-white outline-hidden focus:ring-2 focus:ring-rose-500"
+              placeholder="Provide context or observe conduct regarding this incident..."
+              className="w-full p-3 rounded-xl bg-[#14161C] border border-white/[0.08] text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#E5C590]/50"
             />
           </div>
 
-          <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed">
-            Bildiriminiz AI Güvenlik Motoru tarafından taranacak ve moderatör inceleme sırasına alınacaktır.
+          <div className="bg-[#181B22] p-3 rounded-xl border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed font-sans">
+            Your incident record is encrypted and forwarded directly to the Maison Noir Trust & Discretion council.
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white shadow-md active:scale-95 transition-all"
-          >
-            Şikayeti Gönder
-          </button>
+          <div className="pt-2 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-full text-xs font-sans text-zinc-400 hover:text-white border border-white/[0.08] hover:border-white/20 cursor-pointer transition-colors"
+            >
+              Dismiss
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-full text-xs font-sans font-medium bg-rose-600 hover:bg-rose-500 text-white shadow-md active:scale-95 transition-all cursor-pointer"
+            >
+              Transmit Report
+            </button>
+          </div>
         </form>
       </div>
     </div>
