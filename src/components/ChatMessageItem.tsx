@@ -18,7 +18,7 @@ interface ChatMessageItemProps {
   msg: ChatMessage;
   isMe: boolean;
   isPlayingAudio: boolean;
-  onToggleAudio: (id: string) => void;
+  onToggleAudio: (msg: ChatMessage) => void;
   onMarkViewedOnce?: (id: string) => void;
 }
 
@@ -67,6 +67,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+      {!isMe && msg.senderName && (
+        <div className="flex items-center gap-1.5 mb-1 ml-1 text-[10px] font-mono text-[#E5C590]">
+          {msg.senderAvatar && (
+            <img src={msg.senderAvatar} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+          )}
+          <span>{msg.senderName}</span>
+        </div>
+      )}
       <div
         className={`max-w-[85%] sm:max-w-md rounded-2xl px-4 py-3 text-xs shadow-md ${
           isMe
@@ -112,7 +120,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           /* Audio Dispatch Player */
           <div className="flex items-center gap-3 py-1.5 min-w-[210px] sm:min-w-[240px]">
             <button
-              onClick={() => onToggleAudio(msg.id)}
+              onClick={() => onToggleAudio(msg)}
               className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-xs transition-transform active:scale-95 cursor-pointer ${
                 isMe 
                   ? 'bg-[#E5C590] text-black hover:bg-[#d9b880]' 
@@ -129,8 +137,13 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             <div className="flex-1 space-y-1.5">
               {/* Dynamic Sound Waveform */}
               <div className="flex items-center gap-0.5 sm:gap-1 h-6">
-                {[14, 22, 10, 26, 18, 28, 12, 20, 24, 16, 26, 10, 18, 22, 14, 28, 16, 20].map((h, i) => {
-                  const isActive = isPlayingAudio && i < 11;
+                {(msg.audioWaveform && msg.audioWaveform.length >= 10
+                  ? msg.audioWaveform
+                  : [14, 22, 10, 26, 18, 28, 12, 20, 24, 16, 26, 10, 18, 22, 14, 28, 16, 20]
+                ).map((h, i) => {
+                  const totalBars = (msg.audioWaveform?.length || 18);
+                  const progressIdx = Math.floor(totalBars * 0.6);
+                  const isActive = isPlayingAudio && i <= progressIdx;
                   return (
                     <span
                       key={i}
@@ -145,7 +158,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 })}
               </div>
               <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-                <span>{isPlayingAudio ? '0:07' : '0:00'}</span>
+                <span>{isPlayingAudio ? 'Playing' : '0:00'}</span>
                 <span>{msg.audioDuration || '0:14'}</span>
               </div>
             </div>

@@ -8,7 +8,10 @@ import {
   Crown, 
   Coins, 
   Check,
-  Upload
+  Upload,
+  Eye,
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 
 interface CreatePostModalProps {
@@ -31,8 +34,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [tagsInput, setTagsInput] = useState('');
   const [isSubscribersOnly, setIsSubscribersOnly] = useState(false);
   const [isPPV, setIsPPV] = useState(false);
-  const [unlockPrice, setUnlockPrice] = useState<number>(100);
+  const [unlockPrice, setUnlockPrice] = useState<number>(50);
   const [isSensitive, setIsSensitive] = useState(false);
+  const [hasFaceMask, setHasFaceMask] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -91,6 +95,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       isSubscribersOnly: postType !== 'text' && isSubscribersOnly,
       isPPV: postType !== 'text' && isPPV,
       isSensitive,
+      hasFaceMask,
       unlockPrice: isPPV ? unlockPrice : undefined,
       isUnlocked: false,
       likesCount: 0,
@@ -109,25 +114,25 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     setTagsInput('');
     setIsSubscribersOnly(false);
     setIsPPV(false);
+    setHasFaceMask(false);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div 
-        className="bg-[#0c0c0e] border border-white/[0.12] rounded-xs w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] sm:max-h-[85vh] flex flex-col"
+        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 border-b border-white/[0.08] flex items-center justify-between shrink-0">
-          <div>
-            <span className="text-[10px] font-mono tracking-widest uppercase text-amber-300 block">
-              Maison Member Dispatch
-            </span>
-            <h3 className="font-serif text-lg text-stone-100 font-medium">Publish Private Dispatch</h3>
+        {/* Header */}
+        <div className="p-4 px-5 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-[#121419]">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#E5C590]" />
+            <h3 className="font-serif text-sm text-white font-medium">Publish Private Dispatch</h3>
           </div>
           <button 
             onClick={onClose}
-            className="p-1 rounded-xs text-stone-400 hover:text-stone-200 border border-white/[0.06] hover:border-white/20 transition-colors"
+            className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -136,14 +141,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="p-5 space-y-4 flex-1 overflow-y-auto">
             {/* Post Type Selector */}
-            <div className="grid grid-cols-3 gap-2 p-1 bg-[#121215] border border-white/[0.06] rounded-xs">
+            <div className="grid grid-cols-3 gap-2 p-1 bg-[#121419] border border-white/[0.06] rounded-xl">
               <button
                 type="button"
                 onClick={() => setPostType('photo')}
-                className={`flex items-center justify-center gap-1.5 py-2 rounded-xs text-xs font-serif uppercase tracking-wider transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-serif transition-all cursor-pointer ${
                   postType === 'photo' 
-                    ? 'bg-[#181613] text-amber-200 border border-amber-600/40' 
-                    : 'text-stone-400 hover:text-stone-200'
+                    ? 'bg-[#1e222b] text-[#E5C590] border border-[#E5C590]/40 shadow-sm' 
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" />
@@ -152,10 +157,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <button
                 type="button"
                 onClick={() => setPostType('video')}
-                className={`flex items-center justify-center gap-1.5 py-2 rounded-xs text-xs font-serif uppercase tracking-wider transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-serif transition-all cursor-pointer ${
                   postType === 'video' 
-                    ? 'bg-[#181613] text-amber-200 border border-amber-600/40' 
-                    : 'text-stone-400 hover:text-stone-200'
+                    ? 'bg-[#1e222b] text-[#E5C590] border border-[#E5C590]/40 shadow-sm' 
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <VideoIcon className="w-3.5 h-3.5" />
@@ -164,10 +169,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <button
                 type="button"
                 onClick={() => setPostType('text')}
-                className={`flex items-center justify-center gap-1.5 py-2 rounded-xs text-xs font-serif uppercase tracking-wider transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-serif transition-all cursor-pointer ${
                   postType === 'text' 
-                    ? 'bg-[#181613] text-amber-200 border border-amber-600/40' 
-                    : 'text-stone-400 hover:text-stone-200'
+                    ? 'bg-[#1e222b] text-[#E5C590] border border-[#E5C590]/40 shadow-sm' 
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -177,16 +182,16 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
             {/* Monetization & Access Toggles */}
             {postType !== 'text' && (
-              <div className="bg-[#121215] border border-white/[0.06] rounded-xs p-3.5 space-y-3 font-mono">
-                <span className="block text-[10px] tracking-wider uppercase text-amber-200">Access & Privacy Tier</span>
+              <div className="bg-[#121419] border border-white/[0.06] rounded-xl p-3.5 space-y-3">
+                <span className="block text-[11px] font-mono text-[#E5C590]">Access & Privacy Tier</span>
                 <label className="flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-xs bg-[#161512] text-amber-300 border border-amber-600/30 flex items-center justify-center">
-                      <Crown className="w-3 h-3" />
+                    <div className="w-7 h-7 rounded-lg bg-[#181B22] text-[#E5C590] border border-white/10 flex items-center justify-center">
+                      <Crown className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <div className="text-xs font-serif text-stone-200">Privé Patron Reserve</div>
-                      <div className="text-[10px] text-stone-400 font-sans">Restricted strictly to active monthly patrons</div>
+                      <div className="text-xs font-serif text-zinc-100">Privé Patron Reserve</div>
+                      <div className="text-[10px] text-zinc-400 font-sans">Restricted strictly to active monthly patrons</div>
                     </div>
                   </div>
                   <input
@@ -196,18 +201,18 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       setIsSubscribersOnly(e.target.checked);
                       if (e.target.checked) setIsPPV(false);
                     }}
-                    className="w-4 h-4 rounded-xs accent-amber-500"
+                    className="w-4 h-4 rounded accent-[#E5C590] cursor-pointer"
                   />
                 </label>
 
                 <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-white/[0.06]">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-xs bg-[#161512] text-amber-300 border border-amber-600/30 flex items-center justify-center">
-                      <Coins className="w-3 h-3" />
+                    <div className="w-7 h-7 rounded-lg bg-[#181B22] text-[#E5C590] border border-white/10 flex items-center justify-center">
+                      <Coins className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <div className="text-xs font-serif text-stone-200">Confidential Unseal (PPV)</div>
-                      <div className="text-[10px] text-stone-400 font-sans">Single-access confidential admission fee</div>
+                      <div className="text-xs font-serif text-zinc-100">Confidential Unseal (PPV)</div>
+                      <div className="text-[10px] text-zinc-400 font-sans">Pay-per-view access fee to reveal sealed plate</div>
                     </div>
                   </div>
                   <input
@@ -217,73 +222,102 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       setIsPPV(e.target.checked);
                       if (e.target.checked) setIsSubscribersOnly(false);
                     }}
-                    className="w-4 h-4 rounded-xs accent-amber-500"
+                    className="w-4 h-4 rounded accent-[#E5C590] cursor-pointer"
                   />
                 </label>
 
                 {isPPV && (
-                  <div className="pt-2 pl-8 flex items-center gap-2 text-xs">
-                    <span className="text-stone-400">Unseal Fee (€):</span>
-                    <input
-                      type="number"
-                      min={5}
-                      max={500}
-                      step={5}
-                      value={unlockPrice}
-                      onChange={(e) => setUnlockPrice(Number(e.target.value))}
-                      className="w-24 px-2.5 py-1 rounded-xs border border-white/15 bg-[#16161a] text-stone-100 font-mono"
-                    />
+                  <div className="pt-2 pl-9 flex items-center gap-3 text-xs">
+                    <span className="text-zinc-400">Unseal Price:</span>
+                    <div className="flex items-center gap-1.5">
+                      {[25, 50, 100, 200].map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setUnlockPrice(val)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
+                            unlockPrice === val
+                              ? 'bg-[#E5C590] text-black font-semibold'
+                              : 'bg-white/5 text-zinc-300 hover:bg-white/10 border border-white/10'
+                          }`}
+                        >
+                          {val} ₺
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
             {/* Intimate / Sensual Tag */}
-            <div className="p-3 bg-[#131215] border border-white/[0.06] rounded-xs font-mono">
+            <div className="p-3 bg-[#121419] border border-white/[0.06] rounded-xl font-mono">
               <label className="flex items-center justify-between cursor-pointer gap-2">
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-amber-200 block font-medium">
+                  <span className="text-[11px] text-[#E5C590] block font-medium">
                     Intimate / Confidential Visuals
                   </span>
-                  <p className="text-[10px] font-sans text-stone-400">
-                    Will apply initial scrim filter across member streams until tapped.
+                  <p className="text-[10px] font-sans text-zinc-400">
+                    Applies initial frosted scrim filter across member streams until tapped.
                   </p>
                 </div>
                 <input
                   type="checkbox"
                   checked={isSensitive}
                   onChange={e => setIsSensitive(e.target.checked)}
-                  className="w-4 h-4 rounded-xs accent-amber-500 shrink-0"
+                  className="w-4 h-4 rounded accent-[#E5C590] shrink-0 cursor-pointer"
                 />
               </label>
             </div>
 
+            {/* Discreet Face Mask Blur Toggle */}
+            {postType === 'photo' && (
+              <div className="p-3 bg-[#121419] border border-white/[0.06] rounded-xl font-mono">
+                <label className="flex items-center justify-between cursor-pointer gap-2">
+                  <div>
+                    <span className="text-[11px] text-zinc-200 block font-medium">
+                      🔏 Otomatik Yüz Maskeleme (Discreet Face Mask)
+                    </span>
+                    <p className="text-[10px] font-sans text-zinc-400">
+                      Görsel üzerindeki yüz bölgesine estetik siyah cemiyet bandı / buzlu cam efekti ekler.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={hasFaceMask}
+                    onChange={e => setHasFaceMask(e.target.checked)}
+                    className="w-4 h-4 rounded accent-[#E5C590] shrink-0 cursor-pointer"
+                  />
+                </label>
+              </div>
+            )}
+
             {/* Caption */}
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-1.5">Epigraph / Text</label>
+              <label className="block text-[11px] font-mono text-zinc-400 mb-1.5">Epigraph / Dispatch Text</label>
               <textarea
                 rows={3}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Compose thoughts, reflections or salon notes..."
-                className="w-full px-3.5 py-2.5 rounded-xs border border-white/[0.08] bg-[#121215] text-xs text-stone-200 placeholder-stone-400 font-serif leading-relaxed focus:border-amber-400/50 outline-hidden"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-white/[0.08] bg-[#121419] text-xs text-zinc-200 placeholder-zinc-500 font-sans leading-relaxed focus:border-[#E5C590]/50 outline-none"
               />
             </div>
 
-            {/* Media Presets */}
+            {/* Media Upload and Presets */}
             {postType === 'photo' && (
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400">
-                    Plate Visual (Device Upload or Reference)
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-[11px] font-mono text-zinc-400">
+                    Plate Visual (Device Upload)
                   </label>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-[11px] font-serif uppercase tracking-wider text-amber-300 hover:text-amber-200 flex items-center gap-1.5 cursor-pointer bg-white/5 px-2.5 py-1 rounded-xs border border-white/10"
+                    className="text-xs text-[#E5C590] hover:text-[#d9b880] flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10 transition-colors"
                   >
-                    <Upload className="w-3 h-3" />
-                    <span>Upload Local File</span>
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Device</span>
                   </button>
                   <input
                     ref={fileInputRef}
@@ -295,28 +329,20 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 </div>
 
                 {mediaUrl && (
-                  <div className="relative mb-2.5 rounded-xs overflow-hidden border border-amber-400/50 max-h-48 bg-black flex items-center justify-center">
+                  <div className="relative mb-3 rounded-xl overflow-hidden border border-[#E5C590]/50 max-h-48 bg-black flex items-center justify-center shadow-lg">
                     <img src={mediaUrl} alt="Preview" className="max-h-48 w-full object-cover" />
                     <button
                       type="button"
                       onClick={() => setMediaUrl('')}
-                      className="absolute top-2 right-2 p-1 rounded-xs bg-black/80 text-stone-300 hover:text-white border border-white/20"
+                      className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/80 text-white hover:bg-black transition-colors cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
-                    <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-xs bg-black/80 text-[10px] font-mono text-amber-300 border border-white/10">
+                    <div className="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-md bg-black/80 text-[10px] font-mono text-[#E5C590] border border-white/10">
                       Active Selected Plate
                     </div>
                   </div>
                 )}
-
-                <input
-                  type="url"
-                  value={mediaUrl.startsWith('data:') ? '' : mediaUrl}
-                  onChange={(e) => setMediaUrl(e.target.value)}
-                  placeholder="Or enter direct URL: https://..."
-                  className="w-full px-3 py-1.5 rounded-xs border border-white/[0.08] bg-[#121215] text-xs text-stone-200 placeholder-stone-400 mb-2 font-mono outline-hidden focus:border-amber-400/50"
-                />
 
                 <div className="grid grid-cols-4 gap-2">
                   {samplePhotos.map((url, idx) => (
@@ -324,13 +350,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       key={idx}
                       type="button"
                       onClick={() => setMediaUrl(url)}
-                      className={`relative aspect-video rounded-xs overflow-hidden border transition-all cursor-pointer ${
-                        mediaUrl === url ? 'border-amber-400' : 'border-white/10 opacity-70 hover:opacity-100'
+                      className={`relative aspect-video rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                        mediaUrl === url ? 'border-[#E5C590] ring-2 ring-[#E5C590]/30' : 'border-white/10 opacity-70 hover:opacity-100'
                       }`}
                     >
                       <img src={url} alt="" className="w-full h-full object-cover filter contrast-[1.05]" />
                       {mediaUrl === url && (
-                        <span className="absolute top-1 right-1 bg-amber-500 text-stone-950 rounded-xs p-0.5">
+                        <span className="absolute top-1 right-1 bg-[#E5C590] text-black rounded-full p-0.5">
                           <Check className="w-2.5 h-2.5" />
                         </span>
                       )}
@@ -342,22 +368,15 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
             {postType === 'video' && (
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-1.5">Motion Reference (MP4)</label>
-                <input
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://...mp4"
-                  className="w-full px-3 py-1.5 rounded-xs border border-white/[0.08] bg-[#121215] text-xs text-stone-200 placeholder-stone-400 mb-2 font-mono outline-hidden focus:border-amber-400/50"
-                />
+                <label className="block text-[11px] font-mono text-zinc-400 mb-1.5">Motion Reference (MP4)</label>
                 <div className="flex gap-2">
                   {sampleVideos.map((url, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setVideoUrl(url)}
-                      className={`px-3 py-1.5 rounded-xs border text-xs font-mono ${
-                        videoUrl === url ? 'bg-[#181613] text-amber-200 border-amber-600/50' : 'bg-[#121215] text-stone-400 border-white/10'
+                      className={`px-3.5 py-2 rounded-xl border text-xs font-mono transition-colors cursor-pointer ${
+                        videoUrl === url ? 'bg-[#181B22] text-[#E5C590] border-[#E5C590]/50' : 'bg-[#121419] text-zinc-400 border-white/10 hover:border-white/20'
                       }`}
                     >
                       Motion Reel {idx + 1}
@@ -369,29 +388,29 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
             {/* Tags */}
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-1.5">Chapter & Salon Descriptors</label>
+              <label className="block text-[11px] font-mono text-zinc-400 mb-1.5">Salon Descriptors & Tags</label>
               <input
                 type="text"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
                 placeholder="Vernissage, CapDAntibes, NoirPortrait, Salon"
-                className="w-full px-3 py-1.5 rounded-xs border border-white/[0.08] bg-[#121215] text-xs text-stone-200 placeholder-stone-400 font-mono outline-hidden focus:border-amber-400/50"
+                className="w-full px-3.5 py-2 rounded-xl border border-white/[0.08] bg-[#121419] text-xs text-zinc-200 placeholder-zinc-500 font-sans outline-none focus:border-[#E5C590]/50"
               />
             </div>
           </div>
 
           {/* Sticky Actions Footer */}
-          <div className="p-4 border-t border-white/[0.08] bg-[#0c0c0e] flex items-center justify-end gap-3 shrink-0">
+          <div className="p-4 px-5 border-t border-white/[0.08] bg-[#121419] flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xs text-xs font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 transition-colors"
+              className="px-4 py-2 text-xs rounded-full text-zinc-400 hover:text-white transition-colors cursor-pointer"
             >
               Dismiss
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xs font-serif text-xs uppercase tracking-[0.14em] bg-[#161512] hover:bg-[#201d18] text-amber-200 border border-amber-600/40 hover:border-amber-400 transition-all flex items-center gap-2"
+              className="px-6 py-2 rounded-full font-sans font-semibold text-xs bg-[#E5C590] hover:bg-[#d9b880] text-black shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-2"
             >
               <span>Publish Dispatch</span>
             </button>
@@ -401,3 +420,4 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     </div>
   );
 };
+

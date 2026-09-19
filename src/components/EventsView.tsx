@@ -18,6 +18,8 @@ import { PersonalTicketModal } from './PersonalTicketModal';
 import { EventOrganizerModal } from './EventOrganizerModal';
 import { EventApplicationModal } from './EventApplicationModal';
 import { DigitalConsentModal } from './DigitalConsentModal';
+import { TicketWalletModal } from './TicketWalletModal';
+import { Ticket, Scan } from 'lucide-react';
 
 interface EventsViewProps {
   events: PlatformEvent[];
@@ -59,6 +61,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
   const [applyingEvent, setApplyingEvent] = useState<PlatformEvent | null>(null);
   const [ndaEvent, setNdaEvent] = useState<PlatformEvent | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isTicketWalletOpen, setIsTicketWalletOpen] = useState(false);
 
   const filteredEvents = events.filter(e => {
     const matchesCity = selectedCity === 'all' || e.city.toLowerCase() === selectedCity.toLowerCase();
@@ -95,10 +98,18 @@ export const EventsView: React.FC<EventsViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+            <button
+              onClick={() => setIsTicketWalletOpen(true)}
+              className="py-2.5 px-4 rounded-full bg-[#1A1D24] hover:bg-[#242833] text-[#E5C590] border border-[#E5C590]/40 text-xs font-serif uppercase tracking-[0.14em] flex items-center gap-2 transition-all cursor-pointer shadow-md"
+            >
+              <Ticket className="w-3.5 h-3.5 text-[#E5C590]" />
+              <span>Bilet Cüzdanı & QR</span>
+            </button>
+
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="py-2.5 px-5 rounded-full bg-[#181B22] hover:bg-[#222631] text-[#E5C590] border border-[#E5C590]/40 text-xs font-serif uppercase tracking-[0.14em] flex items-center gap-2 transition-all cursor-pointer shadow-md"
+              className="py-2.5 px-4 rounded-full bg-[#181B22] hover:bg-[#222631] text-white border border-white/10 text-xs font-serif uppercase tracking-[0.14em] flex items-center gap-2 transition-all cursor-pointer shadow-md"
             >
               <Plus className="w-3.5 h-3.5 text-[#E5C590]" />
               <span>Host Salon</span>
@@ -106,7 +117,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
             <button
               onClick={() => setOrganizerEvent(events[0])}
-              className="py-2.5 px-5 rounded-full bg-[#121419] text-zinc-400 hover:text-white border border-white/[0.08] text-xs font-serif uppercase tracking-[0.14em] transition-colors cursor-pointer"
+              className="py-2.5 px-4 rounded-full bg-[#121419] text-zinc-400 hover:text-white border border-white/[0.08] text-xs font-serif uppercase tracking-[0.14em] transition-colors cursor-pointer"
             >
               Concierge Panel
             </button>
@@ -234,6 +245,17 @@ export const EventsView: React.FC<EventsViewProps> = ({
             onCreateEvent(newEvent);
             setIsCreateModalOpen(false);
           }}
+        />
+      )}
+
+      {isTicketWalletOpen && (
+        <TicketWalletModal
+          isOpen={isTicketWalletOpen}
+          onClose={() => setIsTicketWalletOpen(false)}
+          events={events}
+          currentUser={currentUser}
+          onCheckInEvent={onCheckIn}
+          onToast={onToast || (() => {})}
         />
       )}
     </div>

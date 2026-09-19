@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Crown } from 'lucide-react';
+import { Search, Crown, Users } from 'lucide-react';
 import { Conversation } from '../types';
 
 interface ChatSidebarListProps {
@@ -64,15 +64,35 @@ export const ChatSidebarList: React.FC<ChatSidebarListProps> = ({
                   : 'hover:bg-white/[0.02]'
               }`}
             >
-              {/* Avatar with Online indicator */}
+              {/* Avatar with Online or Multi-party indicator */}
               <div className="relative shrink-0">
-                <img
-                  src={conv.participant.avatar}
-                  alt={conv.participant.name}
-                  className="w-11 h-11 rounded-full object-cover border border-white/10"
-                />
-                {conv.participant.isOnline && (
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#0c0d11] rounded-full" />
+                {conv.isGroup && conv.groupParticipants && conv.groupParticipants.length >= 2 ? (
+                  <div className="w-11 h-11 relative">
+                    <img
+                      src={conv.groupParticipants[1].avatar}
+                      alt="P1"
+                      className="w-7 h-7 rounded-full object-cover border border-[#0c0d11] absolute top-0 left-0"
+                    />
+                    <img
+                      src={conv.groupParticipants[2].avatar}
+                      alt="P2"
+                      className="w-7 h-7 rounded-full object-cover border border-[#0c0d11] absolute bottom-0 right-0"
+                    />
+                    <span className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-[#181B22] border border-[#E5C590]/40 flex items-center justify-center text-[9px] text-[#E5C590] font-mono">
+                      3p
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <img
+                      src={conv.participant.avatar}
+                      alt={conv.participant.name}
+                      className="w-11 h-11 rounded-full object-cover border border-white/10"
+                    />
+                    {conv.participant.isOnline && (
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#0c0d11] rounded-full" />
+                    )}
+                  </>
                 )}
               </div>
 
@@ -80,8 +100,9 @@ export const ChatSidebarList: React.FC<ChatSidebarListProps> = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5 truncate">
+                    {conv.isGroup && <Users className="w-3 h-3 text-[#E5C590] shrink-0" />}
                     <span className="font-serif text-xs text-white truncate">
-                      {conv.participant.name}
+                      {conv.groupTitle || conv.participant.name}
                     </span>
                     {conv.participant.membershipTier === 'vip' && (
                       <Crown className="w-3 h-3 text-[#E5C590] shrink-0" />

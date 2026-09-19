@@ -10,17 +10,24 @@ import {
   Video,
   ArrowLeft,
   Lock,
-  Flame
+  Flame,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Conversation, UserProfile, ChatMessage } from '../types';
 import { ChatSidebarList } from './ChatSidebarList';
 import { ChatMessageItem } from './ChatMessageItem';
+import { AudioRecorder } from './AudioRecorder';
 
 interface ChatViewProps {
   conversations: Conversation[];
   currentUser: UserProfile;
   activeConversationId?: string;
-  onSendMessage: (conversationId: string, text: string, isAudio?: boolean) => void;
+  onSendMessage: (
+    conversationId: string, 
+    text: string, 
+    isAudio?: boolean,
+    audioDetails?: { blobUrl?: string; duration?: string; waveform?: number[] }
+  ) => void;
   onReportUser: (targetUser: { id: string; name: string }) => void;
 }
 
@@ -42,10 +49,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isPlayingAudio, setIsPlayingAudio] = useState<string | null>(null);
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const activeAudioElRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setConversations(initialConversations);
@@ -77,7 +89,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
     scrollToBottom();
   }, [activeConversation?.messages]);
 
-  // Gentle ambient audio tone for voice notes
+  // Ambient audio tone fallback for synthetic voice notes
   const playAmbientAudioTone = (durationSeconds = 6) => {
     try {
       const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -103,19 +115,35 @@ export const ChatView: React.FC<ChatViewProps> = ({
       osc.start();
       osc.stop(ctx.currentTime + durationSeconds);
     } catch {
-      // Audio autoplay policy fallback
+      // Autoplay fallback
     }
   };
 
-  const handleToggleAudio = (id: string) => {
-    if (isPlayingAudio === id) {
+  const handleToggleAudio = (msg: ChatMessage) => {
+    if (isPlayingAudio === msg.id) {
+      if (activeAudioElRef.current) {
+        activeAudioElRef.current.pause();
+        activeAudioElRef.current = null;
+      }
       setIsPlayingAudio(null);
     } else {
-      setIsPlayingAudio(id);
-      playAmbientAudioTone(7);
-      setTimeout(() => {
-        setIsPlayingAudio(prev => prev === id ? null : prev);
-      }, 7000);
+      if (activeAudioElRef.current) {
+        activeAudioElRef.current.pause();
+      }
+
+      if (msg.audioBlobUrl) {
+        const audio = new Audio(msg.audioBlobUrl);
+        activeAudioElRef.current = audio;
+        audio.onended = () => setIsPlayingAudio(null);
+        audio.play().catch(() => playAmbientAudioTone(5));
+        setIsPlayingAudio(msg.id);
+      } else {
+        setIsPlayingAudio(msg.id);
+        playAmbientAudioTone(7);
+        setTimeout(() => {
+          setIsPlayingAudio(prev => prev === msg.id ? null : prev);
+        }, 7000);
+      }
     }
   };
 
@@ -123,10 +151,54 @@ export const ChatView: React.FC<ChatViewProps> = ({
     if (!inputText.trim()) return;
     onSendMessage(selectedConvId, inputText);
     setInputText('');
+    setShowEmojiPicker(false);
   };
 
-  const handleSendAudioMock = () => {
-    onSendMessage(selectedConvId, '', true);
+  const handleLiveAudioRecorded = (audioBlobUrl: string, durationStr: string, waveform: number[]) => {
+    setIsRecordingAudio(false);
+    onSendMessage(selectedConvId, '', true, {
+      blobUrl: audioBlobUrl,
+      duration: durationStr,
+      waveform: waveform,
+    });
+  };
+
+  const handleImageFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        const newMsg: ChatMessage = {
+          id: `img-${Date.now()}`,
+          conversationId: selectedConvId,
+          senderId: currentUser.id,
+          text: 'Encrypted Plate Dispatch',
+          mediaUrl: dataUrl,
+          mediaType: 'image',
+          status: 'delivered',
+          createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+
+        setConversations(prev =>
+          prev.map(c => {
+            if (c.id === selectedConvId) {
+              return {
+                ...c,
+                lastMessage: '📷 Encrypted Plate Dispatch',
+                lastMessageTime: 'Just now',
+                messages: [...c.messages, newMsg],
+              };
+            }
+            return c;
+          })
+        );
+      }
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSendViewOnceMock = () => {
@@ -165,6 +237,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
       }))
     );
   };
+
+  const emojis = ['🍸', '🥂', '✨', '🗝️', '🌹', '🖤', '🔥', '👑', '🎭', '🌙', '🕯️', '🥂'];
 
   if (!activeConversation) {
     return (
@@ -308,72 +382,138 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Message Input Box */}
-        <div className="p-3.5 bg-[#121419] border-t border-white/[0.08] shrink-0 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="flex items-center gap-2"
-          >
-            <button
-              type="button"
-              className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
-            >
-              <Smile className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
-            >
-              <Paperclip className="w-4 h-4" />
-            </button>
-
-            {/* 1x Ephemeral View-Once Dispatch Trigger */}
-            <button
-              type="button"
-              onClick={handleSendViewOnceMock}
-              title="Attach Confidential Ephemeral Plate (Auto-destructs after 5s)"
-              className="px-3 py-1.5 rounded-full bg-[#181B22] hover:bg-[#20242e] text-[#E5C590] border border-[#E5C590]/30 text-xs font-mono flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
-            >
-              <Flame className="w-3.5 h-3.5 text-[#E5C590]" />
-              <span className="font-bold text-[11px]">1x</span>
-              <span className="hidden sm:inline text-[10px] text-zinc-400 font-sans">Ephemeral</span>
-            </button>
-
-            <input
-              type="text"
-              value={inputText}
-              onChange={e => {
-                setInputText(e.target.value);
-                if (!isTyping && e.target.value) {
-                  setIsTyping(true);
-                  setTimeout(() => setIsTyping(false), 3000);
-                }
-              }}
-              placeholder="Compose confidential dispatch..."
-              className="flex-1 px-4 py-2.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 outline-none font-sans"
-            />
-
-            {inputText.trim() ? (
+        {/* Concierge Suggested Quick Prompts */}
+        {activeConversation.id === 'conv-concierge' && (
+          <div className="px-4 py-2 bg-[#0e1014] border-t border-white/[0.04] flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
+            <span className="text-[10px] font-mono text-[#E5C590] shrink-0">Concierge Quick Inquiries:</span>
+            {[
+              '🍸 Bu Hafta Sonu Etkinlikleri Neler?',
+              '🗝️ Gizli Kulüp & Loca Tavsiyesi',
+              '✨ Profil & Fotoğraf Stil Önerisi',
+              '📜 NDA & Güvenli Buluşma Protokolü',
+              '💎 VIP & Privé Üyelik Ayrıcalıkları'
+            ].map((prompt, idx) => (
               <button
-                type="submit"
-                className="p-2.5 rounded-full bg-[#E5C590] hover:bg-[#d9b880] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
+                key={idx}
+                type="button"
+                onClick={() => onSendMessage(selectedConvId, prompt)}
+                className="px-3 py-1 rounded-full bg-[#181B22] hover:bg-[#222631] text-zinc-300 hover:text-white border border-white/10 text-[11px] font-sans whitespace-nowrap cursor-pointer transition-colors shadow-xs"
               >
-                <Send className="w-4 h-4" />
+                {prompt}
               </button>
-            ) : (
+            ))}
+          </div>
+        )}
+
+        {/* Message Input Box */}
+        <div className="p-3.5 bg-[#121419] border-t border-white/[0.08] shrink-0 pb-[max(0.85rem,env(safe-area-inset-bottom))] relative">
+          {/* Emoji Picker Popover */}
+          {showEmojiPicker && (
+            <div className="absolute bottom-16 left-4 bg-[#181B22] border border-white/10 rounded-2xl p-2.5 shadow-2xl z-30 flex items-center gap-1.5 animate-fadeIn">
+              {emojis.map((emoji, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setInputText(prev => prev + emoji);
+                    setShowEmojiPicker(false);
+                  }}
+                  className="p-1.5 hover:bg-white/10 rounded-lg text-base cursor-pointer transition-transform hover:scale-125"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Hidden File Input for Device Photo Attachment */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageFileSelected}
+          />
+
+          {isRecordingAudio ? (
+            /* Live Audio Note Recorder */
+            <AudioRecorder
+              onSendAudio={handleLiveAudioRecorded}
+              onCancel={() => setIsRecordingAudio(false)}
+            />
+          ) : (
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                handleSend();
+              }}
+              className="flex items-center gap-2"
+            >
               <button
                 type="button"
-                onClick={handleSendAudioMock}
-                title="Dispatch Encrypted Voice Note"
-                className="p-2.5 rounded-full bg-[#181B22] border border-white/10 text-zinc-300 hover:text-[#E5C590] hover:border-[#E5C590]/40 transition-colors cursor-pointer"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={`p-2 rounded-full transition-colors cursor-pointer ${
+                  showEmojiPicker ? 'text-[#E5C590] bg-[#E5C590]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+                title="Salon Emotes"
               >
-                <Mic className="w-4 h-4" />
+                <Smile className="w-4 h-4" />
               </button>
-            )}
-          </form>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
+                title="Attach Confidential Plate from Device"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+
+              {/* 1x Ephemeral View-Once Dispatch Trigger */}
+              <button
+                type="button"
+                onClick={handleSendViewOnceMock}
+                title="Attach Confidential Ephemeral Plate (Auto-destructs after 5s)"
+                className="px-3 py-1.5 rounded-full bg-[#181B22] hover:bg-[#20242e] text-[#E5C590] border border-[#E5C590]/30 text-xs font-mono flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
+              >
+                <Flame className="w-3.5 h-3.5 text-[#E5C590]" />
+                <span className="font-bold text-[11px]">1x</span>
+                <span className="hidden sm:inline text-[10px] text-zinc-400 font-sans">Ephemeral</span>
+              </button>
+
+              <input
+                type="text"
+                value={inputText}
+                onChange={e => {
+                  setInputText(e.target.value);
+                  if (!isTyping && e.target.value) {
+                    setIsTyping(true);
+                    setTimeout(() => setIsTyping(false), 3000);
+                  }
+                }}
+                placeholder="Compose confidential dispatch..."
+                className="flex-1 px-4 py-2.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 outline-none font-sans"
+              />
+
+              {inputText.trim() ? (
+                <button
+                  type="submit"
+                  className="p-2.5 rounded-full bg-[#E5C590] hover:bg-[#d9b880] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsRecordingAudio(true)}
+                  title="Record Encrypted Voice Note (Mic)"
+                  className="p-2.5 rounded-full bg-[#181B22] border border-white/10 text-zinc-300 hover:text-[#E5C590] hover:border-[#E5C590]/40 transition-colors cursor-pointer group"
+                >
+                  <Mic className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </button>
+              )}
+            </form>
+          )}
         </div>
       </div>
     </div>

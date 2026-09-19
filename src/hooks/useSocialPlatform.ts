@@ -44,6 +44,7 @@ export function useSocialPlatform() {
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isMembershipModalOpen, setIsMembershipModalOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [isCreateStoryOpen, setIsCreateStoryOpen] = useState(false);
   const [isKYCModalOpen, setIsKYCModalOpen] = useState(false);
   const [isVisitorsModalOpen, setIsVisitorsModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -213,6 +214,11 @@ export function useSocialPlatform() {
     showToast('All notifications marked as reviewed.', 'info');
   };
 
+  const handleAddStory = (newStory: Story) => {
+    setStories(prev => [newStory, ...prev]);
+    showToast('24h Vignette published to member circle.', 'success');
+  };
+
   return {
     currentView, setCurrentView,
     isDarkMode, setIsDarkMode,
@@ -220,6 +226,7 @@ export function useSocialPlatform() {
     isWalletOpen, setIsWalletOpen,
     isMembershipModalOpen, setIsMembershipModalOpen,
     isCreatePostOpen, setIsCreatePostOpen,
+    isCreateStoryOpen, setIsCreateStoryOpen,
     isKYCModalOpen, setIsKYCModalOpen,
     isVisitorsModalOpen, setIsVisitorsModalOpen,
     isNotificationsOpen, setIsNotificationsOpen,
@@ -246,5 +253,6 @@ export function useSocialPlatform() {
     handleToggleClubJoin, handleCompleteKYC,
     handleRequestPayout, handleMarkAllNotificationsRead,
     handleStartConversationWithProfile,
+    handleAddStory,
   };
 }

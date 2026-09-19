@@ -26,7 +26,9 @@ interface FeedProps {
   onSubscribeClick: () => void;
   onUnlockPPV: (post: Post) => void;
   onShare: (post: Post) => void;
+  onTip?: (post: Post, amount: number) => void;
   onOpenCreatePost: () => void;
+  onOpenCreateStory?: () => void;
   onNavigateToProfile: (userId?: string) => void;
   onReportPost?: (post: Post) => void;
 }
@@ -46,7 +48,9 @@ export const Feed: React.FC<FeedProps> = ({
   onSubscribeClick,
   onUnlockPPV,
   onShare,
+  onTip,
   onOpenCreatePost,
+  onOpenCreateStory,
   onNavigateToProfile,
   onReportPost,
 }) => {
@@ -74,7 +78,7 @@ export const Feed: React.FC<FeedProps> = ({
       <StoriesBar
         stories={stories}
         currentUser={currentUser}
-        onAddStory={onOpenCreatePost}
+        onAddStory={onOpenCreateStory || onOpenCreatePost}
       />
 
       {/* Editorial Dispatch Entry Box */}
@@ -223,6 +227,7 @@ export const Feed: React.FC<FeedProps> = ({
               onSubscribeClick={onSubscribeClick}
               onUnlockPPV={onUnlockPPV}
               onShare={onShare}
+              onTip={onTip}
               onAuthorClick={onNavigateToProfile}
               onReportPost={onReportPost}
             />

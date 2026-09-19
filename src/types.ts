@@ -26,6 +26,17 @@ export interface UserProfile {
   partnerUsername?: string;
   hasPrivateVault?: boolean;
   vaultKeysGrantedTo?: string[];
+  travelPassport?: {
+    city?: string;
+    country?: string;
+    destinationCity?: string;
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
+    intent?: string;
+    note?: string;
+    isActive?: boolean;
+  };
 }
 
 export interface Comment {
@@ -72,6 +83,7 @@ export interface Post {
   isSensitive?: boolean;
   unlockPrice?: number; // e.g. 150 TL
   isUnlocked?: boolean;
+  hasFaceMask?: boolean;
   exclusivePerks?: string[];
   comments?: Comment[];
 }
@@ -99,11 +111,15 @@ export interface ChatMessage {
   id: string;
   conversationId: string;
   senderId: string;
+  senderName?: string;
+  senderAvatar?: string;
   text?: string;
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   audioDuration?: string;
   isAudio?: boolean;
+  audioBlobUrl?: string;
+  audioWaveform?: number[];
   status: MessageDeliveryStatus;
   createdAt: string;
   isViewOnce?: boolean;
@@ -113,6 +129,15 @@ export interface ChatMessage {
 
 export interface Conversation {
   id: string;
+  isGroup?: boolean;
+  groupTitle?: string;
+  groupParticipants?: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+    role?: string;
+  }[];
   participant: {
     id: string;
     name: string;

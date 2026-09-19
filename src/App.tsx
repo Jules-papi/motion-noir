@@ -30,7 +30,12 @@ export function App() {
   }, [p.currentView]);
 
   // Chat message sender
-  const handleSendMessage = (conversationId: string, text: string, isAudio?: boolean) => {
+  const handleSendMessage = (
+    conversationId: string, 
+    text: string, 
+    isAudio?: boolean,
+    audioDetails?: { blobUrl?: string; duration?: string; waveform?: number[] }
+  ) => {
     const targetId = conversationId || p.activeConversationId;
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
@@ -38,22 +43,51 @@ export function App() {
       senderId: p.currentUser.id,
       text,
       isAudio,
+      audioDuration: audioDetails?.duration || (isAudio ? '0:07' : undefined),
+      audioBlobUrl: audioDetails?.blobUrl,
+      audioWaveform: audioDetails?.waveform,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'delivered',
     };
     p.setConversations(prev => prev.map(c => c.id === targetId ? {
       ...c,
       messages: [...c.messages, newMsg],
-      lastMessage: text || (isAudio ? 'Encrypted Voice Note' : 'Confidential Plate'),
+      lastMessage: text || (isAudio ? '🎙️ Encrypted Voice Note' : 'Confidential Plate'),
       lastMessageTime: 'Just now',
     } : c));
 
     setTimeout(() => {
-      const autoReply = 'Delighted to receive your dispatch in the salon. Discretion assured.';
+      let autoReply = '';
+      let replySenderId = 'partner';
+
+      if (targetId === 'conv-concierge') {
+        replySenderId = 'concierge-bot';
+        const lower = text.toLowerCase();
+        if (lower.includes('etkinlik') || lower.includes('hafta sonu') || lower.includes('event')) {
+          autoReply = `🍸 **Bu Hafta Sonu Küratör Seçkisi:**\n\n1. **Amsterdam Secret Villa — Eşli Lifestyle & Swinger Party** (Noord, Isıtmalı Havuz, 38 Çift + 10 Tek Kadın, Başvuru Onaylı)\n2. **Berlin Privé Masquerade & Dark Romanticism** (Mitte, Siyah İpek & Maske, Canlı DJ)\n3. **Rotterdam Sensual Noir Penthouse** (Erasmusbrug manzaralı, 25 seçkin üye)\n\nEtkinlikler sekmesinden başvurunuzu yapabilir, onaylandıktan sonra QR biletinizi cüzdanınıza alabilirsiniz.`;
+        } else if (lower.includes('kulüp') || lower.includes('loca') || lower.includes('club')) {
+          autoReply = `🗝️ **Özel Kulüp & Loca Tavsiyesi:**\n\nAmsterdam Nocturne Club ve Amsterdam Darkroom & Fetish Circle üyelerimize özel VIP localar sunmaktadır. Masaya şampanya servisi ve özel oda erişimi için profilinizin doğrulanmış olması ve dijital NDA onayınız gereklidir.`;
+        } else if (lower.includes('stil') || lower.includes('profil') || lower.includes('fotoğraf')) {
+          autoReply = `✨ **Kişisel Profil Kürasyon Önerileri:**\n\n• Profil fotoğrafınızda monokrom / loş ışık estetiği etkileşimi %40 artırıyor.\n• Özel ve mahrem fotoğraflarınızı "Intimate / Confidential" olarak işaretleyip PPV (Confidential Plate) kilidi koyabilirsiniz.\n• KYC kimlik doğrulamanızı tamamlayarak Gold/VIP rozetine geçiş yapmanızı öneririm.`;
+        } else if (lower.includes('nda') || lower.includes('güvenlik') || lower.includes('gizlilik')) {
+          autoReply = `📜 **Maison Noir Gizlilik & NDA Güvencesi:**\n\n• Tüm salon etkinliklerinde dijital NDA sözleşmesi zorunludur.\n• Mekan kapılarında kamera mühürleme ve sıfır fotoğraf kuralı uygulanır.\n• Sohbette paylaştığınız "1x Ephemeral" fotoğraflar 5 saniye sonra kalıcı olarak imha edilir.`;
+        } else if (lower.includes('vip') || lower.includes('üyelik') || lower.includes('ayrıcalık')) {
+          autoReply = `💎 **VIP & Privé Üyelik Ayrıcalıkları:**\n\n• Seçkin kulüp etkinliklerine %100 ücretsiz VIP katılım hakkı\n• Sınırsız PPV ve kilitli patron hikayeleri\n• 7/24 Öncelikli Concierge Masa Desteği\n• Sıfır komisyonlu IBAN banka transfer çekimleri.`;
+        } else if (isAudio) {
+          autoReply = `🎙️ Sesli kaydınızı dinledim. Talebinizi salon arşivine kaydettim. Özel rezervasyonunuz ve tercih ettiğiniz etkinlik türü için en uygun davetiyeleri hazırlıyorum.`;
+        } else {
+          autoReply = `Talebinizi aldım sayın ${p.currentUser.name}. Maison Noir salonlarında kusursuz bir deneyim yaşamanız için buradayım. Size etkinlik davetiyesi, özel kulüp locası veya üyelik konusunda nasıl yardımcı olabilirim?`;
+        }
+      } else {
+        autoReply = isAudio 
+          ? 'Voice note deciphered. Elegant resonance. Looking forward to our encounter.'
+          : 'Delighted to receive your dispatch in the salon. Discretion assured.';
+      }
+
       const replyMsg: ChatMessage = {
         id: `msg-rep-${Date.now()}`,
         conversationId: targetId,
-        senderId: 'partner',
+        senderId: replySenderId,
         text: autoReply,
         createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         status: 'seen',
@@ -61,10 +95,10 @@ export function App() {
       p.setConversations(prev => prev.map(c => c.id === targetId ? {
         ...c,
         messages: [...c.messages, replyMsg],
-        lastMessage: autoReply,
+        lastMessage: autoReply.substring(0, 45) + '...',
         lastMessageTime: 'Just now',
       } : c));
-    }, 1800);
+    }, 1200);
   };
 
   // Event lifecycle handlers: Apply -> Approval & Notification -> Payment (if paid) / Direct QR (if free)
@@ -190,6 +224,16 @@ export function App() {
     p.showToast('Yeni gönderiniz yayınlandı!', 'success');
   };
 
+  const handleTipPost = (post: Post, amount: number) => {
+    if (p.walletBalance < amount) {
+      p.showToast(`Yetersiz bakiye! Bahşiş göndermek için kasaya en az ${amount} € yükleyin.`, 'error');
+      p.setIsWalletOpen(true);
+      return;
+    }
+    p.setWalletBalance(prev => prev - amount);
+    p.showToast(`✨ ${post.author.name} adlı üyeye ${amount} € bahşiş iletildi!`, 'success');
+  };
+
   return (
     <div className="min-h-screen bg-[#07080A] text-[#F3F4F6] antialiased overflow-x-hidden w-full max-w-full selection:bg-white/20">
       {/* Interactive Prototype Banner */}
@@ -249,7 +293,9 @@ export function App() {
               onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
               onUnlockPPV={p.handleUnlockPPV}
               onShare={() => p.showToast('Bağlantı kopyalandı!', 'success')}
+              onTip={handleTipPost}
               onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
+              onOpenCreateStory={() => p.setIsCreateStoryOpen(true)}
               onNavigateToProfile={() => p.setCurrentView('profile')}
               onReportPost={(post) => p.setReportingTarget({ type: 'post', title: post.content, id: post.id })}
             />

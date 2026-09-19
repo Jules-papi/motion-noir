@@ -1,5 +1,6 @@
 import React from 'react';
 import { CreatePostModal } from './CreatePostModal';
+import { CreateStoryModal } from './CreateStoryModal';
 import { MediaModal } from './MediaModal';
 import { CommentsModal } from './CommentsModal';
 import { WalletModal } from './WalletModal';
@@ -25,6 +26,12 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
         isOpen={p.isCreatePostOpen}
         onClose={() => p.setIsCreatePostOpen(false)}
         onSubmitPost={onSubmitPost}
+      />
+      <CreateStoryModal
+        currentUser={p.currentUser}
+        isOpen={p.isCreateStoryOpen}
+        onClose={() => p.setIsCreateStoryOpen(false)}
+        onAddStory={p.handleAddStory}
       />
       <MediaModal
         post={p.selectedMediaPost}

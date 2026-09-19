@@ -46,8 +46,12 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
   };
   const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'couples' | 'singles' | 'vip'>('all');
   const [selectedCity, setSelectedCity] = useState('all');
-  const [maxDistance, setMaxDistance] = useState<number>(100);
+  const [maxDistance, setMaxDistance] = useState<number>(150);
+  const [minAge, setMinAge] = useState<number>(20);
+  const [maxAge, setMaxAge] = useState<number>(55);
   const [onlineOnly, setOnlineOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [selectedInterest, setSelectedInterest] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   
   const [followedIds, setFollowedIds] = useState<string[]>([]);
@@ -80,8 +84,12 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
     setSearchQuery('');
     setActiveCategoryTab('all');
     setSelectedCity('all');
-    setMaxDistance(100);
+    setMaxDistance(150);
+    setMinAge(20);
+    setMaxAge(55);
     setOnlineOnly(false);
+    setVerifiedOnly(false);
+    setSelectedInterest('all');
   };
 
   // Find a featured duo/profile for the spotlight
@@ -109,11 +117,14 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
 
       const matchesCity = selectedCity === 'all' || p.city.toLowerCase() === selectedCity.toLowerCase();
       const matchesDistance = p.distanceKm <= maxDistance;
+      const matchesAge = p.age >= minAge && p.age <= maxAge;
       const matchesOnline = !onlineOnly || p.isOnline;
+      const matchesVerified = !verifiedOnly || p.isVerified;
+      const matchesInterest = selectedInterest === 'all' || p.interests.some(i => i.toLowerCase().includes(selectedInterest.toLowerCase()));
 
-      return matchesSearch && matchesCity && matchesDistance && matchesOnline;
+      return matchesSearch && matchesCity && matchesDistance && matchesAge && matchesOnline && matchesVerified && matchesInterest;
     });
-  }, [profiles, activeCategoryTab, searchQuery, selectedCity, maxDistance, onlineOnly]);
+  }, [profiles, activeCategoryTab, searchQuery, selectedCity, maxDistance, minAge, maxAge, onlineOnly, verifiedOnly, selectedInterest]);
 
   return (
     <div className="space-y-12 pb-24 max-w-7xl mx-auto">
@@ -151,7 +162,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
           </div>
         </div>
 
-        {/* Collapsible Filter Panel */}
+        {/* Collapsible Filter Matrix Panel */}
         {showFilters && (
           <div className="p-5 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -161,7 +172,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search moniker, interests, city..."
+                  placeholder="İsim, ilgi alanı, şehir veya stil ara..."
                   className="w-full pl-9 pr-8 py-2 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-white/25 font-sans"
                 />
                 {searchQuery && (
@@ -177,7 +188,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                   onChange={e => setSelectedCity(e.target.value)}
                   className="w-full py-2 px-3.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white focus:outline-none focus:border-white/25 font-sans"
                 >
-                  <option value="all">All Chapters & Cities</option>
+                  <option value="all">Tüm Şehirler & Localar</option>
                   <option value="Amsterdam">Amsterdam Chapter</option>
                   <option value="Rotterdam">Rotterdam Chapter</option>
                   <option value="İstanbul">İstanbul Salon</option>
@@ -193,11 +204,101 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                     onChange={e => setOnlineOnly(e.target.checked)}
                     className="w-3.5 h-3.5 rounded accent-[#E5C590]"
                   />
-                  <span>Active in salon now</span>
+                  <span>Şu an Aktif Üyeler</span>
                 </label>
-                {(searchQuery || selectedCity !== 'all' || onlineOnly) && (
-                  <button onClick={clearFilters} className="text-[11px] font-sans text-[#E5C590] hover:underline cursor-pointer">
-                    Reset
+                <label className="text-xs text-zinc-300 cursor-pointer flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={e => setVerifiedOnly(e.target.checked)}
+                    className="w-3.5 h-3.5 rounded accent-[#E5C590]"
+                  />
+                  <span className="flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-[#E5C590]" />
+                    <span>Onaylı</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Sliders & Interest Matrix */}
+            <div className="pt-3 border-t border-white/[0.06] grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
+              {/* Distance Slider */}
+              <div className="space-y-1.5 bg-[#181B22]/50 p-3 rounded-xl border border-white/[0.04]">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#E5C590]" />
+                    Maksimum Mesafe
+                  </span>
+                  <span className="font-mono text-white font-medium">{maxDistance} km</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="300"
+                  step="5"
+                  value={maxDistance}
+                  onChange={e => setMaxDistance(parseInt(e.target.value, 10))}
+                  className="w-full accent-[#E5C590] cursor-pointer"
+                />
+              </div>
+
+              {/* Age Range Slider */}
+              <div className="space-y-1.5 bg-[#181B22]/50 p-3 rounded-xl border border-white/[0.04]">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#E5C590]" />
+                    Yaş Aralığı
+                  </span>
+                  <span className="font-mono text-white font-medium">{minAge} - {maxAge} yaş</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="18"
+                    max="65"
+                    value={minAge}
+                    onChange={e => setMinAge(Math.min(parseInt(e.target.value, 10), maxAge - 2))}
+                    className="w-full accent-[#E5C590] cursor-pointer"
+                  />
+                  <input
+                    type="range"
+                    min="18"
+                    max="65"
+                    value={maxAge}
+                    onChange={e => setMaxAge(Math.max(parseInt(e.target.value, 10), minAge + 2))}
+                    className="w-full accent-[#E5C590] cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Interest Tags Filter */}
+            <div className="pt-2 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mr-1">İlgi Alanı:</span>
+                {['all', 'Sensual', 'Cocktails', 'Exhibitionism', 'BDSM', 'Tantra', 'Fine Dining', 'Art'].map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => setSelectedInterest(tag)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-sans transition-colors cursor-pointer ${
+                      selectedInterest === tag
+                        ? 'bg-[#E5C590] text-black font-medium'
+                        : 'bg-[#181B22] text-zinc-400 hover:text-white border border-white/[0.06]'
+                    }`}
+                  >
+                    {tag === 'all' ? 'Tümü' : tag}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono text-[#E5C590]">
+                  {filteredProfiles.length} profil bulundu
+                </span>
+                {(searchQuery || selectedCity !== 'all' || onlineOnly || verifiedOnly || selectedInterest !== 'all' || maxDistance !== 150) && (
+                  <button onClick={clearFilters} className="text-xs font-sans text-zinc-400 hover:text-white underline cursor-pointer">
+                    Filtreleri Sıfırla
                   </button>
                 )}
               </div>

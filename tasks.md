@@ -69,3 +69,29 @@
 
 - [x] **3.6. Etkinlik & NDA Bilet Döngüsü**
   - Özel etkinliklerde başvuru ➔ küratör onayı ➔ dijital NDA rıza sözleşmesi imzası ➔ kişiye özel şifreli QR bilet üretimi döngüsünün tam entegrasyonu.
+
+---
+
+## FAZ 4: İleri Düzey İstemci Tarafı & İnteraktif Özellikler (Advanced Client-Side Features)
+
+- [x] **4.1. Gerçek Mikrofon Ses Kaydı (Live Audio Note Recording)**
+  - `navigator.mediaDevices.getUserMedia` ve `MediaRecorder` API ile sohbette gerçek mikrofon kaydı yapma.
+  - Kaydedilen ses dalgasının önizlenmesi, silinmesi veya sohbete gönderilip anında çalınabilmesi.
+
+- [x] **4.2. Cihazdan Medya/Fotoğraf Yükleme & Özel Gönderi/Hikaye Paylaşımı**
+  - Bilgisayar veya telefondan fotoğraf/video seçerek özel PPV kilit fiyatı veya standart içerik yayınlama.
+  - Hikayeler (Stories) bölümüne kendi fotoğrafını ekleyebilme ve 24 saatlik süre sayacı.
+
+- [x] **4.3. Maison Noir Özel "Concierge" Sohbet Asistanı**
+  - Sohbette sabit olarak bulunan "Maison Noir Concierge" odası.
+  - Üyenin tarzına, şehrine ve ilgi alanlarına göre etkinlik/kulüp ve salon tavsiyeleri veren akıllı etkileşimli küratör.
+
+- [x] **4.4. Dijital Bilet Cüzdanı & QR Bilet Okutma/Doğrulama Simülasyonu**
+  - Kullanıcının sahip olduğu tüm onaylı etkinlik biletlerinin listelendiği şık Bilet Kartlığı / Cüzdanı.
+  - Etkinlik kapısında organizatör/görevli modunda bilet QR kodunu tarama veya doğrulama (`Check-in`).
+
+- [x] **4.5. Detaylı Cüzdan, Harcama Analizi & Bahşiş/Transfer Akışı**
+  - Bakiye yükleme (Coin top-up), gönderilere doğrudan bahşiş bırakma (Tip), içerik üretici gelirleri ve harcama dökümü grafikleri.
+
+- [x] **4.6. Gelişmiş Arama & Filtreleme Matrisi**
+  - Keşif ve etkinliklerde mesafe, yaş aralığı, onaylı çift/bireysel filtreleri ve anlık sonuç güncellemesi.

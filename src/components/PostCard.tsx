@@ -28,6 +28,7 @@ interface PostCardProps {
   onSubscribeClick: () => void;
   onUnlockPPV: (post: Post) => void;
   onShare: (post: Post) => void;
+  onTip?: (post: Post, amount: number) => void;
   onAuthorClick?: (authorId: string) => void;
   onReportPost?: (post: Post) => void;
 }
@@ -43,6 +44,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   onSubscribeClick,
   onUnlockPPV,
   onShare,
+  onTip,
   onAuthorClick,
   onReportPost,
 }) => {
@@ -245,6 +247,15 @@ export const PostCard: React.FC<PostCardProps> = ({
               showSensitiveOverlay ? 'filter blur-2xl scale-105' : ''
             }`}
           />
+          {/* Discreet Face Mask Overlay */}
+          {post.hasFaceMask && !showSensitiveOverlay && (
+            <div className="absolute top-[22%] left-1/2 -translate-x-1/2 w-44 h-8 bg-black/90 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center gap-1.5 shadow-2xl pointer-events-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E5C590] animate-pulse" />
+              <span className="text-[10px] font-mono tracking-widest text-[#E5C590] uppercase font-medium">
+                DISCREET MASK
+              </span>
+            </div>
+          )}
           {!showSensitiveOverlay && (
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
               <span className="bg-black/75 text-white text-xs font-sans font-medium px-3.5 py-1.5 rounded-full border border-white/20 backdrop-blur-md flex items-center gap-2 shadow-xl">
@@ -263,6 +274,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         onSave={onSave}
         onOpenComments={onOpenComments}
         onShare={onShare}
+        onTip={onTip}
       />
     </article>
   );
