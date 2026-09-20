@@ -12,7 +12,7 @@ import { runRegressionCheck } from './checks/regression';
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0]?.toLowerCase() || 'full';
-  const targetUrl = process.env.QA_URL || 'https://motion-noir.vercel.app';
+  const targetUrl = process.env.QA_URL || 'http://localhost:4173';
 
   console.log(`[QA Orchestrator] Starting suite: "${command.toUpperCase()}" against ${targetUrl}`);
 
@@ -73,7 +73,7 @@ async function main() {
     // 4. Data Stress Check
     if (['full', 'data'].includes(command)) {
       console.log(`[QA] Running Data Stress Checks...`);
-      const dataIssues = await runDataStressCheck(page, targetUrl);
+      const dataIssues = await runDataStressCheck(page, targetUrl, context);
       allIssues.push(...dataIssues);
       if (dataIssues.length > 0) results.dataStress = false;
     }
