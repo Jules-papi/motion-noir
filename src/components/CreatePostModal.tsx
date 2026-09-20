@@ -135,6 +135,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           </div>
           <button 
             onClick={onClose}
+            aria-label="Close modal"
             className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -240,6 +241,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     <button
                       key={idx}
                       type="button"
+                      aria-label={`Select sample photo ${idx + 1}`}
                       onClick={() => setMediaUrl(url)}
                       className={`relative aspect-video rounded-xl overflow-hidden border transition-all cursor-pointer ${
                         mediaUrl === url ? 'border-[#E5C590] ring-2 ring-[#E5C590]/30' : 'border-white/10 opacity-70 hover:opacity-100'

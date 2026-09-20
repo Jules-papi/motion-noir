@@ -8,7 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "qa": "tsx scripts/qa/index.ts quick",
+    "qa:visual": "tsx scripts/qa/index.ts visual",
+    "qa:responsive": "tsx scripts/qa/index.ts responsive",
+    "qa:data": "tsx scripts/qa/index.ts data",
+    "qa:a11y": "tsx scripts/qa/index.ts a11y",
+    "qa:regression": "tsx scripts/qa/index.ts regression",
+    "qa:full": "tsx scripts/qa/index.ts full"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -24,12 +31,17 @@
     "vite": "^8.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.28.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2"

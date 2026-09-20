@@ -1,0 +1,18 @@
+{
+  "functional": true,
+  "visual": true,
+  "responsive": true,
+  "accessibility": true,
+  "console": true,
+  "network": true,
+  "dataStress": true,
+  "visualRegression": true,
+  "issues": [],
+  "environment": {
+    "url": "https://motion-noir.vercel.app",
+    "framework": "React 18 + Vite + Tailwind CSS",
+    "browser": "Chromium / Google Chrome",
+    "viewport": "1440x900",
+    "timestamp": "2026-09-20T00:12:44.784Z"
+  }
+}

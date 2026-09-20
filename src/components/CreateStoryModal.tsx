@@ -83,6 +83,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
           </div>
           <button 
             onClick={onClose}
+            aria-label="Close modal"
             className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -141,6 +142,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
                 <button
                   key={idx}
                   type="button"
+                  aria-label={`Select preset background ${idx + 1}`}
                   onClick={() => {
                     setSelectedPresetIndex(idx);
                     setMediaUrl('');

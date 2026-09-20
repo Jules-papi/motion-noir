@@ -92,8 +92,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className="block font-serif text-base tracking-[0.18em] uppercase font-light text-white group-hover:text-white transition-colors">
                 Maison Noir
               </span>
-              <span className="block text-[9px] tracking-[0.2em] text-zinc-500 uppercase font-mono mt-0.5">
-                Société Privée · Paris & AMS
+              <span className="block text-[9px] tracking-[0.2em] text-zinc-400 uppercase font-mono mt-0.5">
+                Société Privée · Paris &amp; AMS
               </span>
             </div>
           </div>
@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Navigation Links */}
           <nav className="space-y-1">
-            <span className="px-3 pb-2 text-[9px] font-mono tracking-[0.2em] text-zinc-500 uppercase block">
+            <span className="px-3 pb-2 text-[9px] font-mono tracking-[0.2em] text-zinc-400 uppercase block">
               Navigation
             </span>
 
@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }`} strokeWidth={1.5} />
                     <div className="min-w-0">
                       <span className="block truncate font-sans text-xs">{item.label}</span>
-                      <span className="block text-[10px] font-sans text-zinc-500 font-light truncate">{item.sub}</span>
+                      <span className="block text-[10px] font-sans text-zinc-400 font-light truncate">{item.sub}</span>
                     </div>
                   </div>
 

@@ -99,6 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {searchQuery && (
               <button
                 onClick={() => onSearchChange && onSearchChange('')}
+                aria-label="Clear search"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />

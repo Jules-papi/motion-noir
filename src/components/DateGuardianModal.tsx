@@ -137,6 +137,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
           </div>
           <button 
             onClick={onClose}
+            aria-label="Close modal"
             className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />

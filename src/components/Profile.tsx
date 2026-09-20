@@ -133,6 +133,7 @@ export const Profile: React.FC<ProfileProps> = ({
               <button 
                 type="button"
                 onClick={() => setIsEditingProfile(false)}
+                aria-label="Close edit profile"
                 className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
                 ✕

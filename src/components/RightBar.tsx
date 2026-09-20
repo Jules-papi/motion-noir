@@ -133,7 +133,7 @@ export const RightBar: React.FC<RightBarProps> = ({
               <span className="text-xs font-sans font-medium text-zinc-300 group-hover:text-[#E5C590] transition-colors block">
                 #{t.tag}
               </span>
-              <span className="text-[11px] font-sans text-zinc-500">
+              <span className="text-[11px] font-sans text-zinc-400">
                 {t.count}
               </span>
             </div>
