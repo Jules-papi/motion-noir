@@ -102,6 +102,7 @@ export function App() {
       {/* Top Navigation */}
       <Navbar
         currentUser={p.currentUser}
+        currentView={p.currentView}
         walletBalance={p.walletBalance}
         isUserSubscribed={p.effectiveIsSubscribed}
         unreadNotificationsCount={p.notifications.filter(n => !n.isRead).length}

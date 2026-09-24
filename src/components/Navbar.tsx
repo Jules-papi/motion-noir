@@ -16,6 +16,7 @@ import { formatCurrency } from '../utils/i18n';
 
 interface NavbarProps {
   currentUser: UserProfile;
+  currentView?: ActiveViewType;
   walletBalance: number;
   isUserSubscribed: boolean;
   unreadChatCount?: number;
@@ -39,6 +40,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
+  currentView = 'feed',
   walletBalance,
   isUserSubscribed,
   unreadChatCount = 0,
@@ -68,7 +70,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const currentLang = languages.find(l => l.code === language) || languages[0];
 
   return (
-    <header className="sticky top-0 z-40 bg-[#07080A]/90 backdrop-blur-md border-b border-white/[0.06]">
+    <header className="sticky top-0 z-40 bg-[#07080A]/95 backdrop-blur-md border-b border-white/[0.08]">
+      {/* TIER 1: BRAND, GLOBAL SEARCH & ACCOUNT UTILITY */}
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo and Brand */}
         <div 
@@ -82,8 +85,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="font-serif text-lg tracking-wider text-[#F3F4F6] block leading-none">
               MAISON NOIR
             </span>
-            <span className="text-[9px] tracking-widest text-zinc-400 uppercase block font-sans">
-              Private Members Salon
+            <span className="text-[9px] tracking-widest text-[#E5C590]/80 uppercase block font-sans">
+              Société Privée · Paris & Amsterdam
             </span>
           </div>
         </div>
@@ -215,6 +218,78 @@ export const Navbar: React.FC<NavbarProps> = ({
               <LogOut className="w-4 h-4 stroke-[1.5]" />
             </button>
           )}
+        </div>
+      </div>
+
+      {/* TIER 2: COMMUNITY PILLARS & PLATFORM WORLDS (JOYCLUB ARCHITECTURE) */}
+      <div className="border-t border-white/[0.05] bg-[#0c0d12]/90">
+        <div className="max-w-7xl mx-auto px-4 h-11 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+          <nav className="flex items-center gap-1 sm:gap-2">
+            {/* The Gazette (Akış) */}
+            <button
+              onClick={() => onNavigate('feed')}
+              className={`px-3 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'feed'
+                  ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <span>The Gazette</span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">(Akış)</span>
+            </button>
+
+            {/* The Registry (Üye Kataloğu) */}
+            <button
+              onClick={() => onNavigate('discovery')}
+              className={`px-3 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'discovery'
+                  ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <span>The Registry</span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">(Üyeler)</span>
+            </button>
+
+            {/* Encrypted Salons (Mesajlar / Sohbet) */}
+            <button
+              onClick={() => onNavigate('chat')}
+              className={`px-3 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'chat'
+                  ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <span>Dispatches</span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">(Salonlar)</span>
+              {unreadChatCount > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E5C590]" />
+              )}
+            </button>
+
+            {/* Member Dossier (Profil) */}
+            <button
+              onClick={() => onNavigate('profile')}
+              className={`px-3 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'profile'
+                  ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <span>Member Dossier</span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">(Profil)</span>
+            </button>
+          </nav>
+
+          {/* Quick Access Badges (Right side of Tier 2) */}
+          <div className="hidden lg:flex items-center gap-3 text-xs font-sans text-zinc-400 shrink-0">
+            <span className="text-[11px] text-zinc-500">Maison Chapters:</span>
+            <span className="text-zinc-300 hover:text-[#E5C590] cursor-pointer transition-colors">Paris 🇫🇷</span>
+            <span className="text-zinc-500">·</span>
+            <span className="text-zinc-300 hover:text-[#E5C590] cursor-pointer transition-colors">Amsterdam 🇳🇱</span>
+            <span className="text-zinc-500">·</span>
+            <span className="text-zinc-300 hover:text-[#E5C590] cursor-pointer transition-colors">London 🇬🇧</span>
+          </div>
         </div>
       </div>
     </header>

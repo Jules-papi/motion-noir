@@ -60,15 +60,32 @@ export const RightBar: React.FC<RightBarProps> = ({
 
   return (
     <aside className="hidden xl:block w-80 shrink-0 h-screen sticky top-0 px-4 py-7 space-y-4 overflow-y-auto no-scrollbar border-l border-white/[0.08] bg-[#07080A]">
-      {/* Editorial Welcome Card */}
+      {/* Profile Visitors (Authentic JOYclub / Adult Community Pattern) */}
       <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-4 space-y-3 shadow-xl">
-        <div className="flex items-center gap-2 text-white font-sans text-xs font-medium">
-          <KeyRound className="w-3.5 h-3.5 text-[#E5C590]" />
-          <span>Maison Noir Chapter</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-white font-sans text-xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Profil Ziyaretçileri</span>
+          </div>
+          <span className="text-[10px] font-mono text-[#E5C590]">Bugün 18 Kişi</span>
         </div>
-        <p className="text-xs text-zinc-400 leading-relaxed font-sans font-normal">
-          Welcome to the private society. Discover curated member dossiers, dispatch private visual journals, and connect discreetly.
+        <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+          Son 24 saatte profilinizi inceleyen doğrulanmış üyeler:
         </p>
+        <div className="flex items-center -space-x-2 pt-1">
+          {displayCreators.slice(0, 4).map((c, i) => (
+            <img
+              key={i}
+              src={c.avatar}
+              alt={c.name}
+              title={`${c.name} profilinizi ziyaret etti`}
+              className="w-8 h-8 rounded-full object-cover border-2 border-[#121419] hover:scale-110 transition-transform cursor-pointer"
+            />
+          ))}
+          <div className="w-8 h-8 rounded-full bg-[#181B22] border-2 border-[#121419] flex items-center justify-center text-[10px] font-mono text-[#E5C590] cursor-pointer">
+            +14
+          </div>
+        </div>
       </div>
 
       {/* Society Curators & Hosts */}

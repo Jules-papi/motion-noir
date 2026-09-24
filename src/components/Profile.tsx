@@ -12,7 +12,20 @@ import {
   List, 
   Check,
   Upload,
-  Loader2
+  Loader2,
+  FileText,
+  Image,
+  Calendar,
+  ShieldCheck,
+  Lock,
+  CheckCircle2,
+  HelpCircle,
+  XCircle,
+  Flame,
+  Sparkles,
+  Eye,
+  Heart,
+  Users
 } from 'lucide-react';
 import { noirApi } from '../services/noirApi';
 
@@ -35,6 +48,7 @@ interface ProfileProps {
   onUpdateUser?: (updated: Partial<UserProfile>) => void;
 }
 
+type MainDossierTab = 'overview' | 'dispatches' | 'vault' | 'events';
 type ProfileTab = 'all' | 'photo' | 'video' | 'text';
 
 export const Profile: React.FC<ProfileProps> = ({
@@ -54,6 +68,7 @@ export const Profile: React.FC<ProfileProps> = ({
   onToast,
   onUpdateUser,
 }) => {
+  const [mainTab, setMainTab] = useState<MainDossierTab>('overview');
   const [activeTab, setActiveTab] = useState<ProfileTab>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -301,104 +316,217 @@ export const Profile: React.FC<ProfileProps> = ({
         </div>
       )}
 
-      {/* 4. MEDIA GALLERY & DISPATCH EXHIBITION */}
-      <div className="space-y-6">
-        {/* Quiet Luxury Pill Tabs & View Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] overflow-x-auto no-scrollbar max-w-full">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'all'
-                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              All Dispatches ({posts.length})
-            </button>
+      {/* 2. ADULT COMMUNITY DOSSIER NAVIGATION BAR */}
+      <div className="border-b border-white/[0.08] pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setMainTab('overview')}
+            className={`px-4 py-2 rounded-xl text-xs font-sans whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              mainTab === 'overview'
+                ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5 text-[#E5C590]" />
+            <span>Dossier Özeti & Tercihler</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('photo')}
-              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'photo'
-                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Photography ({photoCount})
-            </button>
+          <button
+            onClick={() => setMainTab('dispatches')}
+            className={`px-4 py-2 rounded-xl text-xs font-sans whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              mainTab === 'dispatches'
+                ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Dispatches ({posts.length})</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('video')}
-              className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'video'
-                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Cinematic ({videoCount})
-            </button>
+          <button
+            onClick={() => setMainTab('vault')}
+            className={`px-4 py-2 rounded-xl text-xs font-sans whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              mainTab === 'vault'
+                ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            }`}
+          >
+            <Image className="w-3.5 h-3.5" />
+            <span>Fotoğraf Mahzeni ({photoCount + 6})</span>
+          </button>
+
+          <button
+            onClick={() => setMainTab('events')}
+            className={`px-4 py-2 rounded-xl text-xs font-sans whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              mainTab === 'events'
+                ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Katıldığı Salonlar (3)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. TAB CONTENT RENDERING */}
+      {mainTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
+          {/* LEFT 2 COLS: Narrative & FetLife/JOYclub Kink Matrix */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Extended About Dossier */}
+            <div className="p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3 shadow-xl">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#E5C590] uppercase tracking-wider">
+                <FileText className="w-3.5 h-3.5" />
+                <span>Hakkımızda & Tanışma Vizyonu</span>
+              </div>
+              <p className="text-sm text-zinc-300 font-light leading-relaxed">
+                {user.bio || 'Maison Noir özel cemiyetinin saygın üyeleri. Sanat, felsefe ve rafine yetişkin deneyimlerini saygı ve gizlilik çerçevesinde buluşturuyoruz.'}
+              </p>
+              <p className="text-xs text-zinc-400 leading-relaxed pt-2 border-t border-white/[0.04]">
+                Bizim için en temel kural karşılıklı rıza, temiz iletişim ve zarafettir. Şifreli salon sohbetlerinde samimi, yüz yüze buluşmalarda ise özenli tavırları önceliklendiririz.
+              </p>
+            </div>
+
+            {/* Tercihler ve Sınırlar (Kink / Fetish / Limits Matrix) */}
+            <div className="p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-5 shadow-xl">
+              <div>
+                <span className="text-xs font-mono text-[#E5C590] uppercase tracking-wider block">
+                  Tercihler, İlgi Alanları ve Sınırlar (Boundaries)
+                </span>
+                <p className="text-xs text-zinc-400 mt-1">
+                  FetLife & JOYclub standartlarında rıza ve fantezi uyum matrisi.
+                </p>
+              </div>
+
+              {/* Yes / Preferred */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Evet / İlgi Duyar & Tercih Eder</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {['Soft Swing', 'Maskeli Salonlar', 'Şarap & Gastronomi', 'Sensual Masaj', 'Shibari / Halat', 'Özel Süit Partileri', 'Kültürel Sohbet'].map(item => (
+                    <span key={item} className="px-3 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                      ✓ {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Maybe / Open */}
+              <div className="space-y-2 pt-2 border-t border-white/[0.04]">
+                <div className="flex items-center gap-1.5 text-xs text-amber-400 font-medium">
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Açık / Meraklı (Uygun Kimyada)</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {['Exhibitionism (İzlenme)', 'Üçlü Deneyim (Threesome)', 'Hafif Dominasyon / BDSM', 'Tantra'].map(item => (
+                    <span key={item} className="px-3 py-1 rounded-full text-xs bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      ? {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hard Limits / Sınırlar */}
+              <div className="space-y-2 pt-2 border-t border-white/[0.04]">
+                <div className="flex items-center gap-1.5 text-xs text-rose-400 font-medium">
+                  <XCircle className="w-3.5 h-3.5" />
+                  <span>Kesin Sınırlar (Hard Limits)</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {['Saygısız / Israrcı Tavırlar', 'İzinsiz Fotoğraf & Medya Yayma', 'Sert Şiddet / Pain', 'Alkol / Madde Baskısı', 'Rızasız Temas'].map(item => (
+                    <span key={item} className="px-3 py-1 rounded-full text-xs bg-rose-500/10 text-rose-300 border border-rose-500/20">
+                      ✕ {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Grid / Stream Switcher */}
-          <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] shrink-0 self-start sm:self-auto">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                viewMode === 'grid'
-                  ? 'bg-[#181B22] text-white shadow-xs'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Gallery Grid"
-              aria-label="Gallery Grid"
-            >
-              <Grid className="w-4 h-4 stroke-[1.5]" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                viewMode === 'list'
-                  ? 'bg-[#181B22] text-white shadow-xs'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Editorial Stream"
-              aria-label="Editorial Stream"
-            >
-              <List className="w-4 h-4 stroke-[1.5]" />
-            </button>
+          {/* RIGHT COL: Telemetry & Specs */}
+          <div className="space-y-6">
+            {/* Profile Telemetry Card */}
+            <div className="p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-4 shadow-xl">
+              <span className="text-xs font-mono text-[#E5C590] uppercase tracking-wider block">
+                Temel Telemetri & Özellikler
+              </span>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">Yaş & Beden:</span>
+                  <span className="text-zinc-200 font-medium">{user.age || 29} Yaş · Atletik</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">Konum / Bölge:</span>
+                  <span className="text-zinc-200 font-medium">{user.location || 'Amsterdam Chapter'}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">Kimlik / Cinsiyet:</span>
+                  <span className="text-zinc-200 font-medium">{user.gender || 'Kadın'}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">Cinsel Yönelim:</span>
+                  <span className="text-zinc-200 font-medium">{user.orientation || 'Biseksüel'}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">İlişki Tipi:</span>
+                  <span className="text-zinc-200 font-medium">Açık Çift (Open Duo)</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">Aradıkları:</span>
+                  <span className="text-[#E5C590] font-medium">Çiftler & Kadınlar</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-500">Diller:</span>
+                  <span className="text-zinc-200 font-medium">İngilizce, Felemenkçe</span>
+                </div>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-zinc-500">Sigara / Alkol:</span>
+                  <span className="text-zinc-200 font-medium">Yalnızca Sosyal</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Community Badges Card */}
+            <div className="p-6 rounded-2xl bg-[#121419] border border-white/[0.08] space-y-3 shadow-xl">
+              <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider block">
+                Topluluk Doğrulamaları
+              </span>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <ShieldCheck className="w-5 h-5 text-[#E5C590] shrink-0" />
+                <div>
+                  <span className="text-xs text-white font-medium block">Maison Attested Patron</span>
+                  <span className="text-[11px] text-zinc-400">Kimlik ve fotoğraf teyidi yapılmış salon üyesi.</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <Eye className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div>
+                  <span className="text-xs text-white font-medium block">1,840 Profil Ziyareti</span>
+                  <span className="text-[11px] text-zinc-400">Doğrulanmış cemiyet üyeleri tarafından görüntülendi.</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Content Stream or Photography Grid */}
-        {filteredPosts.length === 0 ? (
-          <EmptyState
-            variant="posts"
-            title="No dispatches found"
-            description="No entries or photographs have been published under this category yet."
-            actionLabel="Compose Dispatch"
-            onAction={onOpenCreatePost}
-          />
-        ) : viewMode === 'list' ? (
-          <div className="max-w-2xl mx-auto space-y-6">
-            {filteredPosts.map(post => (
-              <PostCard
-                key={post.id}
-                post={post}
-                isUserSubscribed={isUserSubscribed}
-                walletBalance={walletBalance}
-                onLike={onLike}
-                onSave={onSave}
-                onOpenComments={onOpenComments}
-                onOpenMedia={onOpenMedia}
-                onUnlockPPV={onUnlockPPV}
-                onSubscribeClick={onSubscribe}
-                onShare={onShare}
-              />
-            ))}
+      {/* MEDIA VAULT TAB */}
+      {mainTab === 'vault' && (
+        <div className="space-y-6">
+          <div className="p-4 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-[#E5C590]" />
+              <span className="text-xs text-white font-medium">Özel Şifreli Mahzen (Private Vault)</span>
+            </div>
+            <span className="text-xs text-zinc-400">Yalnızca İzinli Patrona Açık</span>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
-            {filteredPosts.map(post => (
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {posts.filter(p => p.type === 'photo').map(post => (
               <ProfilePostGridItem
                 key={post.id}
                 post={post}
@@ -407,9 +535,161 @@ export const Profile: React.FC<ProfileProps> = ({
                 onUnlockPPV={onUnlockPPV}
               />
             ))}
+            {/* VIP Blurred Teasers */}
+            {[1, 2, 3, 4].map(idx => (
+              <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden bg-[#181B22] border border-white/[0.08] flex flex-col items-center justify-center p-4 text-center group cursor-pointer">
+                <div className="absolute inset-0 bg-cover bg-center filter blur-lg opacity-40 scale-110" style={{ backgroundImage: `url(${user.avatar})` }} />
+                <div className="relative z-10 space-y-1">
+                  <Lock className="w-6 h-6 text-[#E5C590] mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs text-white font-medium block">VIP Mahzen #{idx}</span>
+                  <span className="text-[10px] text-zinc-400 block">Erişim İzni İste</span>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* EVENTS TAB */}
+      {mainTab === 'events' && (
+        <div className="space-y-4">
+          {[
+            { title: 'Vernissage Privé — Paris Chapter', date: '14 Kasım 2026', location: 'Le Marais, Paris', desc: 'Gizli galeri açılışı ve maskeli şampanya kokteyli.' },
+            { title: 'Venetian Nocturne Masked Ball', date: '28 Kasım 2026', location: 'Prinsengracht Loft, Amsterdam', desc: 'Siyah kravat ve Venedik maskeleriyle özel çember buluşması.' },
+            { title: 'Sensory Tantric Gathering', date: '12 Aralık 2026', location: 'Secret Penthouse, Brussels', desc: 'Duyusal farkındalık, ipek halat ve meditasyon atölyesi.' },
+          ].map((event, i) => (
+            <div key={i} className="p-5 rounded-2xl bg-[#121419] border border-white/[0.08] flex items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#E5C590]" />
+                  <h4 className="font-serif text-base text-white font-medium">{event.title}</h4>
+                </div>
+                <p className="text-xs text-zinc-400 font-sans">{event.desc}</p>
+                <div className="flex items-center gap-3 text-xs text-zinc-500 font-mono pt-1">
+                  <span>{event.date}</span>
+                  <span>·</span>
+                  <span>{event.location}</span>
+                </div>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-sans bg-white/5 border border-white/10 text-emerald-400 shrink-0">
+                Davetli / Attending
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* DISPATCHES TAB (EXISTING POSTS FEED) */}
+      {mainTab === 'dispatches' && (
+        <div className="space-y-6">
+          {/* Quiet Luxury Pill Tabs & View Switcher */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] overflow-x-auto no-scrollbar max-w-full">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'all'
+                    ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                All Dispatches ({posts.length})
+              </button>
+
+              <button
+                onClick={() => setActiveTab('photo')}
+                className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'photo'
+                    ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Photography ({photoCount})
+              </button>
+
+              <button
+                onClick={() => setActiveTab('video')}
+                className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'video'
+                    ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Cinematic ({videoCount})
+              </button>
+            </div>
+
+            {/* Grid / Stream Switcher */}
+            <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] shrink-0 self-start sm:self-auto">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-[#181B22] text-white shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Gallery Grid"
+                aria-label="Gallery Grid"
+              >
+                <Grid className="w-4 h-4 stroke-[1.5]" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-[#181B22] text-white shadow-xs'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Editorial Stream"
+                aria-label="Editorial Stream"
+              >
+                <List className="w-4 h-4 stroke-[1.5]" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content Stream or Photography Grid */}
+          {filteredPosts.length === 0 ? (
+            <EmptyState
+              variant="posts"
+              title="No dispatches found"
+              description="No entries or photographs have been published under this category yet."
+              actionLabel="Compose Dispatch"
+              onAction={onOpenCreatePost}
+            />
+          ) : viewMode === 'list' ? (
+            <div className="max-w-2xl mx-auto space-y-6">
+              {filteredPosts.map(post => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  isUserSubscribed={isUserSubscribed}
+                  walletBalance={walletBalance}
+                  onLike={onLike}
+                  onSave={onSave}
+                  onOpenComments={onOpenComments}
+                  onOpenMedia={onOpenMedia}
+                  onUnlockPPV={onUnlockPPV}
+                  onSubscribeClick={onSubscribe}
+                  onShare={onShare}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
+              {filteredPosts.map(post => (
+                <ProfilePostGridItem
+                  key={post.id}
+                  post={post}
+                  isUserSubscribed={isUserSubscribed}
+                  onOpenMedia={onOpenMedia}
+                  onUnlockPPV={onUnlockPPV}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   );
