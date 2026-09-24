@@ -110,107 +110,141 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Navigation Controls */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Dispatch Create Button */}
-          <button
-            onClick={onOpenCreatePost}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-black font-sans text-xs font-medium hover:bg-zinc-200 transition-colors shadow-xs cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2]" />
-            <span>Dispatch</span>
-          </button>
-
-          {/* Admission Key / Authenticate */}
-          {onOpenAuth && (
-            <button
-              onClick={onOpenAuth}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#14161C] border border-[#E5C590]/30 hover:border-[#E5C590] text-[#E5C590] text-xs font-sans transition-colors cursor-pointer"
-              title="Salon Admission & Switch Patron"
-            >
-              <KeyRound className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-[11px]">Admission</span>
-            </button>
-          )}
-
-          {/* Language Selector */}
-          {onLanguageChange && (
-            <div className="relative">
-              <button
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="px-2 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] text-xs transition-colors flex items-center gap-1 cursor-pointer"
-                title="Select Language"
-              >
-                <span>{currentLang.flag}</span>
-                <span className="font-sans text-[11px] uppercase hidden sm:inline">{currentLang.code}</span>
-              </button>
-              {langMenuOpen && (
-                <div className="absolute right-0 mt-2 w-32 bg-[#121419] border border-white/[0.08] rounded-xl shadow-2xl p-1 z-50">
-                  {languages.map(l => (
-                    <button
-                      key={l.code}
-                      onClick={() => {
-                        onLanguageChange(l.code);
-                        setLangMenuOpen(false);
-                      }}
-                      className="w-full text-left px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] rounded-lg flex items-center gap-2"
-                    >
-                      <span>{l.flag}</span>
-                      <span className="font-sans">{l.label}</span>
-                    </button>
-                  ))}
+          {currentUser.isGuest ? (
+            <>
+              {/* Language Selector */}
+              {onLanguageChange && (
+                <div className="relative">
+                  <button
+                    onClick={() => setLangMenuOpen(!langMenuOpen)}
+                    className="px-2 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                    title="Select Language"
+                  >
+                    <span>{currentLang.flag}</span>
+                    <span className="font-sans text-[11px] uppercase hidden sm:inline">{currentLang.code}</span>
+                  </button>
+                  {langMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-32 bg-[#121419] border border-white/[0.08] rounded-xl shadow-2xl p-1 z-50">
+                      {languages.map(l => (
+                        <button
+                          key={l.code}
+                          onClick={() => {
+                            onLanguageChange(l.code);
+                            setLangMenuOpen(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] rounded-lg flex items-center gap-2"
+                        >
+                          <span>{l.flag}</span>
+                          <span className="font-sans">{l.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Messages */}
-          <button
-            onClick={() => onNavigate('chat')}
-            className="relative p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer"
-            title="Private Dispatches"
-            aria-label="Private Dispatches"
-          >
-            <MessageSquare className="w-4 h-4 stroke-[1.5]" />
-            {unreadChatCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#E5C590]" />
-            )}
-          </button>
+              {/* Login / Register CTA */}
+              <button
+                onClick={onOpenAuth}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-linear-to-r from-[#E5C590] via-[#DFBA7F] to-[#C9A96E] text-black font-semibold text-xs hover:brightness-110 shadow-[0_2px_12px_rgba(229,197,144,0.3)] transition-all cursor-pointer"
+              >
+                <KeyRound className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Giriş Yap / Üye Ol</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Dispatch Create Button */}
+              <button
+                onClick={onOpenCreatePost}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-black font-sans text-xs font-medium hover:bg-zinc-200 transition-colors shadow-xs cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2]" />
+                <span>Dispatch</span>
+              </button>
 
-          {/* Notifications */}
-          <button
-            onClick={onOpenNotifications}
-            className="relative p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer"
-            title="Notifications"
-            aria-label="Notifications"
-          >
-            <Bell className="w-4 h-4 stroke-[1.5]" />
-            {unreadNotificationsCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#E5C590]" />
-            )}
-          </button>
+              {/* Language Selector */}
+              {onLanguageChange && (
+                <div className="relative">
+                  <button
+                    onClick={() => setLangMenuOpen(!langMenuOpen)}
+                    className="px-2 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                    title="Select Language"
+                  >
+                    <span>{currentLang.flag}</span>
+                    <span className="font-sans text-[11px] uppercase hidden sm:inline">{currentLang.code}</span>
+                  </button>
+                  {langMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-32 bg-[#121419] border border-white/[0.08] rounded-xl shadow-2xl p-1 z-50">
+                      {languages.map(l => (
+                        <button
+                          key={l.code}
+                          onClick={() => {
+                            onLanguageChange(l.code);
+                            setLangMenuOpen(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] rounded-lg flex items-center gap-2"
+                        >
+                          <span>{l.flag}</span>
+                          <span className="font-sans">{l.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
-          {/* User Dossier Avatar */}
-          <div
-            onClick={() => onNavigate('profile')}
-            className="cursor-pointer group ml-0.5"
-            title="Member Dossier"
-          >
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-8 h-8 rounded-full object-cover border border-white/20 group-hover:border-white/40 transition-colors"
-            />
-          </div>
+              {/* Messages */}
+              <button
+                onClick={() => onNavigate('chat')}
+                className="relative p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer"
+                title="Private Dispatches"
+                aria-label="Private Dispatches"
+              >
+                <MessageSquare className="w-4 h-4 stroke-[1.5]" />
+                {unreadChatCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#E5C590]" />
+                )}
+              </button>
 
-          {/* Sign Out Button (when authenticated) */}
-          {!currentUser.isGuest && onLogout && (
-            <button
-              onClick={onLogout}
-              className="p-2 rounded-full text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-              title="Çıkış Yap"
-              aria-label="Çıkış Yap"
-            >
-              <LogOut className="w-4 h-4 stroke-[1.5]" />
-            </button>
+              {/* Notifications */}
+              <button
+                onClick={onOpenNotifications}
+                className="relative p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer"
+                title="Notifications"
+                aria-label="Notifications"
+              >
+                <Bell className="w-4 h-4 stroke-[1.5]" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#E5C590]" />
+                )}
+              </button>
+
+              {/* User Dossier Avatar */}
+              <div
+                onClick={() => onNavigate('profile')}
+                className="cursor-pointer group ml-0.5"
+                title={`${currentUser.name} Dossier`}
+              >
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-full object-cover border border-[#E5C590]/40 group-hover:border-[#E5C590] transition-colors"
+                />
+              </div>
+
+              {/* Sign Out Button */}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="p-2 rounded-full text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                  title="Çıkış Yap"
+                  aria-label="Çıkış Yap"
+                >
+                  <LogOut className="w-4 h-4 stroke-[1.5]" />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

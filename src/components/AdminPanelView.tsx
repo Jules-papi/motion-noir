@@ -61,7 +61,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             Society Governance & Discretion Oversight
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 font-sans max-w-2xl leading-relaxed">
-            Review decorum infractions, audit cryptographic notary pipelines, inspect vault settlements, and ensure compliance with Maison Noir covenants.
+            Review decorum infractions, audit cryptographic notary pipelines, inspect vault settlements, and ensure compliance with Major Club covenants.
           </p>
         </div>
 

@@ -85,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         });
 
         if (newProfile) {
-          onToast({ text: 'Maison Noir dossier created and verified.', type: 'success' });
+          onToast({ text: 'Major Club dossier created and verified.', type: 'success' });
           onAuthSuccess(newProfile);
           onClose();
         }
@@ -164,12 +164,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <Lock className="w-6 h-6" />
           </div>
           <h2 className="text-xl font-serif tracking-wide text-[#E5C590]">
-            {mode === 'signin' ? 'Maison Noir Patron Entry' : 'Request Salon Admission'}
+            {mode === 'signin' ? 'Major Club Üye Girişi' : 'Major Club Üyelik Talebi'}
           </h2>
           <p className="text-xs text-zinc-400 mt-1 font-sans">
             {mode === 'signin'
-              ? 'Present your credentials to access encrypted dispatches.'
-              : 'Register an official dossier in the private registry.'}
+              ? 'Şifreli salonlara ve özel akışa erişmek için giriş yapın.'
+              : 'Seçkin cemiyete katılmak için resmi dossier oluşturun.'}
           </p>
         </div>
 
@@ -227,7 +227,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="patron@maison-noir.com"
+                placeholder="patron@majorclub.com"
                 className="w-full pl-10 pr-3.5 py-2.5 bg-[#14161C] border border-white/10 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-hidden focus:border-[#E5C590]/60 transition-colors"
               />
             </div>
@@ -257,12 +257,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : mode === 'signin' ? (
               <>
-                <span>Enter Private Salon</span>
+                <span>Özel Salona Giriş Yap</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             ) : (
               <>
-                <span>Enroll in Registry</span>
+                <span>Dizine Kayıt Ol</span>
                 <Check className="w-4 h-4" />
               </>
             )}
@@ -275,7 +275,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
             className="text-xs text-zinc-400 hover:text-[#E5C590] transition-colors cursor-pointer"
           >
-            {mode === 'signin' ? "Don't have a dossier? Apply for admission" : 'Already registered? Present credentials'}
+            {mode === 'signin' ? "Hesabınız yok mu? Üyelik başvurusu yapın" : 'Zaten üye misiniz? Giriş yapın'}
           </button>
         </div>
 
@@ -283,22 +283,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="mt-6 pt-5 border-t border-white/[0.08]">
           <div className="flex items-center gap-1.5 text-[11px] text-[#E5C590]/90 uppercase font-sans tracking-wider mb-2.5">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Instant Switch for Evaluators / Buyers</span>
+            <span>Doğrulanmış Üye ile Hızlı Giriş (Demo)</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => handleQuickLoginAs('44444444-4444-4444-4444-444444444444')}
+              onClick={() => handleQuickLoginAs('55555555-5555-5555-5555-555555555555')}
               className="px-2.5 py-2 rounded-lg bg-[#14161C] border border-white/5 hover:border-[#E5C590]/40 text-left text-xs text-zinc-300 transition-colors cursor-pointer"
             >
-              <div className="font-medium text-white truncate">Julian Vane</div>
-              <div className="text-[10px] text-zinc-500">Founder & Curator</div>
+              <div className="font-medium text-white truncate">Marc & Eva</div>
+              <div className="text-[10px] text-zinc-500">Doğrulanmış Çift (Amsterdam)</div>
             </button>
             <button
-              onClick={() => handleQuickLoginAs('11111111-1111-1111-1111-111111111111')}
+              onClick={() => handleQuickLoginAs('77777777-7777-7777-7777-777777777777')}
               className="px-2.5 py-2 rounded-lg bg-[#14161C] border border-white/5 hover:border-[#E5C590]/40 text-left text-xs text-zinc-300 transition-colors cursor-pointer"
             >
-              <div className="font-medium text-white truncate">Elena Rostova</div>
-              <div className="text-[10px] text-zinc-500">Architect (Amsterdam)</div>
+              <div className="font-medium text-white truncate">Aylin & Kerem</div>
+              <div className="text-[10px] text-zinc-500">Modern Çift (İstanbul)</div>
             </button>
           </div>
         </div>

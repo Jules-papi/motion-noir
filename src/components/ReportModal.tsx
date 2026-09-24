@@ -134,7 +134,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
           </div>
 
           <div className="bg-[#181B22] p-3 rounded-xl border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed font-sans">
-            Your incident record is encrypted and forwarded directly to the Maison Noir Trust & Discretion council.
+            Your incident record is encrypted and forwarded directly to the Major Club Trust & Discretion council.
           </div>
 
           <div className="pt-2 flex items-center justify-end gap-2.5">

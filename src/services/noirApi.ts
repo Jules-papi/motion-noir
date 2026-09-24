@@ -72,7 +72,7 @@ export const noirApi = {
       name: profile.name || 'Anonymous Patron',
       username: profile.username || `patron_${profile.id.slice(0, 6)}`,
       avatar: profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
-      bio: profile.bio || 'Curated member of Maison Noir.',
+      bio: profile.bio || 'Curated member of Major Club.',
       location: profile.location || 'Amsterdam Centrum',
       age: profile.age || 29,
       gender: profile.gender || 'female',

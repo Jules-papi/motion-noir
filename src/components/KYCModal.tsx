@@ -77,7 +77,7 @@ export const KYCModal: React.FC<KYCModalProps> = ({
             </h3>
             
             <p className="text-xs text-zinc-400 font-sans leading-relaxed mb-5">
-              To protect the confidentiality and sanctity of Maison Noir, every patron confirms their physical identity via a private, zero-storage cryptographic gesture audit.
+              To protect the confidentiality and sanctity of Major Club, every patron confirms their physical identity via a private, zero-storage cryptographic gesture audit.
             </p>
 
             <div className="bg-[#121419] p-4 rounded-xl border border-white/[0.08] mb-6 text-left">

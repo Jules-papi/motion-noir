@@ -1,5 +1,5 @@
 /**
- * Maison Noir LocalStorage Persistence Engine
+ * Major Club LocalStorage Persistence Engine
  * Keeps all member state, wallet balances, unlocked posts, club memberships,
  * forum debates, and conversations persistent across sessions.
  */

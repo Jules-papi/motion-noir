@@ -47,7 +47,7 @@ export const PersonalTicketModal: React.FC<PersonalTicketModalProps> = ({
           
           <div className="absolute bottom-3 left-5 right-12">
             <span className="text-[9px] font-mono tracking-[0.25em] text-[#C5A880] uppercase block">
-              Maison Noir Société Privée
+              Major Club Société Privée
             </span>
             <h3 className="font-serif text-base truncate mt-0.5 text-[#F4F1EC] font-medium">
               {event.title}

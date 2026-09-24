@@ -156,7 +156,7 @@ export const DecoyScreen: React.FC<DecoyScreenProps> = ({ onDismiss }) => {
             onClick={onDismiss}
             className="hover:text-zinc-300 transition-colors underline cursor-pointer text-[11px] font-mono"
           >
-            Maison Noir'a Geri Dön
+            Major Club'a Geri Dön
           </button>
         </div>
       </main>

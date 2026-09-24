@@ -14,28 +14,28 @@ import { supabase } from '../lib/supabase';
 
 // Default guest patron profile for seamless browsing without auth lock
 const DEFAULT_GUEST_PATRON: UserProfile = {
-  id: '44444444-4444-4444-4444-444444444444',
-  name: 'Julian Vane',
-  username: 'julian_v',
+  id: '00000000-0000-0000-0000-000000000000',
+  name: 'Misafir Patron',
+  username: 'misafir',
   isGuest: true,
-  avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
   coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
-  bio: 'Founder & Senior Curator at Maison Noir. Discretion is paramount.',
-  location: 'Amsterdam Oud-Zuid',
+  bio: 'Major Club portal ziyaretçisi. Özel salon içerikleri ve üye profilleri için giriş yapın.',
+  location: 'Avrupa / Türkiye',
   website: '',
-  joinDate: 'Oct 2024',
-  isVerified: true,
-  followersCount: 1420,
-  followingCount: 380,
-  postsCount: 18,
-  totalLikes: 4200,
+  joinDate: '2025',
+  isVerified: false,
+  followersCount: 0,
+  followingCount: 0,
+  postsCount: 0,
+  totalLikes: 0,
   subscriptionPrice: 0,
   membershipTier: 'standard',
   isSubscribed: false,
   isFollowing: false,
-  age: 31,
-  gender: 'male',
-  orientation: 'Straight',
+  age: 26,
+  gender: 'woman',
+  orientation: 'Heterosexual',
 };
 
 export function useSocialPlatform() {
@@ -119,8 +119,7 @@ export function useSocialPlatform() {
             });
           }
         } else {
-          const sample = dbProfiles.find(p => p.username === 'julian_v') || dbProfiles[0];
-          if (sample) setCurrentUser({ ...sample, isGuest: true });
+          setCurrentUser(DEFAULT_GUEST_PATRON);
         }
       }
 
@@ -141,7 +140,7 @@ export function useSocialPlatform() {
 
     } catch (err) {
       console.error('Failed to load initial Supabase data:', err);
-      showToast('Connecting to Maison Noir cloud database...', 'info');
+      showToast('Connecting to Major Club cloud database...', 'info');
     } finally {
       setIsLoadingInitial(false);
     }

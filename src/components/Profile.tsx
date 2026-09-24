@@ -381,7 +381,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 <span>Hakkımızda & Tanışma Vizyonu</span>
               </div>
               <p className="text-sm text-zinc-300 font-light leading-relaxed">
-                {user.bio || 'Maison Noir özel cemiyetinin saygın üyeleri. Sanat, felsefe ve rafine yetişkin deneyimlerini saygı ve gizlilik çerçevesinde buluşturuyoruz.'}
+                {user.bio || 'Major Club özel cemiyetinin saygın üyeleri. Sanat, felsefe ve rafine yetişkin deneyimlerini saygı ve gizlilik çerçevesinde buluşturuyoruz.'}
               </p>
               <p className="text-xs text-zinc-400 leading-relaxed pt-2 border-t border-white/[0.04]">
                 Bizim için en temel kural karşılıklı rıza, temiz iletişim ve zarafettir. Şifreli salon sohbetlerinde samimi, yüz yüze buluşmalarda ise özenli tavırları önceliklendiririz.

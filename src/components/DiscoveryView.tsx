@@ -137,7 +137,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
           <div className="space-y-2">
             <span className="text-[10px] font-mono tracking-[0.28em] text-[#E5C590] uppercase block">
-              Maison Noir Société Privée
+              Major Club Société Privée
             </span>
             <h1 className="font-serif text-3xl sm:text-5xl font-light text-white tracking-tight">
               Discover

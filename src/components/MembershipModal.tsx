@@ -95,7 +95,7 @@ export const MembershipModal: React.FC<MembershipModalProps> = ({
         <div className="text-center space-y-2 max-w-md mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xs bg-[#161512] text-amber-200 text-[10px] font-mono uppercase tracking-[0.2em] border border-amber-600/30">
             <Crown className="w-3 h-3 text-amber-300" />
-            <span>Maison Noir Society Patronage</span>
+            <span>Major Club Society Patronage</span>
           </div>
           <h2 className="font-serif text-2xl sm:text-3xl text-stone-100 font-medium tracking-tight">
             Elevate Your Club Patronage

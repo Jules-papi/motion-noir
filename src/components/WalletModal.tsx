@@ -85,7 +85,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             </div>
             <div>
               <span className="text-[10px] font-mono tracking-widest uppercase text-[#E5C590] block">
-                Maison Noir Treasury
+                Major Club Treasury
               </span>
               <h3 className="font-serif text-base text-white font-medium">
                 Üye Kasası & Cüzdan Merkezi

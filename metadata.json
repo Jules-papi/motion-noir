@@ -1,5 +1,5 @@
 {
-  "name": "Maison Noir — Private Members Club",
+  "name": "Major Club — Private Members Club",
   "description": "Exclusive private social club, curated evenings, private salons, digital vaults, and confidential society directory.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

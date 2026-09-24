@@ -1,5 +1,5 @@
 /**
- * Media Security Utilities for Maison Noir
+ * Media Security Utilities for Major Club
  * 
  * Provides secure generic blurred silhouette placeholders for private / PPV / locked content.
  * Guarantees that unauthenticated or non-patron DOM elements do NOT leak the original mediaUrl

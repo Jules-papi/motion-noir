@@ -85,7 +85,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
       if (!target) {
         setScanResult({
           status: 'error',
-          message: 'Geçersiz veya sahte bilet kodu! Maison Noir salon kayıtlarında bulunamadı.',
+          message: 'Geçersiz veya sahte bilet kodu! Major Club salon kayıtlarında bulunamadı.',
         });
         return;
       }
@@ -123,7 +123,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
             </div>
             <div>
               <h2 className="font-serif text-lg text-white font-medium">
-                Maison Noir Bilet & Kapı Cüzdanı
+                Major Club Bilet & Kapı Cüzdanı
               </h2>
               <p className="text-[11px] text-zinc-400 font-sans">
                 Kişisel dijital salon pasaportları ve kapı QR doğrulama sistemi
@@ -232,7 +232,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                       {/* Top ribbon */}
                       <div className="w-full flex items-center justify-between pb-3 border-b border-white/[0.06] text-[10px] font-mono">
                         <span className="text-[#E5C590] tracking-widest uppercase">
-                          MAISON NOIR VIP PASS
+                          MAJOR CLUB VIP PASS
                         </span>
                         <span className="flex items-center gap-1 text-zinc-400">
                           <RefreshCw className="w-3 h-3 animate-spin text-[#E5C590]" />
@@ -324,7 +324,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
             <div className="space-y-6 max-w-lg mx-auto">
               <div className="text-center space-y-1">
                 <span className="text-[10px] font-mono tracking-widest text-[#E5C590] uppercase">
-                  Maison Noir Gatekeeping Engine
+                  Major Club Gatekeeping Engine
                 </span>
                 <h3 className="font-serif text-xl text-white font-medium">
                   Giriş Kapısı QR Doğrulayıcı
@@ -349,7 +349,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                   <div className="flex flex-col items-center gap-2 text-zinc-500">
                     <Camera className="w-8 h-8 text-zinc-400" />
                     <span className="text-xs font-sans">Kamera Vizörü Hazır</span>
-                    <span className="text-[10px] font-mono text-zinc-600">Maison Noir High-Speed QR Sensor</span>
+                    <span className="text-[10px] font-mono text-zinc-600">Major Club High-Speed QR Sensor</span>
                   </div>
                 )}
 
