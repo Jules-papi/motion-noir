@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageSquare, Share2, Bookmark, Gift, Coins, Check } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark } from 'lucide-react';
 import { Post } from '../types';
 
 interface PostCardFooterProps {
@@ -17,76 +17,120 @@ export const PostCardFooter: React.FC<PostCardFooterProps> = ({
   onSave,
   onOpenComments,
   onShare,
-  onTip,
 }) => {
-  const [showTipMenu, setShowTipMenu] = useState(false);
-  const [customTip, setCustomTip] = useState('');
-  const [tipSuccess, setTipSuccess] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [likeAnimate, setLikeAnimate] = useState(false);
 
-  const handleSendTip = (amount: number) => {
-    if (onTip) {
-      onTip(post, amount);
-      setTipSuccess(true);
-      setTimeout(() => {
-        setTipSuccess(false);
-        setShowTipMenu(false);
-        setCustomTip('');
-      }, 900);
+  const handleLikeClick = () => {
+    setLikeAnimate(true);
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate(30); } catch {}
     }
+    onLike(post.id);
+    setTimeout(() => setLikeAnimate(false), 300);
   };
 
+  const caption = post.content || '';
+  const isLongCaption = caption.length > 95;
+
   return (
-    <div className="px-4 sm:px-5 py-3 border-t border-white/[0.06] flex items-center justify-between text-zinc-400 relative">
-      <div className="flex items-center gap-4 sm:gap-5">
-        {/* Like */}
-        <button
-          id={`btn-like-${post.id}`}
-          onClick={() => onLike(post.id)}
-          className={`flex items-center gap-1.5 text-xs transition-colors cursor-pointer ${
-            post.isLiked 
-              ? 'text-rose-500' 
-              : 'hover:text-white'
-          }`}
-        >
-          <Heart className={`w-4 h-4 stroke-[1.75] ${post.isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
-          <span className="font-sans text-xs font-medium">{post.likesCount}</span>
-        </button>
+    <div className="px-4 sm:px-5 pt-3 pb-4 space-y-2 text-zinc-300">
+      {/* 1. INSTAGRAM ACTION BAR */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {/* Like Heart */}
+          <button
+            id={`btn-like-${post.id}`}
+            onClick={handleLikeClick}
+            aria-label="Beğen"
+            className={`transition-transform active:scale-75 cursor-pointer ${
+              likeAnimate ? 'scale-125' : ''
+            }`}
+          >
+            <Heart
+              className={`w-6 h-6 stroke-[1.8] transition-colors ${
+                post.isLiked 
+                  ? 'fill-rose-500 text-rose-500' 
+                  : 'text-white hover:text-rose-400'
+              }`}
+            />
+          </button>
 
-        {/* Discussions */}
-        <button
-          id={`btn-comment-${post.id}`}
-          onClick={() => onOpenComments(post)}
-          className="flex items-center gap-1.5 text-xs font-sans hover:text-white transition-colors cursor-pointer"
-        >
-          <MessageSquare className="w-4 h-4 stroke-[1.75]" />
-          <span className="font-sans text-xs font-medium">{post.commentsCount}</span>
-        </button>
+          {/* Comment Bubble */}
+          <button
+            id={`btn-comment-${post.id}`}
+            onClick={() => onOpenComments(post)}
+            aria-label="Yorum Yap"
+            className="text-white hover:text-zinc-300 transition-transform active:scale-75 cursor-pointer"
+          >
+            <MessageCircle className="w-6 h-6 stroke-[1.8]" />
+          </button>
 
-        {/* Share */}
-        <button
-          id={`btn-share-${post.id}`}
-          onClick={() => onShare(post)}
-          className="flex items-center gap-1.5 text-xs font-sans hover:text-white transition-colors cursor-pointer"
-        >
-          <Share2 className="w-4 h-4 stroke-[1.75]" />
-          <span className="font-sans text-xs font-medium">{post.sharesCount}</span>
-        </button>
+          {/* Share / Direct Plane */}
+          <button
+            id={`btn-share-${post.id}`}
+            onClick={() => onShare(post)}
+            aria-label="Paylaş"
+            className="text-white hover:text-zinc-300 transition-transform active:scale-75 cursor-pointer"
+          >
+            <Send className="w-5 h-5 stroke-[1.8] -rotate-12" />
+          </button>
+        </div>
 
+        {/* Bookmark / Save */}
+        <button
+          id={`btn-save-${post.id}`}
+          onClick={() => onSave(post.id)}
+          aria-label="Kaydet"
+          className="text-white hover:text-[#E5C590] transition-transform active:scale-75 cursor-pointer"
+        >
+          <Bookmark className={`w-5 h-5 stroke-[1.8] ${post.isSaved ? 'fill-[#E5C590] text-[#E5C590]' : ''}`} />
+        </button>
       </div>
 
-      {/* Archive / Bookmark */}
-      <button
-        id={`btn-save-${post.id}`}
-        onClick={() => onSave(post.id)}
-        aria-label="Archive Record"
-        className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-          post.isSaved 
-            ? 'text-[#E5C590]' 
-            : 'text-zinc-400 hover:text-white'
-        }`}
-      >
-        <Bookmark className={`w-4 h-4 stroke-[1.75] ${post.isSaved ? 'fill-[#E5C590]' : ''}`} />
-      </button>
+      {/* 2. LIKES COUNT (INSTAGRAM FORMAT) */}
+      <div className="text-xs font-sans font-semibold text-white pt-0.5">
+        {post.likesCount > 0 ? (
+          <span>{post.likesCount.toLocaleString()} beğenme</span>
+        ) : (
+          <span className="font-normal text-zinc-400">İlk beğenen sen ol</span>
+        )}
+      </div>
+
+      {/* 3. INLINE CAPTION PREVIEW */}
+      {caption && (
+        <div className="text-xs font-sans leading-relaxed text-zinc-200">
+          <span className="font-semibold text-white mr-1.5">
+            {post.author.username || post.author.name}
+          </span>
+          <span className="text-zinc-300">
+            {isExpanded || !isLongCaption ? caption : `${caption.slice(0, 95)}...`}
+          </span>
+          {isLongCaption && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="ml-1 text-zinc-400 hover:text-zinc-200 text-xs font-medium cursor-pointer"
+            >
+              {isExpanded ? 'daha az' : 'devamı'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 4. COMMENTS BOTTOM SHEET TRIGGER */}
+      {post.commentsCount > 0 && (
+        <button
+          onClick={() => onOpenComments(post)}
+          className="text-xs font-sans text-zinc-400 hover:text-zinc-200 transition-colors block text-left cursor-pointer pt-0.5"
+        >
+          {post.commentsCount === 1 ? '1 yorumu gör' : `${post.commentsCount} yorumun tümünü gör`}
+        </button>
+      )}
+
+      {/* 5. TIMESTAMP */}
+      <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 pt-0.5">
+        {post.createdAt || 'Az önce'}
+      </div>
     </div>
   );
 };

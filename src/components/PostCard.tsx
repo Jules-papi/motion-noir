@@ -9,7 +9,8 @@ import {
   Eye, 
   MoreHorizontal,
   ShieldAlert,
-  KeyRound
+  KeyRound,
+  Heart
 } from 'lucide-react';
 import { Post } from '../types';
 import { PostCardFooter } from './PostCardFooter';
@@ -52,7 +53,33 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [isSensitiveRevealed, setIsSensitiveRevealed] = useState(false);
+  const [showHeartAnim, setShowHeartAnim] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastTapRef = useRef<number>(0);
+
+  const handleMediaDoubleTap = (e: React.MouseEvent) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      e.preventDefault();
+      e.stopPropagation();
+      setShowHeartAnim(true);
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate([40, 25, 40]); } catch {}
+      }
+      if (!post.isLiked) {
+        onLike(post.id);
+      }
+      setTimeout(() => setShowHeartAnim(false), 900);
+    } else {
+      lastTapRef.current = now;
+      setTimeout(() => {
+        if (Date.now() - lastTapRef.current >= DOUBLE_TAP_DELAY && !showHeartAnim) {
+          if (!showSensitiveOverlay) onOpenMedia(post);
+        }
+      }, DOUBLE_TAP_DELAY);
+    }
+  };
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -160,10 +187,10 @@ export const PostCard: React.FC<PostCardProps> = ({
         </div>
       </div>
 
-      {/* 2. DISPATCH CAPTION */}
-      {post.content && (
-        <div className="px-4 sm:px-5 pb-3.5">
-          <p className="text-zinc-200 text-xs sm:text-sm font-sans leading-relaxed whitespace-pre-line font-normal">
+      {/* 2. TEXT-ONLY DISPATCH CONTENT (if no photo/video) */}
+      {!post.mediaUrl && !post.videoUrl && post.content && (
+        <div className="px-4 sm:px-5 py-4 bg-white/[0.02]">
+          <p className="text-zinc-200 text-sm font-sans leading-relaxed whitespace-pre-line font-normal">
             {post.content}
           </p>
           {post.tags && post.tags.length > 0 && (
@@ -171,7 +198,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               {post.tags.map(tag => (
                 <span 
                   key={tag} 
-                  className="text-[11px] font-sans text-zinc-400 hover:text-white cursor-pointer transition-colors"
+                  className="text-[11px] font-sans text-[#E5C590]/80 hover:text-[#E5C590] cursor-pointer transition-colors"
                 >
                   #{tag}
                 </span>
@@ -234,8 +261,8 @@ export const PostCard: React.FC<PostCardProps> = ({
         </div>
       ) : post.mediaUrl ? (
         <div 
-          onClick={() => !showSensitiveOverlay && onOpenMedia(post)}
-          className="relative w-full overflow-hidden bg-[#07080A] cursor-pointer group max-h-[560px]"
+          onClick={handleMediaDoubleTap}
+          className="relative w-full aspect-[4/5] max-h-[640px] overflow-hidden bg-[#07080A] cursor-pointer group select-none"
         >
           {showSensitiveOverlay && (
             <PostSensitiveOverlay onReveal={() => setIsSensitiveRevealed(true)} />
@@ -247,6 +274,16 @@ export const PostCard: React.FC<PostCardProps> = ({
               showSensitiveOverlay ? 'filter blur-2xl scale-105' : ''
             }`}
           />
+
+          {/* Instagram-Style Floating Heart Burst on Double Tap */}
+          {showHeartAnim && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 animate-in zoom-in-50 fade-in duration-150">
+              <div className="w-24 h-24 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center shadow-2xl drop-shadow-[0_0_30px_rgba(229,197,144,0.8)] animate-pulse">
+                <Heart className="w-16 h-16 fill-[#E5C590] text-[#E5C590] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" />
+              </div>
+            </div>
+          )}
+
           {/* Discreet Face Mask Overlay */}
           {post.hasFaceMask && !showSensitiveOverlay && (
             <div className="absolute top-[22%] left-1/2 -translate-x-1/2 w-44 h-8 bg-black/90 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center gap-1.5 shadow-2xl pointer-events-none">
@@ -256,11 +293,11 @@ export const PostCard: React.FC<PostCardProps> = ({
               </span>
             </div>
           )}
-          {!showSensitiveOverlay && (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+          {!showSensitiveOverlay && !showHeartAnim && (
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
               <span className="bg-black/75 text-white text-xs font-sans font-medium px-3.5 py-1.5 rounded-full border border-white/20 backdrop-blur-md flex items-center gap-2 shadow-xl">
                 <Eye className="w-3.5 h-3.5 text-white" />
-                Inspect
+                İncele
               </span>
             </div>
           )}
