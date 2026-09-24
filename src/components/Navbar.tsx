@@ -6,6 +6,7 @@ import {
   Plus, 
   MessageSquare, 
   KeyRound,
+  LogOut,
   X
 } from 'lucide-react';
 import { UserProfile } from '../types';
@@ -33,14 +34,15 @@ interface NavbarProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   onOpenAuth?: () => void;
+  onLogout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   walletBalance,
   isUserSubscribed,
-  unreadChatCount = 2,
-  unreadNotificationsCount = 2,
+  unreadChatCount = 0,
+  unreadNotificationsCount = 0,
   currency = 'EUR',
   language = 'tr',
   searchQuery = '',
@@ -53,6 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   onNavigate,
   onOpenAuth,
+  onLogout,
 }) => {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
@@ -200,6 +203,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="w-8 h-8 rounded-full object-cover border border-white/20 group-hover:border-white/40 transition-colors"
             />
           </div>
+
+          {/* Sign Out Button (when authenticated) */}
+          {!currentUser.isGuest && onLogout && (
+            <button
+              onClick={onLogout}
+              className="p-2 rounded-full text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              title="Çıkış Yap"
+              aria-label="Çıkış Yap"
+            >
+              <LogOut className="w-4 h-4 stroke-[1.5]" />
+            </button>
+          )}
         </div>
       </div>
     </header>

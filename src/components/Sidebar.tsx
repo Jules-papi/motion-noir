@@ -9,7 +9,8 @@ import {
   Plus, 
   Crown, 
   KeyRound, 
-  FileText
+  FileText,
+  LogOut
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { SupportedCurrency, SupportedLanguage } from '../types/anlatiTypes';
@@ -31,6 +32,8 @@ interface SidebarProps {
   onOpenKYCModal?: () => void;
   onOpenVisitorsModal?: () => void;
   onOpenPayoutModal?: () => void;
+  onOpenAuth?: () => void;
+  onLogout?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -39,10 +42,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentUser,
   walletBalance,
   isUserSubscribed,
-  unreadChatCount = 2,
+  unreadChatCount = 0,
   onOpenWallet,
   onOpenCreatePost,
   onOpenMembershipModal,
+  onOpenAuth,
+  onLogout,
 }) => {
   const navItems = [
     { 
@@ -153,28 +158,58 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Compose Dispatch</span>
           </button>
 
-          {/* Member Card Summary */}
-          <div 
-            onClick={() => onNavigate('profile')}
-            className="p-2.5 rounded-xl bg-[#121419] border border-white/[0.06] hover:border-white/15 flex items-center justify-between cursor-pointer transition-colors"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-8 h-8 rounded-full object-cover border border-white/10 shrink-0"
-              />
-              <div className="min-w-0">
-                <div className="font-sans text-xs font-medium text-white truncate">
-                  {currentUser.name}
-                </div>
-                <div className="text-[10px] font-mono text-zinc-400 truncate">
-                  {currentUser.location || 'Amsterdam'}
+          {/* Member Card Summary / Guest Admission */}
+          {currentUser.isGuest ? (
+            <button
+              onClick={onOpenAuth}
+              className="w-full p-2.5 rounded-xl bg-gradient-to-r from-[#181B22] to-[#121419] border border-[#E5C590]/30 hover:border-[#E5C590] text-[#E5C590] flex items-center justify-between transition-all cursor-pointer shadow-sm group"
+            >
+              <div className="flex items-center gap-2.5">
+                <KeyRound className="w-4 h-4 text-[#E5C590]" />
+                <div className="text-left">
+                  <div className="font-sans text-xs font-medium text-white group-hover:text-[#E5C590] transition-colors">
+                    Salon Admission
+                  </div>
+                  <div className="text-[10px] text-zinc-400 font-sans">
+                    Giriş Yap / Üye Ol
+                  </div>
                 </div>
               </div>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-[#E5C590]/10 text-[#E5C590]">
+                Katıl
+              </span>
+            </button>
+          ) : (
+            <div className="p-2.5 rounded-xl bg-[#121419] border border-white/[0.06] hover:border-white/15 flex items-center justify-between transition-colors">
+              <div 
+                onClick={() => onNavigate('profile')}
+                className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+              >
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-full object-cover border border-white/10 shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="font-sans text-xs font-medium text-white truncate">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[10px] font-mono text-zinc-400 truncate">
+                    @{currentUser.username}
+                  </div>
+                </div>
+              </div>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  title="Çıkış Yap"
+                  className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer shrink-0 ml-1"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Active" />
-          </div>
+          )}
         </div>
       </aside>
 

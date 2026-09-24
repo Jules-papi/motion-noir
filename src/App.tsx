@@ -30,6 +30,12 @@ export function App() {
     conversationId: string, 
     text: string
   ) => {
+    if (p.currentUser.isGuest) {
+      p.showToast('Mesaj göndermek için lütfen giriş yapın veya üye olun.', 'info');
+      p.setIsAuthOpen(true);
+      return;
+    }
+
     const targetId = conversationId || p.activeConversationId;
     if (!targetId || !text.trim()) return;
 
@@ -61,6 +67,12 @@ export function App() {
 
   // V1 Create Post (The Gazette) — 100% Realtime PostgreSQL Insertion
   const handleSubmitNewPost = async (postData: Partial<Post>) => {
+    if (p.currentUser.isGuest) {
+      p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
+      p.setIsAuthOpen(true);
+      return;
+    }
+
     if (!postData.content && !postData.mediaUrl) return;
 
     try {
@@ -104,6 +116,7 @@ export function App() {
         onOpenMembershipModal={() => p.setIsMembershipModalOpen(true)}
         onOpenNotifications={() => p.setIsNotificationsOpen(true)}
         onOpenAuth={() => p.setIsAuthOpen(true)}
+        onLogout={p.handleLogout}
         onNavigate={p.setCurrentView}
         isDarkMode={p.isDarkMode}
         onToggleDarkMode={() => p.setIsDarkMode(!p.isDarkMode)}
@@ -120,11 +133,20 @@ export function App() {
           language={language}
           currency={currency}
           onOpenWallet={() => p.setIsWalletOpen(true)}
-          onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
+          onOpenCreatePost={() => {
+            if (p.currentUser.isGuest) {
+              p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
+              p.setIsAuthOpen(true);
+            } else {
+              p.setIsCreatePostOpen(true);
+            }
+          }}
           onOpenMembershipModal={() => p.setIsMembershipModalOpen(true)}
           onOpenKYCModal={() => p.setIsKYCModalOpen(true)}
           onOpenVisitorsModal={() => p.setIsVisitorsModalOpen(true)}
           onOpenPayoutModal={() => p.setIsPayoutModalOpen(true)}
+          onOpenAuth={() => p.setIsAuthOpen(true)}
+          onLogout={p.handleLogout}
         />
 
         <main className="flex-1 min-w-0 p-3 sm:p-5 pb-24 md:pb-8">
@@ -142,7 +164,14 @@ export function App() {
               onSubscribeClick={() => {}}
               onUnlockPPV={() => {}}
               onShare={() => p.showToast('Dispatch link copied.', 'success')}
-              onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
+              onOpenCreatePost={() => {
+                if (p.currentUser.isGuest) {
+                  p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
+                  p.setIsAuthOpen(true);
+                } else {
+                  p.setIsCreatePostOpen(true);
+                }
+              }}
               onNavigateToProfile={(userId) => {
                 if (userId && userId !== p.currentUser.id) {
                   const target = p.discoveryProfiles.find(x => x.id === userId);
@@ -155,7 +184,7 @@ export function App() {
               }}
               onReportPost={(post) => p.setReportingTarget({ type: 'post', title: post.content, id: post.id })}
               onRefresh={async () => {
-                const fresh = await noirApi.getPosts();
+                const fresh = await noirApi.getPosts(p.currentUser.isGuest ? undefined : p.currentUser.id);
                 p.setPosts(fresh);
                 p.showToast('The Gazette refreshed from cloud archives.', 'success');
               }}
@@ -169,9 +198,16 @@ export function App() {
               posts={p.posts.filter(item => item.author.id === p.currentUser.id)}
               walletBalance={p.walletBalance}
               isUserSubscribed={p.effectiveIsSubscribed}
-              onSubscribe={() => {}}
-              onOpenWallet={() => {}}
-              onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
+              onSubscribe={() => p.setIsMembershipModalOpen(true)}
+              onOpenWallet={() => p.setIsWalletOpen(true)}
+              onOpenCreatePost={() => {
+                if (p.currentUser.isGuest) {
+                  p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
+                  p.setIsAuthOpen(true);
+                } else {
+                  p.setIsCreatePostOpen(true);
+                }
+              }}
               onLike={p.handleLike}
               onSave={p.handleSave}
               onOpenComments={(post) => p.setSelectedCommentsPost(post)}
@@ -180,9 +216,14 @@ export function App() {
               onShare={() => p.showToast('Dossier link copied.', 'success')}
               onToast={(msg) => p.showToast(msg.text, msg.type)}
               onUpdateUser={async (updated) => {
+                if (p.currentUser.isGuest) {
+                  p.showToast('Profili kaydetmek için lütfen giriş yapın veya üye olun.', 'info');
+                  p.setIsAuthOpen(true);
+                  return;
+                }
                 p.setCurrentUser(prev => ({ ...prev, ...updated }));
                 await noirApi.updateProfile(p.currentUser.id, updated);
-                p.showToast('Dossier updated in salon archives.', 'success');
+                p.showToast('Dossier güncellendi ve arşive kaydedildi.', 'success');
               }}
             />
           )}
@@ -217,8 +258,11 @@ export function App() {
           walletBalance={p.walletBalance}
           isUserSubscribed={p.effectiveIsSubscribed}
           currentUser={p.currentUser}
-          onOpenWallet={() => {}}
-          onSubscribeClick={() => {}}
+          followingIds={p.followingIds}
+          suggestedProfiles={p.discoveryProfiles}
+          onFollow={p.handleFollow}
+          onOpenWallet={() => p.setIsWalletOpen(true)}
+          onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
           onNavigateToProfile={(userId) => {
             if (userId && userId !== p.currentUser.id) {
               const target = p.discoveryProfiles.find(x => x.id === userId);

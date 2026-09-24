@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { UserProfile, Post, Comment, Conversation, ChatMessage } from '../types';
+import { UserProfile, Post, Comment, Conversation, ChatMessage, AppNotification } from '../types';
 
 export const noirApi = {
   // -------------------------------------------------------------
@@ -120,7 +120,7 @@ export const noirApi = {
   // -------------------------------------------------------------
   // POSTS (The Gazette)
   // -------------------------------------------------------------
-  async getPosts(): Promise<Post[]> {
+  async getPosts(currentUserId?: string): Promise<Post[]> {
     const { data, error } = await supabase
       .from('noir_posts')
       .select(`
@@ -132,6 +132,22 @@ export const noirApi = {
     if (error || !data) {
       console.error('Error fetching noir_posts:', error);
       return [];
+    }
+
+    let likedIds: string[] = [];
+    let savedIds: string[] = [];
+
+    if (currentUserId && currentUserId !== '44444444-4444-4444-4444-444444444444') {
+      try {
+        const [likesRes, savesRes] = await Promise.all([
+          supabase.from('noir_post_likes').select('post_id').eq('user_id', currentUserId),
+          supabase.from('noir_post_saves').select('post_id').eq('user_id', currentUserId),
+        ]);
+        if (likesRes.data) likedIds = likesRes.data.map(x => x.post_id);
+        if (savesRes.data) savedIds = savesRes.data.map(x => x.post_id);
+      } catch (err) {
+        console.warn('Could not fetch likes/saves for user:', err);
+      }
     }
 
     return data.map(p => ({
@@ -149,8 +165,8 @@ export const noirApi = {
       likesCount: p.likes_count || 0,
       commentsCount: p.comments_count || 0,
       sharesCount: 0,
-      isLiked: false,
-      isSaved: false,
+      isLiked: likedIds.includes(p.id),
+      isSaved: savedIds.includes(p.id),
       createdAt: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }));
   },
@@ -198,6 +214,39 @@ export const noirApi = {
     };
   },
 
+  // -------------------------------------------------------------
+  // STORAGE & MEDIA UPLOADS
+  // -------------------------------------------------------------
+  async uploadImage(file: File, folder: string = 'media'): Promise<string | null> {
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const cleanExt = ['jpeg', 'jpg', 'png', 'webp', 'gif'].includes(ext.toLowerCase()) ? ext.toLowerCase() : 'jpg';
+      const filename = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${cleanExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('noir-media')
+        .upload(filename, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type || `image/${cleanExt === 'jpg' ? 'jpeg' : cleanExt}`,
+        });
+
+      if (error || !data) {
+        console.error('Storage upload error:', error);
+        return null;
+      }
+
+      const { data: pubData } = supabase.storage.from('noir-media').getPublicUrl(data.path);
+      return pubData.publicUrl;
+    } catch (err) {
+      console.error('Upload exception:', err);
+      return null;
+    }
+  },
+
+  // -------------------------------------------------------------
+  // LIKES (The Gazette)
+  // -------------------------------------------------------------
   async toggleLikePost(postId: string, userId: string, currentlyLiked: boolean): Promise<number> {
     if (currentlyLiked) {
       await supabase
@@ -206,17 +255,141 @@ export const noirApi = {
         .match({ post_id: postId, user_id: userId });
       
       const { data } = await supabase.rpc('decrement_likes', { post_id_input: postId });
-      return (data as number) || 0;
+      return typeof data === 'number' ? data : 0;
     } else {
       await supabase
         .from('noir_post_likes')
         .insert({ post_id: postId, user_id: userId });
 
       const { data } = await supabase.rpc('increment_likes', { post_id_input: postId });
-      return (data as number) || 1;
+      return typeof data === 'number' ? data : 1;
     }
   },
 
+  async getLikedPostIds(userId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('noir_post_likes')
+      .select('post_id')
+      .eq('user_id', userId);
+    if (error || !data) return [];
+    return data.map(r => r.post_id);
+  },
+
+  // -------------------------------------------------------------
+  // SAVES / BOOKMARKS (The Gazette)
+  // -------------------------------------------------------------
+  async toggleSavePost(userId: string, postId: string, currentlySaved: boolean): Promise<boolean> {
+    if (currentlySaved) {
+      const { error } = await supabase
+        .from('noir_post_saves')
+        .delete()
+        .match({ user_id: userId, post_id: postId });
+      return error ? true : false;
+    } else {
+      const { error } = await supabase
+        .from('noir_post_saves')
+        .insert({ user_id: userId, post_id: postId });
+      return error ? false : true;
+    }
+  },
+
+  async getSavedPostIds(userId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('noir_post_saves')
+      .select('post_id')
+      .eq('user_id', userId);
+    if (error || !data) return [];
+    return data.map(r => r.post_id);
+  },
+
+  // -------------------------------------------------------------
+  // FOLLOW SYSTEM (The Registry / Network)
+  // -------------------------------------------------------------
+  async followUser(followerId: string, followingId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('noir_follows')
+      .insert({ follower_id: followerId, following_id: followingId });
+    return !error;
+  },
+
+  async unfollowUser(followerId: string, followingId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('noir_follows')
+      .delete()
+      .match({ follower_id: followerId, following_id: followingId });
+    return !error;
+  },
+
+  async getFollowingIds(followerId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('noir_follows')
+      .select('following_id')
+      .eq('follower_id', followerId);
+    if (error || !data) return [];
+    return data.map(r => r.following_id);
+  },
+
+  async getFollowersCount(userId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('noir_follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', userId);
+    if (error || count === null) return 0;
+    return count;
+  },
+
+  // -------------------------------------------------------------
+  // NOTIFICATIONS
+  // -------------------------------------------------------------
+  async getNotifications(userId: string): Promise<AppNotification[]> {
+    const { data, error } = await supabase
+      .from('noir_notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+    return data.map(n => ({
+      id: n.id,
+      type: n.type || 'system',
+      title: n.title,
+      message: n.content || '',
+      isRead: n.is_read,
+      createdAt: new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }));
+  },
+
+  async createNotification(params: {
+    userId: string;
+    actorId?: string;
+    type: string;
+    title: string;
+    content?: string;
+  }): Promise<void> {
+    try {
+      await supabase.from('noir_notifications').insert({
+        user_id: params.userId,
+        actor_id: params.actorId || null,
+        type: params.type,
+        title: params.title,
+        content: params.content || '',
+        is_read: false,
+      });
+    } catch (err) {
+      console.warn('Notification insert error:', err);
+    }
+  },
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await supabase
+      .from('noir_notifications')
+      .update({ is_read: true })
+      .eq('user_id', userId);
+  },
+
+  // -------------------------------------------------------------
+  // COMMENTS (The Gazette)
+  // -------------------------------------------------------------
   async getComments(postId: string): Promise<Comment[]> {
     const { data, error } = await supabase
       .from('noir_post_comments')
@@ -267,11 +440,12 @@ export const noirApi = {
       return null;
     }
 
-    // update count in noir_posts
-    await supabase
-      .from('noir_posts')
-      .update({ comments_count: supabase.rpc('increment_comments', { post_id_input: postId }) })
-      .eq('id', postId);
+    // Safely execute increment_comments RPC in PostgreSQL
+    try {
+      await supabase.rpc('increment_comments', { post_id_input: postId });
+    } catch (rpcErr) {
+      console.warn('RPC increment_comments note:', rpcErr);
+    }
 
     return {
       id: data.id,

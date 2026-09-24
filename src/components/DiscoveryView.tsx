@@ -96,7 +96,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
 
   // Find a featured duo/profile for the spotlight
   const featuredProfile = useMemo(() => {
-    return profiles.find(p => p.gender === 'couple_mf' || p.gender === 'couple') || profiles[0];
+    return profiles.find(p => p.gender === 'couple_mf') || profiles[0];
   }, [profiles]);
 
   // Online active members for the horizontal strip

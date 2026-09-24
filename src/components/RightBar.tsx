@@ -15,6 +15,9 @@ interface RightBarProps {
   isUserSubscribed: boolean;
   currentUser: UserProfile;
   registeredEvents?: PlatformEvent[];
+  followingIds?: string[];
+  suggestedProfiles?: (UserProfile | { id: string; name: string; username: string; avatar: string })[];
+  onFollow?: (userId: string) => void;
   onOpenWallet: () => void;
   onSubscribeClick: () => void;
   onNavigateToProfile: (userId?: string) => void;
@@ -28,6 +31,9 @@ export const RightBar: React.FC<RightBarProps> = ({
   isUserSubscribed,
   currentUser,
   registeredEvents = [],
+  followingIds = [],
+  suggestedProfiles,
+  onFollow,
   onOpenWallet,
   onSubscribeClick,
   onNavigateToProfile,
@@ -35,10 +41,14 @@ export const RightBar: React.FC<RightBarProps> = ({
   onNavigateToForum,
   onTopicClick,
 }) => {
-  const [creators, setCreators] = React.useState(OTHER_SUGGESTED_CREATORS);
+  const displayCreators = (suggestedProfiles && suggestedProfiles.length > 0)
+    ? suggestedProfiles.slice(0, 5)
+    : OTHER_SUGGESTED_CREATORS;
 
-  const toggleFollow = (id: string) => {
-    setCreators(prev => prev.map(c => c.id === id ? { ...c, isFollowing: !c.isFollowing } : c));
+  const handleToggle = (id: string) => {
+    if (onFollow) {
+      onFollow(id);
+    }
   };
 
   const trendingTopics = [
@@ -68,51 +78,54 @@ export const RightBar: React.FC<RightBarProps> = ({
         </h4>
 
         <div className="space-y-3">
-          {creators.map(c => (
-            <div key={c.id} className="flex items-center justify-between gap-2">
-              <div 
-                onClick={() => onNavigateToProfile(c.id)}
-                className="flex items-center gap-2.5 cursor-pointer group flex-1 min-w-0"
-              >
-                <img
-                  src={c.avatar}
-                  alt={c.name}
-                  className="w-8 h-8 rounded-full object-cover border border-white/15 group-hover:border-white/40 transition-colors shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-sans text-xs font-medium text-white truncate group-hover:text-zinc-200 transition-colors">
-                      {c.name}
+          {displayCreators.map(c => {
+            const isFollowing = followingIds.includes(c.id);
+            return (
+              <div key={c.id} className="flex items-center justify-between gap-2">
+                <div 
+                  onClick={() => onNavigateToProfile(c.id)}
+                  className="flex items-center gap-2.5 cursor-pointer group flex-1 min-w-0"
+                >
+                  <img
+                    src={c.avatar}
+                    alt={c.name}
+                    className="w-8 h-8 rounded-full object-cover border border-white/15 group-hover:border-white/40 transition-colors shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-sans text-xs font-medium text-white truncate group-hover:text-zinc-200 transition-colors">
+                        {c.name}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-sans text-zinc-400 truncate block">
+                      @{c.username}
                     </span>
                   </div>
-                  <span className="text-[11px] font-sans text-zinc-400 truncate block">
-                    @{c.username}
-                  </span>
                 </div>
-              </div>
 
-              <button
-                onClick={() => toggleFollow(c.id)}
-                className={`px-3 py-1 rounded-full text-[11px] font-sans font-medium transition-all border shrink-0 cursor-pointer ${
-                  c.isFollowing
-                    ? 'bg-[#181B22] text-zinc-300 border-white/10 hover:border-white/20'
-                    : 'bg-white hover:bg-zinc-200 text-black border-transparent'
-                }`}
-              >
-                {c.isFollowing ? (
-                  <span className="flex items-center gap-1">
-                    <UserCheck className="w-3 h-3" />
-                    <span>Circle</span>
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <UserPlus className="w-3 h-3" />
-                    <span>Admit</span>
-                  </span>
-                )}
-              </button>
-            </div>
-          ))}
+                <button
+                  onClick={() => handleToggle(c.id)}
+                  className={`px-3 py-1 rounded-full text-[11px] font-sans font-medium transition-all border shrink-0 cursor-pointer ${
+                    isFollowing
+                      ? 'bg-[#181B22] text-zinc-300 border-white/10 hover:border-white/20'
+                      : 'bg-white hover:bg-zinc-200 text-black border-transparent'
+                  }`}
+                >
+                  {isFollowing ? (
+                    <span className="flex items-center gap-1">
+                      <UserCheck className="w-3 h-3" />
+                      <span>Circle</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <UserPlus className="w-3 h-3" />
+                      <span>Admit</span>
+                    </span>
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
 

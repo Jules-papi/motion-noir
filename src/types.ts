@@ -6,6 +6,7 @@ export interface UserProfile {
   id: string;
   name: string;
   username: string;
+  isGuest?: boolean;
   avatar: string;
   coverImage: string;
   bio: string;

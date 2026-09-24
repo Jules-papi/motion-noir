@@ -11,8 +11,10 @@ import {
   Upload,
   Eye,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
+import { noirApi } from '../services/noirApi';
 
 interface CreatePostModalProps {
   currentUser: UserProfile;
@@ -37,6 +39,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [unlockPrice, setUnlockPrice] = useState<number>(50);
   const [isSensitive, setIsSensitive] = useState(false);
   const [hasFaceMask, setHasFaceMask] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -50,7 +53,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -62,6 +65,18 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       }
     };
     reader.readAsDataURL(file);
+
+    try {
+      setIsUploading(true);
+      const cloudUrl = await noirApi.uploadImage(file, 'dispatches');
+      if (cloudUrl) {
+        setMediaUrl(cloudUrl);
+      }
+    } catch (err) {
+      console.warn('Storage upload fallback:', err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const samplePhotos = [
@@ -205,11 +220,21 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   </label>
                   <button
                     type="button"
+                    disabled={isUploading}
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-xs text-[#E5C590] hover:text-[#d9b880] flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10 transition-colors"
+                    className="text-xs text-[#E5C590] hover:text-[#d9b880] flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10 transition-colors disabled:opacity-50"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload from Device</span>
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload from Device</span>
+                      </>
+                    )}
                   </button>
                   <input
                     ref={fileInputRef}

@@ -10,8 +10,11 @@ import { EmptyState } from './EmptyState';
 import { 
   Grid, 
   List, 
-  Check
+  Check,
+  Upload,
+  Loader2
 } from 'lucide-react';
+import { noirApi } from '../services/noirApi';
 
 interface ProfileProps {
   user: UserProfile;
@@ -63,6 +66,31 @@ export const Profile: React.FC<ProfileProps> = ({
   const [editGender, setEditGender] = useState(user.gender || 'Woman');
   const [editOrientation, setEditOrientation] = useState(user.orientation || 'Heterosexual');
   const [editAvatar, setEditAvatar] = useState(user.avatar);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) setEditAvatar(result);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setIsUploadingAvatar(true);
+      const url = await noirApi.uploadImage(file, 'avatars');
+      if (url) {
+        setEditAvatar(url);
+      }
+    } catch (err) {
+      console.warn('Avatar upload fallback:', err);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   React.useEffect(() => {
     if (!isEditingProfile) return;
@@ -218,13 +246,39 @@ export const Profile: React.FC<ProfileProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono text-zinc-400 mb-1">Avatar Image URL</label>
-                <input
-                  type="text"
-                  value={editAvatar}
-                  onChange={e => setEditAvatar(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#181B22] border border-white/[0.08] text-white outline-none focus:border-[#E5C590]/50"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-mono text-zinc-400">Avatar Image</label>
+                  <label className="text-xs text-[#E5C590] hover:text-[#d9b880] flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full border border-white/10 transition-colors">
+                    {isUploadingAvatar ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload Photo</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={isUploadingAvatar}
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <img src={editAvatar} alt="Avatar Preview" className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0 bg-[#121419]" />
+                  <input
+                    type="text"
+                    value={editAvatar}
+                    onChange={e => setEditAvatar(e.target.value)}
+                    placeholder="or paste image URL..."
+                    className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-[#181B22] border border-white/[0.08] text-white outline-none focus:border-[#E5C590]/50"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 border-t border-white/[0.08] flex items-center justify-end gap-2.5">

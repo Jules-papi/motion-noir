@@ -21,8 +21,10 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
         isOpen={p.isAuthOpen}
         onClose={() => p.setIsAuthOpen(false)}
         onAuthSuccess={(user) => {
-          p.setCurrentUser(user);
+          p.setCurrentUser({ ...user, isGuest: false });
           p.setIsAuthOpen(false);
+          noirApi.getFollowingIds(user.id).then(f => p.setFollowingIds(f));
+          noirApi.getPosts(user.id).then(posts => p.setPosts(posts));
         }}
         onToast={(msg) => p.showToast(msg.text, msg.type)}
       />
@@ -58,6 +60,11 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
         onClose={() => p.setSelectedCommentsPost(null)}
         currentUser={p.currentUser}
         onAddComment={async (postId, text) => {
+          if (p.currentUser.isGuest) {
+            p.showToast('Yorum yapmak için lütfen giriş yapın veya üye olun.', 'info');
+            p.setIsAuthOpen(true);
+            return;
+          }
           try {
             const added = await noirApi.addComment(postId, p.currentUser.id, text);
             if (added) {
@@ -66,7 +73,7 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
                 commentsCount: post.commentsCount + 1,
                 comments: [...(post.comments || []), added],
               } : post));
-              p.showToast('Your comment was preserved in the salon records.', 'success');
+              p.showToast('Yorumunuz salona iletildi.', 'success');
             }
           } catch (err) {
             console.error('Error adding comment:', err);
