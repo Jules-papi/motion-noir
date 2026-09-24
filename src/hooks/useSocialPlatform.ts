@@ -39,8 +39,8 @@ const DEFAULT_GUEST_PATRON: UserProfile = {
 };
 
 export function useSocialPlatform() {
-  // Navigation & UI state
-  const [currentView, setCurrentView] = useState<ActiveViewType>('feed');
+  // Navigation & UI state: Defaults to portal landing page for visitors / guests
+  const [currentView, setCurrentView] = useState<ActiveViewType>('home');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'info' | 'error' } | null>(null);
 

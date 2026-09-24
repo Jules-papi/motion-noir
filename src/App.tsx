@@ -8,6 +8,7 @@ import { Feed } from './components/Feed';
 import { Profile } from './components/Profile';
 import { ChatView } from './components/ChatView';
 import { DiscoveryView } from './components/DiscoveryView';
+import { GuestLandingView } from './components/GuestLandingView';
 import { AppModals } from './components/AppModals';
 import { PrototypeBanner } from './components/PrototypeBanner';
 import { Post, ChatMessage } from './types';
@@ -151,6 +152,15 @@ export function App() {
         />
 
         <main className="flex-1 min-w-0 p-3 sm:p-5 pb-24 md:pb-8">
+          {/* Guest Portal Landing View (Hero, Infographic, Categories Grid, Ethos, FAQ, Imprint) */}
+          {p.currentView === 'home' && (
+            <GuestLandingView
+              onNavigate={p.setCurrentView}
+              onOpenAuth={() => p.setIsAuthOpen(true)}
+              totalMembersCount={14200}
+            />
+          )}
+
           {/* V1: The Gazette Feed */}
           {p.currentView === 'feed' && (
             <Feed
@@ -255,31 +265,33 @@ export function App() {
           )}
         </main>
 
-        <RightBar
-          walletBalance={p.walletBalance}
-          isUserSubscribed={p.effectiveIsSubscribed}
-          currentUser={p.currentUser}
-          followingIds={p.followingIds}
-          suggestedProfiles={p.discoveryProfiles}
-          onFollow={p.handleFollow}
-          onOpenWallet={() => p.setIsWalletOpen(true)}
-          onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
-          onNavigateToProfile={(userId) => {
-            if (userId && userId !== p.currentUser.id) {
-              const target = p.discoveryProfiles.find(x => x.id === userId);
-              if (target) {
-                p.handleStartConversationWithProfile(target);
-                return;
+        {p.currentView !== 'home' && (
+          <RightBar
+            walletBalance={p.walletBalance}
+            isUserSubscribed={p.effectiveIsSubscribed}
+            currentUser={p.currentUser}
+            followingIds={p.followingIds}
+            suggestedProfiles={p.discoveryProfiles}
+            onFollow={p.handleFollow}
+            onOpenWallet={() => p.setIsWalletOpen(true)}
+            onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
+            onNavigateToProfile={(userId) => {
+              if (userId && userId !== p.currentUser.id) {
+                const target = p.discoveryProfiles.find(x => x.id === userId);
+                if (target) {
+                  p.handleStartConversationWithProfile(target);
+                  return;
+                }
               }
-            }
-            p.setCurrentView('profile');
-          }}
-          onTopicClick={(tag) => {
-            setSearchQuery(tag);
-            p.setCurrentView('feed');
-            p.showToast(`Exploring #${tag} dispatches.`, 'info');
-          }}
-        />
+              p.setCurrentView('profile');
+            }}
+            onTopicClick={(tag) => {
+              setSearchQuery(tag);
+              p.setCurrentView('feed');
+              p.showToast(`Exploring #${tag} dispatches.`, 'info');
+            }}
+          />
+        )}
       </div>
 
       {/* Floating Toast Notification */}

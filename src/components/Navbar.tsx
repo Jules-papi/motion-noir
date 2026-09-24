@@ -75,20 +75,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo and Brand */}
         <div 
-          onClick={() => onNavigate('feed')}
+          onClick={() => onNavigate('home')}
           className="flex items-center gap-3 cursor-pointer select-none group shrink-0"
         >
-          <div className="w-8 h-8 rounded-full bg-[#121419] border border-[#E5C590]/40 flex items-center justify-center text-[#E5C590] shadow-xs group-hover:border-[#E5C590] transition-colors">
-            <span className="font-serif font-bold text-sm tracking-tighter">MN</span>
-          </div>
-          <div className="hidden sm:block">
-            <span className="font-serif text-lg tracking-wider text-[#F3F4F6] block leading-none">
-              MAISON NOIR
-            </span>
-            <span className="text-[9px] tracking-widest text-[#E5C590]/80 uppercase block font-sans">
-              Société Privée · Paris & Amsterdam
-            </span>
-          </div>
+          <img 
+            src="/major-club-logo.png" 
+            alt="MAJOR CLUB" 
+            className="h-9 sm:h-11 w-auto object-contain drop-shadow-[0_4px_12px_rgba(229,197,144,0.25)] hover:scale-105 transition-transform" 
+          />
         </div>
 
         {/* Global Search Bar */}
@@ -225,6 +219,19 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="border-t border-white/[0.05] bg-[#0c0d12]/90">
         <div className="max-w-7xl mx-auto px-4 h-11 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
           <nav className="flex items-center gap-1 sm:gap-2">
+            {/* Portal / Anasayfa */}
+            <button
+              onClick={() => onNavigate('home')}
+              className={`px-3 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentView === 'home'
+                  ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <span>Portal</span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">(Giriş)</span>
+            </button>
+
             {/* The Gazette (Akış) */}
             <button
               onClick={() => onNavigate('feed')}
