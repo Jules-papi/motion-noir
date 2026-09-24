@@ -324,7 +324,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Access Badges (Right side of Tier 2) */}
           <div className="hidden lg:flex items-center gap-3 text-xs font-sans text-zinc-400 shrink-0">
-            <span className="text-[11px] text-zinc-500">Maison Chapters:</span>
+            <span className="text-[11px] text-zinc-500">Club Chapters:</span>
             <span className="text-zinc-300 hover:text-[#E5C590] cursor-pointer transition-colors">Paris 🇫🇷</span>
             <span className="text-zinc-500">·</span>
             <span className="text-zinc-300 hover:text-[#E5C590] cursor-pointer transition-colors">Amsterdam 🇳🇱</span>
