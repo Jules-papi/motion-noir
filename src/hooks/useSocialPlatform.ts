@@ -98,6 +98,7 @@ export function useSocialPlatform() {
           distanceKm: Math.floor(2 + Math.random() * 8),
           isOnline: true,
           isVerified: p.isVerified,
+          isPrivate: p.isPrivate,
           membershipTier: p.membershipTier,
           interests: ['Art', 'Noir', 'Private Salons'],
           matchRate: 92,

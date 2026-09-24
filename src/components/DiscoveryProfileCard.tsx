@@ -6,7 +6,8 @@ import {
   Check, 
   Crown, 
   Users, 
-  ArrowUpRight
+  ArrowUpRight,
+  Lock
 } from 'lucide-react';
 import { DiscoveryProfile } from '../types';
 
@@ -18,6 +19,7 @@ interface DiscoveryProfileCardProps {
   onStartChat: (profile: DiscoveryProfile) => void;
   onOpenInterestModal: (profile: DiscoveryProfile) => void;
   onLikeProfile: (profile: DiscoveryProfile) => void;
+  onViewProfile?: (userId: string) => void;
 }
 
 export const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
@@ -26,6 +28,7 @@ export const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   onStartChat,
   onOpenInterestModal,
   onLikeProfile,
+  onViewProfile,
 }) => {
   const isCouple = profile.gender === 'couple_mf';
 
@@ -36,7 +39,7 @@ export const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
        ---------------------------------------------------- */
     return (
       <div 
-        onClick={() => onOpenInterestModal(profile)}
+        onClick={() => onViewProfile ? onViewProfile(profile.id) : onOpenInterestModal(profile)}
         className="group relative rounded-2xl overflow-hidden bg-[#121419] border border-white/[0.08] hover:border-white/20 transition-all duration-300 flex flex-col cursor-pointer shadow-xl"
       >
         {/* Dominant Duo Photography */}
@@ -147,7 +150,7 @@ export const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
      ---------------------------------------------------- */
   return (
     <div 
-      onClick={() => onOpenInterestModal(profile)}
+      onClick={() => onViewProfile ? onViewProfile(profile.id) : onOpenInterestModal(profile)}
       className="group relative rounded-2xl overflow-hidden bg-[#121419] border border-white/[0.08] hover:border-white/20 transition-all duration-300 flex flex-col cursor-pointer shadow-xl"
     >
       {/* Dominant Portrait Photography */}
@@ -163,16 +166,25 @@ export const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
 
         {/* Discreet Top Badges */}
         <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
-          {profile.isOnline ? (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-sans text-white">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>In Salon</span>
-            </div>
-          ) : (
-            <div className="text-[10px] font-sans text-zinc-400 px-3 py-1 rounded-full bg-black/50 backdrop-blur-xs border border-white/5">
-              Attested
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {profile.isOnline ? (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-sans text-white">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>In Salon</span>
+              </div>
+            ) : (
+              <div className="text-[10px] font-sans text-zinc-400 px-3 py-1 rounded-full bg-black/50 backdrop-blur-xs border border-white/5">
+                Attested
+              </div>
+            )}
+
+            {profile.isPrivate && (
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-500/30 text-[10px] font-sans text-amber-300">
+                <Lock className="w-3 h-3" />
+                <span>Gizli</span>
+              </div>
+            )}
+          </div>
 
           {profile.membershipTier === 'vip' && (
             <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#181B22]/90 backdrop-blur-md border border-[#E5C590]/30 text-[10px] font-sans text-[#E5C590] uppercase tracking-wider">

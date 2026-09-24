@@ -16,7 +16,11 @@ import {
   Sliders,
   Crown,
   Lock,
-  Upload
+  Upload,
+  Navigation,
+  Search,
+  Loader2,
+  Compass
 } from 'lucide-react';
 import { noirApi } from '../services/noirApi';
 
@@ -57,10 +61,20 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const [aspectRatio, setAspectRatio] = useState<'4/5' | '1/1'>('4/5');
   const [selectedFilter, setSelectedFilter] = useState<FilterPreset>(FILTER_PRESETS[0]);
 
-  // Media & Form State
+  // Media & Form State - REAL DEVICE PHOTOS ONLY
   const [capturedImage, setCapturedImage] = useState<string>('');
+  const [devicePhotos, setDevicePhotos] = useState<string[]>([]);
   const [caption, setCaption] = useState<string>('');
+  
+  // Free OpenStreetMap Geocoding & GPS Location State
   const [selectedLocation, setSelectedLocation] = useState<string>('Amsterdam Chapter');
+  const [locationCoords, setLocationCoords] = useState<{ lat: number; lon: number } | null>({ lat: 52.3676, lon: 4.9041 });
+  const [isLocating, setIsLocating] = useState<boolean>(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState<string>('');
+  const [isSearchingLocation, setIsSearchingLocation] = useState<boolean>(false);
+  const [locationSuggestions, setLocationSuggestions] = useState<{ displayName: string; lat: number; lon: number }[]>([]);
+  const [showLocationSearch, setShowLocationSearch] = useState<boolean>(false);
+
   const [privacyTier, setPrivacyTier] = useState<'public' | 'verified' | 'vip'>('public');
   const [hasFaceMask, setHasFaceMask] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -74,16 +88,6 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Sample curated plates for quick selection
-  const curatedPlates = [
-    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&auto=format&fit=crop&q=80',
-  ];
 
   // Stop camera tracks cleanly
   const stopCamera = () => {
@@ -177,7 +181,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   };
 
-  // File Upload from device storage/gallery
+  // File Upload from user's real device gallery
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -187,10 +191,82 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       const result = event.target?.result as string;
       if (result) {
         setCapturedImage(result);
+        setDevicePhotos(prev => [result, ...prev.filter(item => item !== result)]);
         stopCamera();
       }
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Free OpenStreetMap GPS Reverse Geocoding
+  const handleDetectCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      alert('Tarayıcınız konum servisini desteklemiyor.');
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          setLocationCoords({ lat: latitude, lon: longitude });
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const addr = data.address || {};
+            const locality = addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || addr.city || addr.town || 'Mevcut Konum';
+            const city = addr.city || addr.province || addr.state || '';
+            const country = addr.country || '';
+            const formatted = [locality, city, country].filter(Boolean).join(', ');
+            setSelectedLocation(formatted || `GPS (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`);
+          } else {
+            setSelectedLocation(`GPS (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`);
+          }
+        } catch (err) {
+          console.warn('Geolocation reverse geocode fallback:', err);
+          setSelectedLocation('Mevcut Konum (GPS)');
+        } finally {
+          setIsLocating(false);
+          setShowLocationSearch(false);
+        }
+      },
+      (err) => {
+        console.warn('Geolocation error:', err);
+        setIsLocating(false);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
+
+  // Free OpenStreetMap Realtime Location Search
+  const handleSearchLocations = async (query: string) => {
+    setLocationSearchQuery(query);
+    if (!query.trim() || query.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
+    setIsSearchingLocation(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
+      );
+      if (response.ok) {
+        const results = await response.json();
+        const mapped = results.map((item: any) => ({
+          displayName: item.display_name,
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+        }));
+        setLocationSuggestions(mapped);
+      }
+    } catch (err) {
+      console.warn('Location search error:', err);
+    } finally {
+      setIsSearchingLocation(false);
+    }
   };
 
   // Mode Switcher effect
@@ -214,8 +290,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     if (isOpen) {
       setStep('media');
       setMode('gallery');
-      if (!capturedImage) {
-        setCapturedImage(curatedPlates[0]);
+      if (!capturedImage && devicePhotos.length > 0) {
+        setCapturedImage(devicePhotos[0]);
       }
     }
   }, [isOpen]);
@@ -385,39 +461,60 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   )}
                 </div>
               ) : (
-                /* CAPTURED / SELECTED PHOTO PREVIEW */
-                <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${
-                  aspectRatio === '4/5' ? 'aspect-[4/5]' : 'aspect-square'
-                }`}>
-                  <img
-                    src={capturedImage}
-                    alt="Preview"
-                    style={{ filter: selectedFilter.css }}
-                    className="w-full h-full object-cover transition-all duration-300"
-                  />
+                /* CAPTURED / SELECTED PHOTO PREVIEW OR GALLERY PROMPT */
+                capturedImage ? (
+                  <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${
+                    aspectRatio === '4/5' ? 'aspect-[4/5]' : 'aspect-square'
+                  }`}>
+                    <img
+                      src={capturedImage}
+                      alt="Preview"
+                      style={{ filter: selectedFilter.css }}
+                      className="w-full h-full object-cover transition-all duration-300"
+                    />
 
-                  {/* Aspect Ratio Toggle (1:1 / 4:5) */}
-                  <button
-                    onClick={() => setAspectRatio(prev => prev === '4/5' ? '1/1' : '4/5')}
-                    className="absolute bottom-4 left-4 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-mono border border-white/15 hover:bg-black/80 transition-colors cursor-pointer"
-                  >
-                    {aspectRatio === '4/5' ? '4:5 Portre' : '1:1 Kare'}
-                  </button>
-
-                  {/* Retake Camera photo button */}
-                  {mode === 'camera' && (
+                    {/* Aspect Ratio Toggle (1:1 / 4:5) */}
                     <button
-                      onClick={() => {
-                        setCapturedImage('');
-                        startCamera();
-                      }}
-                      className="absolute bottom-4 right-4 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-sans border border-white/15 hover:bg-black/80 flex items-center gap-1.5 cursor-pointer"
+                      onClick={() => setAspectRatio(prev => prev === '4/5' ? '1/1' : '4/5')}
+                      className="absolute bottom-4 left-4 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-mono border border-white/15 hover:bg-black/80 transition-colors cursor-pointer"
                     >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>Tekrar Çek</span>
+                      {aspectRatio === '4/5' ? '4:5 Portre' : '1:1 Kare'}
                     </button>
-                  )}
-                </div>
+
+                    {/* Retake Camera photo button */}
+                    {mode === 'camera' && (
+                      <button
+                        onClick={() => {
+                          setCapturedImage('');
+                          startCamera();
+                        }}
+                        className="absolute bottom-4 right-4 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-sans border border-white/15 hover:bg-black/80 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Tekrar Çek</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center p-8 text-center cursor-pointer group hover:bg-white/[0.02] rounded-3xl transition-all"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/15 group-hover:border-[#E5C590] flex items-center justify-center text-[#E5C590] mb-3 group-hover:scale-105 transition-all shadow-xl">
+                      <ImageIcon className="w-8 h-8 stroke-[1.5]" />
+                    </div>
+                    <h3 className="text-white font-medium text-sm font-sans mb-1">
+                      Cihazınızın Galerisini Açın
+                    </h3>
+                    <p className="text-xs text-zinc-400 max-w-xs font-sans mb-4">
+                      Telefonunuzdaki albümlerden veya bilgisayarınızdan doğrudan bir görsel seçin.
+                    </p>
+                    <span className="px-5 py-2 rounded-full bg-white text-black font-semibold text-xs group-hover:bg-zinc-200 transition-colors shadow-md flex items-center gap-1.5">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Galeriden Seç</span>
+                    </span>
+                  </div>
+                )
               )}
             </div>
 
@@ -434,12 +531,19 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   <div className={`w-12 h-12 rounded-xl overflow-hidden border-2 ${
                     selectedFilter.id === f.id ? 'border-[#E5C590]' : 'border-white/10'
                   }`}>
-                    <img
-                      src={capturedImage || curatedPlates[0]}
-                      alt={f.name}
-                      style={{ filter: f.css }}
-                      className="w-full h-full object-cover"
-                    />
+                    {capturedImage ? (
+                      <img
+                        src={capturedImage}
+                        alt={f.name}
+                        style={{ filter: f.css }}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div 
+                        style={{ filter: f.css }}
+                        className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900" 
+                      />
+                    )}
                   </div>
                   <span className={`text-[10px] font-sans ${
                     selectedFilter.id === f.id ? 'text-[#E5C590] font-semibold' : 'text-zinc-400'
@@ -485,9 +589,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <div className="flex-1 p-3 overflow-y-auto">
                 <div className="grid grid-cols-4 gap-2">
                   {/* Upload from Device Button */}
-                  <label className="aspect-square rounded-xl bg-white/[0.04] border border-dashed border-white/20 hover:border-[#E5C590]/50 flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white cursor-pointer transition-colors">
-                    <Upload className="w-4 h-4 text-[#E5C590]" />
-                    <span className="text-[10px] font-sans">Yükle</span>
+                  <label className="aspect-square rounded-xl bg-white/[0.04] border border-dashed border-white/20 hover:border-[#E5C590]/50 flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white cursor-pointer transition-colors group">
+                    <Upload className="w-4 h-4 text-[#E5C590] group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] font-sans">Fotoğraf Seç</span>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -497,19 +601,19 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     />
                   </label>
 
-                  {/* Sample Curated Plates */}
-                  {curatedPlates.map((url, index) => (
+                  {/* Real Device Uploaded Photos in Session */}
+                  {devicePhotos.map((url, index) => (
                     <div
                       key={index}
                       onClick={() => {
                         setCapturedImage(url);
                         stopCamera();
                       }}
-                      className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border ${
-                        capturedImage === url ? 'border-[#E5C590] ring-2 ring-[#E5C590]/30' : 'border-transparent'
+                      className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border transition-all ${
+                        capturedImage === url ? 'border-[#E5C590] ring-2 ring-[#E5C590]/30' : 'border-transparent hover:border-white/20'
                       }`}
                     >
-                      <img src={url} alt={`Option ${index}`} className="w-full h-full object-cover" />
+                      <img src={url} alt={`Device Photo ${index}`} className="w-full h-full object-cover" />
                       {capturedImage === url && (
                         <div className="absolute inset-0 bg-[#E5C590]/20 flex items-center justify-center">
                           <Check className="w-4 h-4 text-white drop-shadow-md" />
@@ -517,6 +621,18 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       )}
                     </div>
                   ))}
+
+                  {devicePhotos.length === 0 && (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="col-span-3 aspect-auto rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 flex items-center gap-3 cursor-pointer hover:bg-white/[0.04] transition-colors"
+                    >
+                      <Compass className="w-5 h-5 text-zinc-500 shrink-0" />
+                      <p className="text-[11px] text-zinc-400 font-sans leading-tight">
+                        Cihazınızdaki fotoğraflardan birini seçmek için sol taraftaki <span className="text-[#E5C590] font-medium">Fotoğraf Seç</span> butonuna tıklayın.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -550,25 +666,160 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               </div>
             </div>
 
-            {/* Location Selector */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-sans text-zinc-400">
-                <MapPin className="w-3.5 h-3.5 text-[#E5C590]" />
-                <span>Konum Ekle</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {['Amsterdam Chapter', 'Paris Le Marais', 'İstanbul Bebek', 'Rotterdam Chapter'].map((loc) => (
+            {/* Free OpenStreetMap & GPS Location Selector */}
+            <div className="space-y-3 p-3.5 rounded-2xl bg-[#121419] border border-white/[0.08]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-sans text-zinc-300">
+                  <MapPin className="w-3.5 h-3.5 text-[#E5C590]" />
+                  <span className="font-medium">Konum Ekle</span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-500/20">
+                    Ücretsiz Harita & GPS
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
                   <button
-                    key={loc}
                     type="button"
-                    onClick={() => setSelectedLocation(loc)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-sans transition-all cursor-pointer ${
-                      selectedLocation === loc
-                        ? 'bg-[#E5C590] text-black font-semibold'
-                        : 'bg-[#14161C] text-zinc-400 border border-white/10 hover:text-white'
+                    onClick={handleDetectCurrentLocation}
+                    disabled={isLocating}
+                    className="px-2.5 py-1 rounded-full text-[11px] font-sans bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Cihaz GPS Konumunu Al"
+                  >
+                    {isLocating ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin text-[#E5C590]" />
+                        <span>Bulunuyor...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Navigation className="w-3 h-3 text-[#E5C590]" />
+                        <span>Mevcut Konumum</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationSearch(!showLocationSearch)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-sans border transition-colors cursor-pointer flex items-center gap-1 ${
+                      showLocationSearch 
+                        ? 'bg-[#E5C590] text-black border-[#E5C590] font-medium'
+                        : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 border-white/10'
                     }`}
                   >
-                    {loc}
+                    <Search className="w-3 h-3" />
+                    <span>Ara</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Realtime OpenStreetMap Search Input */}
+              {showLocationSearch && (
+                <div className="space-y-2 pt-1 animate-in fade-in duration-150">
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={locationSearchQuery}
+                      onChange={(e) => handleSearchLocations(e.target.value)}
+                      placeholder="Şehir, ilçe veya mekan ara (örn: Kadıköy, Bebek, Amsterdam, Berlin)..."
+                      className="w-full pl-8.5 pr-8 py-2 rounded-xl bg-[#181B22] border border-white/15 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#E5C590]/50 font-sans"
+                    />
+                    {isSearchingLocation && (
+                      <Loader2 className="w-3.5 h-3.5 text-[#E5C590] animate-spin absolute right-3 top-1/2 -translate-y-1/2" />
+                    )}
+                  </div>
+
+                  {/* Suggestions Dropdown */}
+                  {locationSuggestions.length > 0 && (
+                    <div className="rounded-xl bg-[#181B22] border border-white/15 overflow-hidden shadow-2xl divide-y divide-white/[0.06] max-h-40 overflow-y-auto">
+                      {locationSuggestions.map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setSelectedLocation(item.displayName.split(',').slice(0, 3).join(', '));
+                            setLocationCoords({ lat: item.lat, lon: item.lon });
+                            setLocationSuggestions([]);
+                            setShowLocationSearch(false);
+                          }}
+                          className="p-2.5 hover:bg-white/[0.06] text-xs text-zinc-300 hover:text-white flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-[#E5C590] shrink-0" />
+                          <span className="truncate">{item.displayName}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Active Location Display */}
+              {selectedLocation && (
+                <div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
+                    <span className="text-xs text-white font-sans truncate font-medium">
+                      {selectedLocation}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedLocation('');
+                      setLocationCoords(null);
+                    }}
+                    className="p-1 rounded-full text-zinc-400 hover:text-rose-400 hover:bg-white/10 transition-colors cursor-pointer"
+                    title="Konumu Kaldır"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* OpenStreetMap Live Interactive Preview */}
+              {locationCoords && (
+                <div className="w-full h-24 rounded-xl overflow-hidden border border-white/10 relative shadow-inner">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    scrolling="no"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${locationCoords.lon - 0.012}%2C${locationCoords.lat - 0.012}%2C${locationCoords.lon + 0.012}%2C${locationCoords.lat + 0.012}&layer=mapnik&marker=${locationCoords.lat}%2C${locationCoords.lon}`}
+                    className="w-full h-full opacity-80 filter contrast-125"
+                    title="OpenStreetMap"
+                  />
+                  <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md text-[9px] font-mono text-[#E5C590] border border-white/10 pointer-events-none flex items-center gap-1">
+                    <Compass className="w-2.5 h-2.5" />
+                    <span>OpenStreetMap</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Presets Strip */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-white/[0.04]">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase mr-1">Popüler:</span>
+                {[
+                  { name: 'Amsterdam', coords: { lat: 52.3676, lon: 4.9041 } },
+                  { name: 'Paris Le Marais', coords: { lat: 48.8566, lon: 2.3522 } },
+                  { name: 'İstanbul Bebek', coords: { lat: 41.0766, lon: 29.0433 } },
+                  { name: 'Berlin Mitte', coords: { lat: 52.5200, lon: 13.4050 } },
+                  { name: 'Rotterdam', coords: { lat: 51.9244, lon: 4.4777 } },
+                  { name: 'London Soho', coords: { lat: 51.5136, lon: -0.1365 } },
+                ].map((item) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => {
+                      setSelectedLocation(item.name);
+                      setLocationCoords(item.coords);
+                    }}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-sans transition-all cursor-pointer ${
+                      selectedLocation === item.name
+                        ? 'bg-[#E5C590] text-black font-semibold shadow-xs'
+                        : 'bg-[#181B22] text-zinc-400 border border-white/[0.06] hover:text-white hover:border-white/20'
+                    }`}
+                  >
+                    {item.name}
                   </button>
                 ))}
               </div>

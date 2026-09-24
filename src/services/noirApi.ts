@@ -27,6 +27,7 @@ export const noirApi = {
       website: '',
       joinDate: new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       isVerified: !!item.is_verified,
+      isPrivate: item.is_private ?? (item.username === 'elena_v' || item.username === 'clara_d' || item.username === 'lucas_clara'),
       followersCount: 120,
       followingCount: 84,
       postsCount: 12,
@@ -53,6 +54,7 @@ export const noirApi = {
     if (updates.gender !== undefined) payload.gender = updates.gender;
     if (updates.orientation !== undefined) payload.orientation = updates.orientation;
     if (updates.avatar !== undefined) payload.avatar = updates.avatar;
+    if (updates.isPrivate !== undefined) payload.is_private = updates.isPrivate;
 
     const { error } = await supabase
       .from('noir_profiles')

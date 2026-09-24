@@ -14,6 +14,7 @@ export interface UserProfile {
   website: string;
   joinDate: string;
   isVerified: boolean;
+  isPrivate?: boolean;
   followersCount: number;
   followingCount: number;
   postsCount: number;
@@ -274,6 +275,7 @@ export interface DiscoveryProfile {
   distanceKm: number;
   isOnline: boolean;
   isVerified: boolean;
+  isPrivate?: boolean;
   membershipTier: MembershipTier;
   interests: string[];
   matchRate: number; // percentage e.g. 94%

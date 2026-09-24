@@ -20,6 +20,85 @@ export function App() {
   const [language, setLanguage] = useState<SupportedLanguage>('en');
   const [currency, setCurrency] = useState<SupportedCurrency>('EUR');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewingProfileUser, setViewingProfileUser] = useState<UserProfile | null>(null);
+
+  // Unified Profile Navigation Handler: Supports visitors browsing any member
+  const handleViewProfile = (userId: string) => {
+    // If clicking own profile and logged in
+    if (!p.currentUser.isGuest && userId === p.currentUser.id) {
+      setViewingProfileUser(null);
+      p.setCurrentView('profile');
+      return;
+    }
+
+    // 1. Look in discovery profiles
+    const disc = p.discoveryProfiles.find(d => d.id === userId);
+    if (disc) {
+      setViewingProfileUser({
+        id: disc.id,
+        name: disc.name,
+        username: disc.username,
+        avatar: disc.avatar,
+        coverImage: disc.coverImage || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
+        bio: disc.bio,
+        location: disc.city,
+        website: '',
+        joinDate: '2025',
+        isVerified: disc.isVerified,
+        isPrivate: disc.isPrivate,
+        followersCount: 128,
+        followingCount: 64,
+        postsCount: p.posts.filter(item => item.author.id === disc.id).length,
+        totalLikes: 350,
+        subscriptionPrice: 0,
+        membershipTier: disc.membershipTier,
+        isSubscribed: false,
+        isFollowing: p.followingIds.includes(disc.id),
+        age: disc.age,
+        gender: disc.gender,
+        orientation: 'Hetero / Bi-Curious',
+      });
+      p.setCurrentView('profile');
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // 2. Look in posts author
+    const postWithAuthor = p.posts.find(item => item.author.id === userId);
+    if (postWithAuthor) {
+      setViewingProfileUser({
+        id: postWithAuthor.author.id,
+        name: postWithAuthor.author.name,
+        username: postWithAuthor.author.username,
+        avatar: postWithAuthor.author.avatar,
+        coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
+        bio: `${postWithAuthor.author.name} is a patron of Major Club.`,
+        location: 'Amsterdam Chapter',
+        website: '',
+        joinDate: '2025',
+        isVerified: !!postWithAuthor.author.isVerified,
+        isPrivate: false,
+        followersCount: 140,
+        followingCount: 75,
+        postsCount: p.posts.filter(item => item.author.id === userId).length,
+        totalLikes: 420,
+        subscriptionPrice: 0,
+        membershipTier: 'standard',
+        isSubscribed: false,
+        isFollowing: p.followingIds.includes(userId),
+        age: 28,
+        gender: 'Individual',
+        orientation: 'Hetero / Bi-Curious',
+      });
+      p.setCurrentView('profile');
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Fallback
+    setViewingProfileUser(null);
+    p.setCurrentView('profile');
+  };
 
   // Scroll Reset strictly on primary navigation page change
   useEffect(() => {
@@ -119,7 +198,10 @@ export function App() {
         onOpenNotifications={() => p.setIsNotificationsOpen(true)}
         onOpenAuth={() => p.setIsAuthOpen(true)}
         onLogout={p.handleLogout}
-        onNavigate={p.setCurrentView}
+        onNavigate={(view) => {
+          if (view === 'profile') setViewingProfileUser(null);
+          p.setCurrentView(view);
+        }}
         isDarkMode={p.isDarkMode}
         onToggleDarkMode={() => p.setIsDarkMode(!p.isDarkMode)}
       />
@@ -128,7 +210,10 @@ export function App() {
       <div className="max-w-7xl mx-auto flex">
         <Sidebar
           currentView={p.currentView}
-          onNavigate={p.setCurrentView}
+          onNavigate={(view) => {
+            if (view === 'profile') setViewingProfileUser(null);
+            p.setCurrentView(view);
+          }}
           currentUser={p.currentUser}
           walletBalance={p.walletBalance}
           isUserSubscribed={p.effectiveIsSubscribed}
@@ -155,7 +240,10 @@ export function App() {
           {/* Guest Portal Landing View (Hero, Infographic, Categories Grid, Ethos, FAQ, Imprint) */}
           {p.currentView === 'home' && (
             <GuestLandingView
-              onNavigate={p.setCurrentView}
+              onNavigate={(view) => {
+                if (view === 'profile') setViewingProfileUser(null);
+                p.setCurrentView(view);
+              }}
               onOpenAuth={() => p.setIsAuthOpen(true)}
               totalMembersCount={14200}
             />
@@ -183,16 +271,7 @@ export function App() {
                   p.setIsCreatePostOpen(true);
                 }
               }}
-              onNavigateToProfile={(userId) => {
-                if (userId && userId !== p.currentUser.id) {
-                  const target = p.discoveryProfiles.find(x => x.id === userId);
-                  if (target) {
-                    p.handleStartConversationWithProfile(target);
-                    return;
-                  }
-                }
-                p.setCurrentView('profile');
-              }}
+              onNavigateToProfile={(userId) => handleViewProfile(userId)}
               onReportPost={(post) => p.setReportingTarget({ type: 'post', title: post.content, id: post.id })}
               onRefresh={async () => {
                 const fresh = await noirApi.getPosts(p.currentUser.isGuest ? undefined : p.currentUser.id);
@@ -205,10 +284,12 @@ export function App() {
           {/* V1: Member Dossier Profile */}
           {p.currentView === 'profile' && (
             <Profile
-              user={p.currentUser}
-              posts={p.posts.filter(item => item.author.id === p.currentUser.id)}
+              user={viewingProfileUser || p.currentUser}
+              currentUser={p.currentUser}
+              posts={p.posts.filter(item => item.author.id === (viewingProfileUser ? viewingProfileUser.id : p.currentUser.id))}
               walletBalance={p.walletBalance}
               isUserSubscribed={p.effectiveIsSubscribed}
+              isFollowing={viewingProfileUser ? p.followingIds.includes(viewingProfileUser.id) : false}
               onSubscribe={() => p.setIsMembershipModalOpen(true)}
               onOpenWallet={() => p.setIsWalletOpen(true)}
               onOpenCreatePost={() => {
@@ -226,6 +307,31 @@ export function App() {
               onUnlockPPV={() => {}}
               onShare={() => p.showToast('Dossier link copied.', 'success')}
               onToast={(msg) => p.showToast(msg.text, msg.type)}
+              onBack={() => {
+                setViewingProfileUser(null);
+                p.setCurrentView('feed');
+              }}
+              onToggleFollow={(id) => p.handleFollow(id)}
+              onStartChat={(targetUser) => {
+                const discTarget = p.discoveryProfiles.find(d => d.id === targetUser.id) || {
+                  id: targetUser.id,
+                  name: targetUser.name,
+                  username: targetUser.username,
+                  avatar: targetUser.avatar,
+                  bio: targetUser.bio,
+                  age: targetUser.age || 28,
+                  gender: (targetUser.gender as any) || 'woman',
+                  city: targetUser.location || 'Amsterdam',
+                  distanceKm: 4,
+                  isOnline: true,
+                  isVerified: targetUser.isVerified,
+                  membershipTier: targetUser.membershipTier,
+                  interests: [],
+                  matchRate: 90,
+                };
+                p.handleStartConversationWithProfile(discTarget);
+              }}
+              onOpenAuth={() => p.setIsAuthOpen(true)}
               onUpdateUser={async (updated) => {
                 if (p.currentUser.isGuest) {
                   p.showToast('Profili kaydetmek için lütfen giriş yapın veya üye olun.', 'info');
@@ -260,7 +366,7 @@ export function App() {
               onStartChat={(profile) => {
                 p.handleStartConversationWithProfile(profile);
               }}
-              onViewProfile={() => p.setCurrentView('profile')}
+              onViewProfile={(userId) => handleViewProfile(userId)}
             />
           )}
         </main>
@@ -275,16 +381,7 @@ export function App() {
             onFollow={p.handleFollow}
             onOpenWallet={() => p.setIsWalletOpen(true)}
             onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
-            onNavigateToProfile={(userId) => {
-              if (userId && userId !== p.currentUser.id) {
-                const target = p.discoveryProfiles.find(x => x.id === userId);
-                if (target) {
-                  p.handleStartConversationWithProfile(target);
-                  return;
-                }
-              }
-              p.setCurrentView('profile');
-            }}
+            onNavigateToProfile={(userId) => handleViewProfile(userId)}
             onTopicClick={(tag) => {
               setSearchQuery(tag);
               p.setCurrentView('feed');

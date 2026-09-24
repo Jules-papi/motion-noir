@@ -10,7 +10,11 @@ import {
   Check, 
   Sparkles,
   ShieldCheck,
-  Share2
+  Share2,
+  ArrowLeft,
+  Lock,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -18,23 +22,43 @@ interface ProfileHeaderProps {
   user: UserProfile;
   walletBalance: number;
   isUserSubscribed: boolean;
+  isOwnProfile?: boolean;
+  isFollowing?: boolean;
   onSubscribe: () => void;
   onOpenWallet: () => void;
   onOpenCreatePost: () => void;
   onEditProfile?: () => void;
+  onToggleFollow?: () => void;
+  onStartChat?: () => void;
+  onBack?: () => void;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
   walletBalance,
   isUserSubscribed,
+  isOwnProfile = true,
+  isFollowing = false,
   onSubscribe,
   onOpenWallet,
   onOpenCreatePost,
   onEditProfile,
+  onToggleFollow,
+  onStartChat,
+  onBack,
 }) => {
   return (
     <div className="w-full space-y-6">
+      {/* Return to Feed / Directory Navigation Button */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans text-zinc-300 hover:text-white transition-all cursor-pointer group shadow-xs"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+          <span>Geri Dön</span>
+        </button>
+      )}
       {/* 1. CINEMATIC EDITORIAL HERO PHOTOGRAPHY */}
       <div className="relative w-full rounded-2xl overflow-hidden bg-[#121419] border border-white/[0.08] shadow-2xl">
         <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden bg-[#07080A]">
@@ -63,12 +87,18 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="font-serif text-3xl sm:text-4xl text-white font-normal tracking-tight">
                     {user.name}
                   </h1>
                   {user.isVerified && (
                     <Check className="w-4 h-4 text-[#E5C590] shrink-0" />
+                  )}
+                  {user.isPrivate && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[10px] font-mono flex items-center gap-1.5 shadow-xs">
+                      <Lock className="w-3 h-3" />
+                      <span>Gizli Profil</span>
+                    </span>
                   )}
                 </div>
 
@@ -85,23 +115,62 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </div>
             </div>
 
-            {/* Quiet Action Buttons */}
+            {/* Action Buttons: Own Profile vs Visitor View */}
             <div className="flex items-center gap-2.5 flex-wrap">
-              <button
-                onClick={onOpenCreatePost}
-                className="py-2.5 px-5 rounded-full text-xs font-sans bg-[#181B22] hover:bg-[#222631] text-white border border-white/[0.12] hover:border-white/30 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
-              >
-                <Plus className="w-3.5 h-3.5 text-[#E5C590]" />
-                <span>New Dispatch</span>
-              </button>
+              {isOwnProfile ? (
+                <>
+                  <button
+                    onClick={onOpenCreatePost}
+                    className="py-2.5 px-5 rounded-full text-xs font-sans bg-[#181B22] hover:bg-[#222631] text-white border border-white/[0.12] hover:border-white/30 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-[#E5C590]" />
+                    <span>New Dispatch</span>
+                  </button>
 
-              {onEditProfile && (
-                <button
-                  onClick={onEditProfile}
-                  className="py-2.5 px-5 rounded-full text-xs font-sans bg-white hover:bg-zinc-200 text-black font-medium transition-all cursor-pointer shadow-xs"
-                >
-                  Edit Dossier
-                </button>
+                  {onEditProfile && (
+                    <button
+                      onClick={onEditProfile}
+                      className="py-2.5 px-5 rounded-full text-xs font-sans bg-white hover:bg-zinc-200 text-black font-medium transition-all cursor-pointer shadow-xs"
+                    >
+                      Edit Dossier
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {onToggleFollow && (
+                    <button
+                      onClick={onToggleFollow}
+                      className={`py-2.5 px-5 rounded-full text-xs font-sans font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
+                        isFollowing
+                          ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 hover:border-[#E5C590]/60'
+                          : 'bg-white hover:bg-zinc-200 text-black'
+                      }`}
+                    >
+                      {isFollowing ? (
+                        <>
+                          <UserCheck className="w-3.5 h-3.5" />
+                          <span>Çemberde (Takip Ediliyor)</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="w-3.5 h-3.5" />
+                          <span>{user.isPrivate ? 'Takip İsteği Gönder' : 'Takip Et (Admit)'}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {onStartChat && (
+                    <button
+                      onClick={onStartChat}
+                      className="py-2.5 px-4 rounded-full text-xs font-sans bg-[#181B22] hover:bg-[#222631] text-white border border-white/[0.12] hover:border-white/30 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-[#E5C590]" />
+                      <span>Özel Dispatch</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

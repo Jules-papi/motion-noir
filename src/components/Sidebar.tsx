@@ -147,59 +147,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ======================================================== */}
       <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 shrink-0 h-screen sticky top-0 px-5 lg:px-6 py-6 border-r border-white/[0.08] bg-[#07080A] overflow-y-auto no-scrollbar">
         <div className="space-y-6">
-          {/* Major Club Brand Header */}
-          <div 
-            onClick={() => onNavigate('home')}
-            className="cursor-pointer group flex items-center gap-3"
-          >
-            <img 
-              src="/major-club-logo.png" 
-              alt="MAJOR CLUB" 
-              className="h-8 w-auto object-contain hover:scale-105 transition-transform"
-            />
+          {/* PAGE CONTEXT & SECTION HEADER (NO DUPLICATE LOGO OR NAV LINKS) */}
+          <div className="px-1 py-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#E5C590] animate-pulse" />
+              <span className="text-[10px] font-mono tracking-[0.2em] text-[#E5C590] uppercase font-semibold">
+                {currentView === 'feed' && 'The Gazette · Akış'}
+                {currentView === 'discovery' && 'The Registry · Üyeler'}
+                {currentView === 'chat' && 'Dispatches · Salonlar'}
+                {currentView === 'profile' && 'Member Dossier · Profil'}
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1 font-sans">
+              {currentView === 'feed' && 'Topluluğun en güncel dispatch paylaşımları ve görsel akışı.'}
+              {currentView === 'discovery' && 'Doğrulanmış üyeler, çiftler ve ayrıcalıklı patron kataloğu.'}
+              {currentView === 'chat' && 'Uçtan uca şifreli birebir yazışmalar ve özel salonlar.'}
+              {currentView === 'profile' && 'Kişisel dossier, tercihler, mahzen ve gizlilik ayarları.'}
+            </p>
           </div>
 
-          {/* Minimalist Divider */}
           <div className="h-px bg-white/[0.06]" />
-
-          {/* Core Navigation Links */}
-          <nav className="space-y-1">
-            <span className="px-3 pb-1 text-[9px] font-mono tracking-[0.2em] text-zinc-500 uppercase block">
-              Navigasyon
-            </span>
-
-            {navItems.map(item => {
-              const Icon = item.icon;
-              const isActive = currentView === item.id;
-              return (
-                <button
-                  key={item.id}
-                  data-nav-id={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all text-left cursor-pointer group ${
-                    isActive 
-                      ? 'bg-[#181B22] text-[#E5C590] font-medium border border-[#E5C590]/30 shadow-xs' 
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                      isActive ? 'text-[#E5C590]' : 'text-zinc-400 group-hover:text-white'
-                    }`} strokeWidth={1.5} />
-                    <div className="min-w-0">
-                      <span className="block truncate font-sans text-xs">{item.label}</span>
-                    </div>
-                  </div>
-
-                  {Boolean(item.badge && item.badge > 0) && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-[#E5C590]/20 border border-[#E5C590]/30 text-[9px] font-mono text-[#E5C590]">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
 
           {/* PAGE-SPECIFIC IDENTITY MODULE */}
           {currentView === 'feed' && (

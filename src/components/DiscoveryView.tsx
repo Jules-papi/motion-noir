@@ -530,22 +530,28 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
               {filteredProfiles.map(profile => (
                 <div 
                   key={profile.id}
-                  className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] flex items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md"
+                  onClick={() => onViewProfile?.(profile.id)}
+                  className="p-4 rounded-2xl bg-[#121419] border border-white/[0.08] flex items-center justify-between gap-4 hover:border-white/20 transition-all shadow-md cursor-pointer group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <img 
                       src={profile.avatar} 
                       alt={profile.name} 
-                      className="w-14 h-14 rounded-2xl object-cover border border-white/15 shrink-0"
+                      className="w-14 h-14 rounded-2xl object-cover border border-white/15 shrink-0 group-hover:scale-105 transition-transform"
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-serif text-base text-white font-medium truncate">
+                        <h4 className="font-serif text-base text-white font-medium truncate group-hover:text-[#E5C590] transition-colors">
                           {profile.name}
                         </h4>
                         <span className="text-xs font-mono text-zinc-400">· {profile.age}</span>
                         {profile.isVerified && (
                           <ShieldCheck className="w-3.5 h-3.5 text-[#E5C590] shrink-0" />
+                        )}
+                        {profile.isPrivate && (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-mono">
+                            Gizli
+                          </span>
                         )}
                       </div>
                       <div className="text-xs text-zinc-400 font-sans flex items-center gap-2 mt-0.5">
@@ -561,13 +567,19 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
 
                   <div className="flex items-center gap-2 shrink-0">
                     <button
-                      onClick={() => onStartChat(profile)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onStartChat(profile);
+                      }}
                       className="py-2 px-4 rounded-full text-xs font-sans bg-[#181B22] hover:bg-[#222631] text-white border border-white/15 transition-colors cursor-pointer"
                     >
                       Message
                     </button>
                     <button
-                      onClick={() => setInterestModalProfile(profile)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setInterestModalProfile(profile);
+                      }}
                       className="py-2 px-3.5 rounded-full text-xs font-sans bg-white hover:bg-zinc-200 text-black font-medium transition-colors cursor-pointer"
                     >
                       Introduce
@@ -588,6 +600,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
                   onStartChat={onStartChat}
                   onOpenInterestModal={p => setInterestModalProfile(p)}
                   onLikeProfile={handleLikeProfile}
+                  onViewProfile={onViewProfile}
                 />
               ))}
             </div>

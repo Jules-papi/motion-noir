@@ -31,9 +31,11 @@ import { noirApi } from '../services/noirApi';
 
 interface ProfileProps {
   user: UserProfile;
+  currentUser?: UserProfile;
   posts: Post[];
   walletBalance: number;
   isUserSubscribed: boolean;
+  isFollowing?: boolean;
   onSubscribe: () => void;
   onOpenWallet: () => void;
   onOpenCreatePost: () => void;
@@ -46,6 +48,10 @@ interface ProfileProps {
   onViewPartnerProfile?: (username: string) => void;
   onToast?: (msg: { text: string; type: 'success' | 'info' | 'error' }) => void;
   onUpdateUser?: (updated: Partial<UserProfile>) => void;
+  onBack?: () => void;
+  onToggleFollow?: (userId: string) => void;
+  onStartChat?: (user: UserProfile) => void;
+  onOpenAuth?: () => void;
 }
 
 type MainDossierTab = 'overview' | 'dispatches' | 'vault' | 'events';
@@ -53,9 +59,11 @@ type ProfileTab = 'all' | 'photo' | 'video' | 'text';
 
 export const Profile: React.FC<ProfileProps> = ({
   user,
+  currentUser,
   posts,
   walletBalance,
   isUserSubscribed,
+  isFollowing = false,
   onSubscribe,
   onOpenWallet,
   onOpenCreatePost,
@@ -67,7 +75,13 @@ export const Profile: React.FC<ProfileProps> = ({
   onShare,
   onToast,
   onUpdateUser,
+  onBack,
+  onToggleFollow,
+  onStartChat,
+  onOpenAuth,
 }) => {
+  const isOwnProfile = !currentUser?.isGuest && currentUser?.id === user.id;
+
   const [mainTab, setMainTab] = useState<MainDossierTab>('overview');
   const [activeTab, setActiveTab] = useState<ProfileTab>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -81,7 +95,19 @@ export const Profile: React.FC<ProfileProps> = ({
   const [editGender, setEditGender] = useState(user.gender || 'Woman');
   const [editOrientation, setEditOrientation] = useState(user.orientation || 'Heterosexual');
   const [editAvatar, setEditAvatar] = useState(user.avatar);
+  const [editIsPrivate, setEditIsPrivate] = useState<boolean>(!!user.isPrivate);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  React.useEffect(() => {
+    setEditName(user.name);
+    setEditBio(user.bio);
+    setEditLocation(user.location || 'Amsterdam Chapter');
+    setEditAge(user.age || 29);
+    setEditGender(user.gender || 'Woman');
+    setEditOrientation(user.orientation || 'Heterosexual');
+    setEditAvatar(user.avatar);
+    setEditIsPrivate(!!user.isPrivate);
+  }, [user]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,6 +153,7 @@ export const Profile: React.FC<ProfileProps> = ({
         gender: editGender,
         orientation: editOrientation,
         avatar: editAvatar,
+        isPrivate: editIsPrivate,
       });
     }
     setIsEditingProfile(false);
@@ -153,10 +180,15 @@ export const Profile: React.FC<ProfileProps> = ({
         user={user}
         walletBalance={walletBalance}
         isUserSubscribed={isUserSubscribed}
+        isOwnProfile={isOwnProfile}
+        isFollowing={isFollowing}
         onSubscribe={onSubscribe}
         onOpenWallet={onOpenWallet}
         onOpenCreatePost={onOpenCreatePost}
         onEditProfile={() => setIsEditingProfile(true)}
+        onToggleFollow={() => onToggleFollow?.(user.id)}
+        onStartChat={() => onStartChat?.(user)}
+        onBack={onBack}
       />
       {/* EDIT PROFILE MODAL */}
       {isEditingProfile && (
@@ -296,6 +328,26 @@ export const Profile: React.FC<ProfileProps> = ({
                 </div>
               </div>
 
+              <div className="pt-2 border-t border-white/[0.08]">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={editIsPrivate}
+                    onChange={e => setEditIsPrivate(e.target.checked)}
+                    className="w-4 h-4 rounded-md border-white/20 text-[#E5C590] focus:ring-0 bg-[#181B22]"
+                  />
+                  <div>
+                    <span className="text-xs text-white font-medium flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Gizli Profil (Private Account)</span>
+                    </span>
+                    <span className="text-[11px] text-zinc-400 block">
+                      Açıkken sadece onayladığınız üyeler fotoğraf ve dispatches içeriklerinizi görebilir.
+                    </span>
+                  </div>
+                </label>
+              </div>
+
               <div className="pt-3 border-t border-white/[0.08] flex items-center justify-end gap-2.5">
                 <button
                   type="button"
@@ -316,11 +368,42 @@ export const Profile: React.FC<ProfileProps> = ({
         </div>
       )}
 
-      {/* 2. ADULT COMMUNITY DOSSIER NAVIGATION BAR */}
-      <div className="border-b border-white/[0.08] pb-1">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => setMainTab('overview')}
+      {/* 2. PRIVATE PROFILE LOCK FOR VISITORS / NON-CIRCLE MEMBERS */}
+      {user.isPrivate && !isOwnProfile ? (
+        <div className="py-20 px-6 rounded-3xl bg-[#121419]/70 border border-white/[0.08] text-center flex flex-col items-center justify-center my-6 max-w-xl mx-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mb-4 text-[#E5C590] shadow-inner">
+            <Lock className="w-7 h-7 stroke-[1.5]" />
+          </div>
+          <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 text-xs font-mono uppercase tracking-wider mb-2">
+            Gizli Profil
+          </span>
+          <h3 className="font-serif text-2xl text-white font-normal mb-2">Bu Hesap Gizlidir</h3>
+          <p className="text-xs text-zinc-400 max-w-sm mb-6 leading-relaxed font-sans">
+            Bu kullanıcının paylaşımlarını, fotoğraf mahzenini ve özel salon dispatches akışını görebilmek için onaylı üye olmalı ve takip isteği göndermelisiniz.
+          </p>
+          {currentUser?.isGuest ? (
+            <button
+              onClick={onOpenAuth}
+              className="px-6 py-2.5 rounded-full bg-linear-to-r from-[#E5C590] to-[#C9A96E] text-black font-semibold text-xs hover:brightness-110 shadow-lg cursor-pointer transition-all"
+            >
+              Giriş Yap / Üye Ol
+            </button>
+          ) : (
+            <button
+              onClick={() => onToggleFollow?.(user.id)}
+              className="px-6 py-2.5 rounded-full bg-white hover:bg-zinc-200 text-black font-medium text-xs transition-colors cursor-pointer"
+            >
+              {isFollowing ? '✓ Takip İsteği Gönderildi' : 'Takip İsteği Gönder'}
+            </button>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* 2. ADULT COMMUNITY DOSSIER NAVIGATION BAR */}
+          <div className="border-b border-white/[0.08] pb-1">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setMainTab('overview')}
             className={`px-4 py-2 rounded-xl text-xs font-sans whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
               mainTab === 'overview'
                 ? 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 shadow-xs font-medium'
@@ -689,6 +772,8 @@ export const Profile: React.FC<ProfileProps> = ({
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
     </div>
