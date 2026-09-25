@@ -7,7 +7,8 @@ import {
   MessageSquare, 
   KeyRound,
   LogOut,
-  X
+  X,
+  EyeOff
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { SupportedCurrency, SupportedLanguage } from '../types/anlatiTypes';
@@ -36,6 +37,7 @@ interface NavbarProps {
   onToggleDarkMode: () => void;
   onOpenAuth?: () => void;
   onLogout?: () => void;
+  onToggleCamouflage?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -58,6 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onOpenAuth,
   onLogout,
+  onToggleCamouflage,
 }) => {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
@@ -110,6 +113,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Navigation Controls */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Camouflage Mode Panic Button */}
+          {onToggleCamouflage && (
+            <button
+              onClick={onToggleCamouflage}
+              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer relative group flex items-center justify-center min-w-[36px] min-h-[36px]"
+              title="Kamufle / Panik Modu (Esc)"
+              aria-label="Kamufle Modu (Esc)"
+            >
+              <EyeOff className="w-4 h-4 stroke-[1.75]" />
+              <span className="hidden md:group-hover:block absolute right-0 top-full mt-2 px-2.5 py-1 bg-[#121419] border border-white/10 text-[10px] text-zinc-200 rounded-lg whitespace-nowrap shadow-2xl z-50 pointer-events-none">
+                Kamufle Modu (Esc)
+              </span>
+            </button>
+          )}
           {currentUser.isGuest ? (
             <>
               {/* Language Selector */}

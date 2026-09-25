@@ -53,6 +53,7 @@ export function useSocialPlatform() {
   const [isVisitorsModalOpen, setIsVisitorsModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
+  const [isCamouflageMode, setIsCamouflageMode] = useState(false);
   const [selectedMediaPost, setSelectedMediaPost] = useState<Post | null>(null);
   const [selectedCommentsPost, setSelectedCommentsPost] = useState<Post | null>(null);
   const [reportingTarget, setReportingTarget] = useState<{ type: 'user' | 'post' | 'message' | 'event'; title: string; id: string } | null>(null);
@@ -334,6 +335,66 @@ export function useSocialPlatform() {
     showToast('Tüm bildirimler okundu olarak işaretlendi.', 'info');
   };
 
+  const handleAddComment = async (postId: string, text: string) => {
+    if (currentUser.isGuest) {
+      showToast('Yorum yapmak için lütfen giriş yapın veya üye olun.', 'info');
+      setIsAuthOpen(true);
+      return;
+    }
+
+    const optimisticComment = {
+      id: `temp-${Date.now()}`,
+      author: {
+        id: currentUser.id,
+        name: currentUser.name,
+        username: currentUser.username,
+        avatar: currentUser.avatar,
+        isVerified: currentUser.isVerified,
+      },
+      text,
+      createdAt: 'Şimdi',
+      likes: 0,
+      isLiked: false,
+    };
+
+    setPosts(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          commentsCount: (p.commentsCount || 0) + 1,
+          comments: p.comments ? [...p.comments, optimisticComment] : [optimisticComment],
+        };
+      }
+      return p;
+    }));
+
+    if (selectedCommentsPost && selectedCommentsPost.id === postId) {
+      setSelectedCommentsPost(prev => prev ? {
+        ...prev,
+        commentsCount: (prev.commentsCount || 0) + 1,
+        comments: prev.comments ? [...prev.comments, optimisticComment] : [optimisticComment],
+      } : null);
+    }
+
+    try {
+      const realComment = await noirApi.addComment(postId, currentUser.id, text);
+      if (realComment) {
+        showToast('Yorumunuz paylaşıldı.', 'success');
+      }
+    } catch (err) {
+      console.error('Error adding comment to DB:', err);
+      showToast('Yorum eklenirken hata oluştu.', 'error');
+    }
+  };
+
+  const toggleCamouflageMode = () => {
+    setIsCamouflageMode(prev => {
+      const next = !prev;
+      showToast(next ? 'Kamufle Modu devrede (Esc ile dönebilirsiniz).' : 'Major Club Portalı geri yüklendi.', 'info');
+      return next;
+    });
+  };
+
   return {
     currentView, setCurrentView,
     isDarkMode, setIsDarkMode,
@@ -346,6 +407,8 @@ export function useSocialPlatform() {
     isVisitorsModalOpen, setIsVisitorsModalOpen,
     isNotificationsOpen, setIsNotificationsOpen,
     isPayoutModalOpen, setIsPayoutModalOpen,
+    isCamouflageMode, setIsCamouflageMode,
+    toggleCamouflageMode,
     selectedMediaPost, setSelectedMediaPost,
     selectedCommentsPost, setSelectedCommentsPost,
     reportingTarget, setReportingTarget,
@@ -362,6 +425,7 @@ export function useSocialPlatform() {
     isLoadingInitial,
     effectiveIsSubscribed: true,
     handleLike, handleSave,
+    handleAddComment,
     handleLogout,
     handleMarkAllNotificationsRead,
     handleStartConversationWithProfile,

@@ -70,13 +70,19 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
             if (added) {
               p.setPosts(prev => prev.map(post => post.id === postId ? {
                 ...post,
-                commentsCount: post.commentsCount + 1,
+                commentsCount: (post.commentsCount || 0) + 1,
                 comments: [...(post.comments || []), added],
               } : post));
+              p.setSelectedCommentsPost(prev => prev && prev.id === postId ? {
+                ...prev,
+                commentsCount: (prev.commentsCount || 0) + 1,
+                comments: [...(prev.comments || []), added],
+              } : prev);
               p.showToast('Yorumunuz salona iletildi.', 'success');
             }
           } catch (err) {
             console.error('Error adding comment:', err);
+            p.showToast('Yorum iletilirken bir hata oluştu.', 'error');
           }
         }}
       />

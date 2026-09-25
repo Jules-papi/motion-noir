@@ -27,7 +27,7 @@ export const noirApi = {
       website: '',
       joinDate: new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       isVerified: !!item.is_verified,
-      isPrivate: item.is_private ?? (item.username === 'elena_v' || item.username === 'clara_d' || item.username === 'lucas_clara'),
+      isPrivate: item.is_private ?? false,
       followersCount: 120,
       followingCount: 84,
       postsCount: 12,
@@ -169,11 +169,12 @@ export const noirApi = {
       sharesCount: 0,
       isLiked: likedIds.includes(p.id),
       isSaved: savedIds.includes(p.id),
+      isSensitive: !!p.is_sensitive,
       createdAt: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }));
   },
 
-  async createPost(post: { authorId: string; content: string; type?: string; mediaUrl?: string }): Promise<Post | null> {
+  async createPost(post: { authorId: string; content: string; type?: string; mediaUrl?: string; isSensitive?: boolean }): Promise<Post | null> {
     const { data, error } = await supabase
       .from('noir_posts')
       .insert({
@@ -181,6 +182,7 @@ export const noirApi = {
         content: post.content,
         type: post.type || (post.mediaUrl ? 'photo' : 'text'),
         media_url: post.mediaUrl,
+        is_sensitive: post.isSensitive ?? false,
         likes_count: 0,
         comments_count: 0,
       })

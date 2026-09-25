@@ -11,7 +11,8 @@ import { DiscoveryView } from './components/DiscoveryView';
 import { GuestLandingView } from './components/GuestLandingView';
 import { AppModals } from './components/AppModals';
 import { PrototypeBanner } from './components/PrototypeBanner';
-import { Post, ChatMessage } from './types';
+import { CamouflageView } from './components/CamouflageView';
+import { Post, ChatMessage, UserProfile } from './types';
 import { SupportedCurrency, SupportedLanguage } from './types/anlatiTypes';
 import { noirApi } from './services/noirApi';
 
@@ -175,6 +176,24 @@ export function App() {
     }
   };
 
+  // Global Discreet Camouflage Hotkey (Esc)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const isAnyModalOpen = p.isAuthOpen || p.isCreatePostOpen || p.selectedMediaPost || p.selectedCommentsPost || p.reportingTarget;
+        if (!isAnyModalOpen) {
+          p.toggleCamouflageMode();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [p.isAuthOpen, p.isCreatePostOpen, p.selectedMediaPost, p.selectedCommentsPost, p.reportingTarget, p.toggleCamouflageMode]);
+
+  if (p.isCamouflageMode) {
+    return <CamouflageView onExitCamouflage={p.toggleCamouflageMode} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#07080A] text-[#F3F4F6] antialiased overflow-x-hidden w-full max-w-full selection:bg-white/20">
       <PrototypeBanner />
@@ -198,6 +217,7 @@ export function App() {
         onOpenNotifications={() => p.setIsNotificationsOpen(true)}
         onOpenAuth={() => p.setIsAuthOpen(true)}
         onLogout={p.handleLogout}
+        onToggleCamouflage={p.toggleCamouflageMode}
         onNavigate={(view) => {
           if (view === 'profile') setViewingProfileUser(null);
           p.setCurrentView(view);
@@ -258,7 +278,19 @@ export function App() {
               walletBalance={p.walletBalance}
               onLike={p.handleLike}
               onSave={p.handleSave}
-              onOpenComments={(post) => p.setSelectedCommentsPost(post)}
+              onOpenComments={async (post) => {
+                p.setSelectedCommentsPost(post);
+                try {
+                  const dbComments = await noirApi.getComments(post.id);
+                  p.setSelectedCommentsPost(prev => prev && prev.id === post.id ? {
+                    ...prev,
+                    comments: dbComments,
+                    commentsCount: dbComments.length > 0 ? dbComments.length : prev.commentsCount,
+                  } : prev);
+                } catch (cErr) {
+                  console.warn('Error fetching comments for modal:', cErr);
+                }
+              }}
               onOpenMedia={(post) => p.setSelectedMediaPost(post)}
               onSubscribeClick={() => {}}
               onUnlockPPV={() => {}}
@@ -302,7 +334,19 @@ export function App() {
               }}
               onLike={p.handleLike}
               onSave={p.handleSave}
-              onOpenComments={(post) => p.setSelectedCommentsPost(post)}
+              onOpenComments={async (post) => {
+                p.setSelectedCommentsPost(post);
+                try {
+                  const dbComments = await noirApi.getComments(post.id);
+                  p.setSelectedCommentsPost(prev => prev && prev.id === post.id ? {
+                    ...prev,
+                    comments: dbComments,
+                    commentsCount: dbComments.length > 0 ? dbComments.length : prev.commentsCount,
+                  } : prev);
+                } catch (cErr) {
+                  console.warn('Error fetching comments for profile modal:', cErr);
+                }
+              }}
               onOpenMedia={(post) => p.setSelectedMediaPost(post)}
               onUnlockPPV={() => {}}
               onShare={() => p.showToast('Dossier link copied.', 'success')}

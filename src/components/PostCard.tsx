@@ -103,7 +103,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   const isSubscriptionLocked = false;
   const isPPVLocked = false;
   const isContentLocked = false;
-  const showSensitiveOverlay = false;
+  const showSensitiveOverlay = Boolean(post.isSensitive && !isSensitiveRevealed);
 
   return (
     <article 
