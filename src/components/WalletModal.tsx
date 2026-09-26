@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  Coins, 
-  Check, 
-  ShieldCheck, 
-  TrendingUp, 
-  TrendingDown, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  Gift, 
-  PieChart, 
-  History, 
-  Landmark, 
+import {
+  X,
+  Coins,
+  Check,
+  ShieldCheck,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Gift,
+  PieChart,
+  History,
+  Landmark,
   Sparkles,
   CreditCard
 } from 'lucide-react';
@@ -68,7 +68,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   ];
 
   const spendingAnalytics = [
-    { label: 'Özel Salon & Etkinlik Biletleri', percent: 55, amount: '€ 450', color: 'bg-[#E5C590]' },
+    { label: 'Özel Salon & Etkinlik Biletleri', percent: 55, amount: '€ 450', color: 'bg-[#C5A880]' },
     { label: 'PPV İçerik & Kilit Açma', percent: 25, amount: '€ 185', color: 'bg-indigo-400' },
     { label: 'İçerik Üreticilerine Bahşiş (Tips)', percent: 12, amount: '€ 95', color: 'bg-rose-400' },
     { label: 'Kulüp & Topluluk Üyelikleri', percent: 8, amount: '€ 60', color: 'bg-emerald-400' },
@@ -76,15 +76,15 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
-      <div className="bg-[#0c0c0e] border border-white/[0.12] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl max-h-[92vh] flex flex-col relative text-[#F4F1EC]">
+      <div className="bg-[#09090B] border border-white/[0.12] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl max-h-[92vh] flex flex-col relative text-[#F4F1EC]">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-white/[0.08] flex items-center justify-between bg-[#121419] shrink-0">
+        <div className="px-5 py-4 border-b border-white/[0.08] flex items-center justify-between bg-[#111113] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#1A1D24] border border-[#E5C590]/30 text-[#E5C590] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[#1A1D24] border border-[#C5A880]/30 text-[#C5A880] flex items-center justify-center">
               <Coins className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] font-mono tracking-widest uppercase text-[#E5C590] block">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-[#C5A880] block">
                 Major Club Treasury
               </span>
               <h3 className="font-serif text-base text-white font-medium">
@@ -101,12 +101,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-5 pt-3 pb-2 bg-[#121419]/60 border-b border-white/[0.04]">
+        <div className="flex items-center gap-2 px-5 pt-3 pb-2 bg-[#111113]/60 border-b border-white/[0.04]">
           <button
             onClick={() => setActiveTab('topup')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-serif uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'topup'
-                ? 'bg-[#1E222B] text-[#E5C590] border border-[#E5C590]/40 shadow-sm'
+                ? 'bg-[#1E222B] text-[#C5A880] border border-[#C5A880]/40 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -117,7 +117,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             onClick={() => setActiveTab('analytics')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-serif uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'analytics'
-                ? 'bg-[#1E222B] text-[#E5C590] border border-[#E5C590]/40 shadow-sm'
+                ? 'bg-[#1E222B] text-[#C5A880] border border-[#C5A880]/40 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -128,7 +128,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             onClick={() => setActiveTab('history')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-serif uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'history'
-                ? 'bg-[#1E222B] text-[#E5C590] border border-[#E5C590]/40 shadow-sm'
+                ? 'bg-[#1E222B] text-[#C5A880] border border-[#C5A880]/40 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -148,7 +148,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 </span>
                 <div className="font-serif text-3xl sm:text-4xl font-light flex items-baseline gap-2 text-white">
                   <span>{walletBalance}</span>
-                  <span className="text-base font-mono text-[#E5C590]">€</span>
+                  <span className="text-base font-mono text-[#C5A880]">€</span>
                 </div>
               </div>
 
@@ -159,7 +159,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                     onClose();
                     onOpenPayout();
                   }}
-                  className="px-3.5 py-2 rounded-xl bg-[#1D212B] hover:bg-[#252A38] text-xs font-serif uppercase tracking-wider text-[#E5C590] border border-[#E5C590]/30 transition-colors cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-[#1D212B] hover:bg-[#252A38] text-xs font-serif uppercase tracking-wider text-[#C5A880] border border-[#C5A880]/30 transition-colors cursor-pointer"
                 >
                   IBAN Çekim Talebi
                 </button>
@@ -191,20 +191,20 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                       }}
                       className={`p-3 rounded-xl border text-left transition-all relative cursor-pointer ${
                         selectedTopUp === opt.amount && !customAmount
-                          ? 'border-[#E5C590]/70 bg-[#1A1D24] text-white shadow-sm'
-                          : 'border-white/[0.06] bg-[#121419] text-zinc-300 hover:border-white/20'
+                          ? 'border-[#C5A880]/70 bg-[#1A1D24] text-white shadow-sm'
+                          : 'border-white/[0.06] bg-[#111113] text-zinc-300 hover:border-white/20'
                       }`}
                     >
                       <div className="font-serif text-base text-white font-medium">
                         +{opt.amount} €
                       </div>
                       {opt.bonus && (
-                        <span className="text-[10px] font-mono text-[#E5C590] block mt-0.5">
+                        <span className="text-[10px] font-mono text-[#C5A880] block mt-0.5">
                           {opt.bonus}
                         </span>
                       )}
                       {selectedTopUp === opt.amount && !customAmount && (
-                        <span className="absolute top-2.5 right-2.5 text-[#E5C590]">
+                        <span className="absolute top-2.5 right-2.5 text-[#C5A880]">
                           <Check className="w-3.5 h-3.5" />
                         </span>
                       )}
@@ -225,14 +225,14 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                   onChange={e => {
                     setCustomAmount(e.target.value);
                   }}
-                  className="w-full bg-[#121419] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder-zinc-500 focus:outline-hidden focus:border-[#E5C590]"
+                  className="w-full bg-[#111113] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder-zinc-500 focus:outline-hidden focus:border-[#C5A880]"
                 />
               </div>
 
               {/* Payment methods support */}
-              <div className="p-3 bg-[#121419] rounded-xl border border-white/[0.06] flex items-center justify-between text-xs text-zinc-400 font-mono">
+              <div className="p-3 bg-[#111113] rounded-xl border border-white/[0.06] flex items-center justify-between text-xs text-zinc-400 font-mono">
                 <span className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-[#E5C590]" />
+                  <CreditCard className="w-4 h-4 text-[#C5A880]" />
                   <span>iDEAL, Mastercard, Visa, Apple Pay</span>
                 </span>
                 <span className="text-[10px] text-emerald-400 font-medium">Anında Yükleme</span>
@@ -255,7 +255,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                       <span className="font-mono text-white font-medium">{item.amount} ({item.percent}%)</span>
                     </div>
                     <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full ${item.color} rounded-full transition-all duration-500`}
                         style={{ width: `${item.percent}%` }}
                       />
@@ -265,11 +265,11 @@ export const WalletModal: React.FC<WalletModalProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2 font-mono text-xs">
-                <div className="p-3 rounded-xl bg-[#121419] border border-white/5">
+                <div className="p-3 rounded-xl bg-[#111113] border border-white/5">
                   <span className="text-zinc-500 block text-[10px] uppercase">Toplam Harcama</span>
                   <span className="text-rose-400 font-serif text-lg font-medium block mt-1">- € 790</span>
                 </div>
-                <div className="p-3 rounded-xl bg-[#121419] border border-white/5">
+                <div className="p-3 rounded-xl bg-[#111113] border border-white/5">
                   <span className="text-zinc-500 block text-[10px] uppercase">Toplam Kazanç / Bahşiş</span>
                   <span className="text-emerald-400 font-serif text-lg font-medium block mt-1">+ € 310</span>
                 </div>
@@ -289,7 +289,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                   return (
                     <div
                       key={tx.id}
-                      className="p-3 rounded-xl bg-[#121419] border border-white/[0.04] flex items-center justify-between gap-3"
+                      className="p-3 rounded-xl bg-[#111113] border border-white/[0.04] flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -322,7 +322,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
         {/* Footer */}
         {activeTab === 'topup' && (
-          <div className="p-4 border-t border-white/[0.08] bg-[#0c0c0e] flex items-center justify-end gap-3 shrink-0">
+          <div className="p-4 border-t border-white/[0.08] bg-[#09090B] flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}

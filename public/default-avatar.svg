@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title desc">
+  <title id="title">Nötr profil görseli</title>
+  <desc id="desc">Koyu zemin üzerinde soyut Major Club monogramı</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#242126"/>
+      <stop offset="1" stop-color="#09090b"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e4d3b5"/>
+      <stop offset="1" stop-color="#9a7a51"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg)"/>
+  <circle cx="200" cy="200" r="128" fill="none" stroke="#ffffff" stroke-opacity=".08"/>
+  <path d="M112 258V142l88 82 88-82v116" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M142 258V205l58 53 58-53v53" fill="none" stroke="#f1efea" stroke-opacity=".32" stroke-width="8" stroke-linecap="round"/>
+</svg>

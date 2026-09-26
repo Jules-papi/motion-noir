@@ -37,13 +37,13 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
   };
 
   return (
-    <div 
+    <div
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-150"
     >
-      <div 
+      <div
         onClick={e => e.stopPropagation()}
-        className="bg-[#0c0c0e] border border-white/[0.12] rounded-2xl max-w-md w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative cursor-default"
+        className="bg-[#09090B] border border-white/[0.12] rounded-2xl max-w-md w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative cursor-default"
       >
         {/* Header */}
         <div className="p-5 border-b border-white/[0.08] flex items-center justify-between shrink-0">
@@ -67,7 +67,7 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="p-5 space-y-4 text-xs flex-1 overflow-y-auto">
             {/* Target Profile Card Summary */}
-            <div className="flex items-center gap-3.5 p-3 rounded-xs bg-[#121215] border border-white/[0.06]">
+            <div className="flex items-center gap-3.5 p-3 rounded-xs bg-[#111113] border border-white/[0.06]">
               <img
                 src={profile.avatar}
                 alt={profile.name}
@@ -78,7 +78,7 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
                   <span className="truncate">{profile.name}</span>
                   <span className="text-stone-400 font-mono text-xs">, {profile.age}</span>
                   {isCouple && (
-                    <span className="px-1.5 py-0.5 rounded-xs bg-[#161512] text-amber-200 border border-amber-600/30 text-[9px] font-mono uppercase tracking-wider">
+                    <span className="px-1.5 py-0.5 rounded-xs bg-[#1A1A1E] text-amber-200 border border-amber-600/30 text-[9px] font-mono uppercase tracking-wider">
                       Duo
                     </span>
                   )}
@@ -98,7 +98,7 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
                     key={idx}
                     type="button"
                     onClick={() => setNote(msg)}
-                    className="w-full text-left p-2.5 rounded-xs text-xs font-serif italic bg-[#131316] hover:bg-[#18181d] text-stone-300 hover:text-amber-100 transition-colors border border-white/[0.05] hover:border-amber-500/30"
+                    className="w-full text-left p-2.5 rounded-xs text-xs font-serif italic bg-[#111113] hover:bg-[#1A1A1E] text-stone-300 hover:text-amber-100 transition-colors border border-white/[0.05] hover:border-amber-500/30"
                   >
                     "{msg}"
                   </button>
@@ -116,18 +116,18 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
                 value={note}
                 onChange={e => setNote(e.target.value)}
                 placeholder="Compose a discreet and gracious note..."
-                className="w-full p-3 rounded-xs bg-[#131316] border border-white/[0.08] text-stone-200 placeholder-stone-400 outline-hidden focus:border-amber-400/50 text-xs font-serif leading-relaxed"
+                className="w-full p-3 rounded-xs bg-[#111113] border border-white/[0.08] text-stone-200 placeholder-stone-400 outline-hidden focus:border-amber-400/50 text-xs font-serif leading-relaxed"
               />
             </div>
 
-            <div className="flex items-center gap-2.5 text-[11px] font-mono text-stone-400 bg-[#12141a] p-3 rounded-xs border border-white/[0.06]">
+            <div className="flex items-center gap-2.5 text-[11px] font-mono text-stone-400 bg-[#111113] p-3 rounded-xs border border-white/[0.06]">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>Discretion Guarantee: Direct contact tokens remain masked until reciprocal accord is granted.</span>
             </div>
           </div>
 
           {/* Sticky Footer */}
-          <div className="p-4 border-t border-white/[0.08] bg-[#0c0c0e] flex items-center justify-end gap-3 shrink-0">
+          <div className="p-4 border-t border-white/[0.08] bg-[#09090B] flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
@@ -137,7 +137,7 @@ export const SendInterestModal: React.FC<SendInterestModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xs font-serif text-xs uppercase tracking-[0.14em] bg-[#161512] hover:bg-[#201d18] text-amber-200 border border-amber-600/40 hover:border-amber-400 transition-all flex items-center gap-2"
+              className="px-5 py-2 rounded-xs font-serif text-xs uppercase tracking-[0.14em] bg-[#1A1A1E] hover:bg-[#1A1A1E] text-amber-200 border border-amber-600/40 hover:border-amber-400 transition-all flex items-center gap-2"
             >
               <Send className="w-3 h-3 text-amber-300" />
               <span>Transmit Note</span>

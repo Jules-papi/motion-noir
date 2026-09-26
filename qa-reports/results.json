@@ -1,18 +1,29 @@
 {
   "functional": true,
-  "visual": true,
+  "visual": false,
   "responsive": true,
   "accessibility": true,
   "console": true,
   "network": true,
   "dataStress": true,
   "visualRegression": true,
-  "issues": [],
+  "issues": [
+    {
+      "severity": "MEDIUM",
+      "category": "Visual",
+      "route": "/",
+      "viewport": "1440x900",
+      "element": "input & button",
+      "problem": "[InteractiveCollision] Interactive elements overlap significantly by 576px²",
+      "screenshot": "visual-1790373784238.png",
+      "probableCause": "CSS styling conflict"
+    }
+  ],
   "environment": {
     "url": "http://localhost:4173",
     "framework": "React 18 + Vite + Tailwind CSS",
     "browser": "Chromium / Google Chrome",
     "viewport": "1440x900",
-    "timestamp": "2026-09-20T00:21:59.432Z"
+    "timestamp": "2026-09-25T22:02:55.600Z"
   }
 }

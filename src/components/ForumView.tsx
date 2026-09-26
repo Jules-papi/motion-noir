@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  MessageSquare, 
-  ThumbsUp, 
-  Eye, 
-  Plus, 
-  Search, 
-  Pin, 
-  Crown 
+import {
+  MessageSquare,
+  ThumbsUp,
+  Eye,
+  Plus,
+  Search,
+  Pin,
+  Crown
 } from 'lucide-react';
 import { ForumCategory, ForumTopic, UserProfile } from '../types';
 import { CreateTopicModal } from './CreateTopicModal';
@@ -48,10 +48,10 @@ export const ForumView: React.FC<ForumViewProps> = ({
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
       {/* Forum Header Banner */}
-      <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
+      <div className="bg-[#111113] border border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
         <div className="relative z-10 max-w-xl space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#181B22] border border-white/10 text-[#E5C590] text-xs font-sans font-medium">
-            <Crown className="w-3.5 h-3.5 text-[#E5C590]" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A1A1E] border border-white/10 text-[#C5A880] text-xs font-sans font-medium">
+            <Crown className="w-3.5 h-3.5 text-[#C5A880]" />
             <span>Salons & Dispatches</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-serif font-light text-white tracking-wide">
@@ -76,7 +76,7 @@ export const ForumView: React.FC<ForumViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Categories Sidebar */}
         <div className="lg:col-span-1 space-y-2">
-          <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-3 shadow-xl space-y-1">
+          <div className="bg-[#111113] border border-white/[0.08] rounded-2xl p-3 shadow-xl space-y-1">
             <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 px-3 py-1.5 block">
               Categories
             </span>
@@ -87,7 +87,7 @@ export const ForumView: React.FC<ForumViewProps> = ({
               }}
               className={`w-full text-left px-3 py-2 rounded-xl text-xs font-sans transition-all flex items-center justify-between cursor-pointer ${
                 selectedCategoryId === 'all'
-                  ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                  ? 'bg-[#1A1A1E] text-white font-medium border border-white/10 shadow-xs'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
               }`}
             >
@@ -104,7 +104,7 @@ export const ForumView: React.FC<ForumViewProps> = ({
                 }}
                 className={`w-full text-left px-3 py-2 rounded-xl text-xs font-sans transition-all flex items-center justify-between cursor-pointer ${
                   selectedCategoryId === cat.id
-                    ? 'bg-[#181B22] text-white font-medium border border-white/10 shadow-xs'
+                    ? 'bg-[#1A1A1E] text-white font-medium border border-white/10 shadow-xs'
                     : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
                 }`}
               >
@@ -141,7 +141,7 @@ export const ForumView: React.FC<ForumViewProps> = ({
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search chamber dispatches or tags..."
-                  className="w-full pl-9 pr-4 py-2 rounded-full bg-[#121419] border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+                  className="w-full pl-9 pr-4 py-2 rounded-full bg-[#111113] border border-white/[0.08] text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
                 />
               </div>
 
@@ -151,13 +151,13 @@ export const ForumView: React.FC<ForumViewProps> = ({
                   <div
                     key={topic.id}
                     onClick={() => setActiveTopicId(topic.id)}
-                    className="bg-[#121419] border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-xl hover:border-white/15 transition-all cursor-pointer space-y-3"
+                    className="bg-[#111113] border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-xl hover:border-white/15 transition-all cursor-pointer space-y-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5 flex-1">
                         <div className="flex items-center gap-2">
                           {topic.isPinned && (
-                            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#181B22] border border-[#E5C590]/30 text-[#E5C590] font-sans font-medium flex items-center gap-1">
+                            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#1A1A1E] border border-[#C5A880]/30 text-[#C5A880] font-sans font-medium flex items-center gap-1">
                               <Pin className="w-2.5 h-2.5" />
                               Pinned
                             </span>

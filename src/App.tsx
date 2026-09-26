@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { useSocialPlatform } from './hooks/useSocialPlatform';
 import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, type ActiveViewType } from './components/Sidebar';
 import { RightBar } from './components/RightBar';
 import { Feed } from './components/Feed';
 import { Profile } from './components/Profile';
 import { ChatView } from './components/ChatView';
 import { DiscoveryView } from './components/DiscoveryView';
+import { EventsView } from './components/EventsView';
+import { AdminPanelView } from './components/AdminPanelView';
 import { GuestLandingView } from './components/GuestLandingView';
 import { AppModals } from './components/AppModals';
 import { PrototypeBanner } from './components/PrototypeBanner';
@@ -15,18 +17,78 @@ import { CamouflageView } from './components/CamouflageView';
 import { Post, ChatMessage, UserProfile } from './types';
 import { SupportedCurrency, SupportedLanguage } from './types/anlatiTypes';
 import { noirApi } from './services/noirApi';
+import { isSupportedLanguage } from './utils/i18n';
+import { LanguageProvider } from './i18n/LanguageContext';
+import { DEFAULT_COVER_URL } from './constants/profile';
+import { supabase } from './lib/supabase';
+import type { AuthMode } from './components/AuthModal';
+
+const LANGUAGE_STORAGE_KEY = 'major-club-language';
+
+const getInitialLanguage = (): SupportedLanguage => {
+  const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (saved && isSupportedLanguage(saved)) return saved;
+
+  const browserLanguage = window.navigator.language.toLowerCase().split('-')[0];
+  return isSupportedLanguage(browserLanguage) ? browserLanguage : 'en';
+};
 
 export function App() {
   const p = useSocialPlatform();
-  const [language, setLanguage] = useState<SupportedLanguage>('en');
+  const [language, setLanguage] = useState<SupportedLanguage>(getInitialLanguage);
   const [currency, setCurrency] = useState<SupportedCurrency>('EUR');
   const [searchQuery, setSearchQuery] = useState('');
+  const [authMode, setAuthMode] = useState<AuthMode>(() =>
+    new URLSearchParams(window.location.search).has('password-recovery') ? 'recovery' : 'signin'
+  );
   const [viewingProfileUser, setViewingProfileUser] = useState<UserProfile | null>(null);
+  const unreadChatCount = p.conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+
+  const openAuth = (mode: 'signin' | 'signup' = 'signin') => {
+    setAuthMode(mode);
+    p.setIsAuthOpen(true);
+  };
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has('password-recovery')) {
+      setAuthMode('recovery');
+      p.setIsAuthOpen(true);
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(event => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setAuthMode('recovery');
+        p.setIsAuthOpen(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [p.setIsAuthOpen]);
+
+  useEffect(() => {
+    if (!p.currentUser.isGuest && p.currentView === 'home') {
+      p.setCurrentView('feed');
+    }
+  }, [p.currentUser.isGuest, p.currentView, p.setCurrentView]);
+
+  const handlePrimaryNavigate = (view: ActiveViewType) => {
+    if (p.currentUser.isGuest && (view === 'chat' || view === 'profile')) {
+      openAuth('signin');
+      return;
+    }
+
+    if (view === 'profile') setViewingProfileUser(null);
+    p.setCurrentView(view);
+  };
 
   // Unified Profile Navigation Handler: Supports visitors browsing any member
-  const handleViewProfile = (userId: string) => {
-    // If clicking own profile and logged in
-    if (!p.currentUser.isGuest && userId === p.currentUser.id) {
+  const handleViewProfile = (userId?: string) => {
+    if (!userId && p.currentUser.isGuest) {
+      openAuth('signin');
+      return;
+    }
+
+    if (!userId || userId === p.currentUser.id) {
       setViewingProfileUser(null);
       p.setCurrentView('profile');
       return;
@@ -40,24 +102,27 @@ export function App() {
         name: disc.name,
         username: disc.username,
         avatar: disc.avatar,
-        coverImage: disc.coverImage || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
+        coverImage: disc.coverImage || DEFAULT_COVER_URL,
         bio: disc.bio,
         location: disc.city,
         website: '',
         joinDate: '2025',
         isVerified: disc.isVerified,
         isPrivate: disc.isPrivate,
-        followersCount: 128,
-        followingCount: 64,
+        followersCount: 0,
+        followingCount: 0,
         postsCount: p.posts.filter(item => item.author.id === disc.id).length,
-        totalLikes: 350,
+        totalLikes: 0,
         subscriptionPrice: 0,
         membershipTier: disc.membershipTier,
         isSubscribed: false,
         isFollowing: p.followingIds.includes(disc.id),
         age: disc.age,
         gender: disc.gender,
-        orientation: 'Hetero / Bi-Curious',
+        orientation: disc.orientation || '',
+        interests: disc.interests || [],
+        lookingFor: disc.lookingFor || [],
+        boundaries: disc.boundaries || [],
       });
       p.setCurrentView('profile');
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -72,24 +137,26 @@ export function App() {
         name: postWithAuthor.author.name,
         username: postWithAuthor.author.username,
         avatar: postWithAuthor.author.avatar,
-        coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
-        bio: `${postWithAuthor.author.name} is a patron of Major Club.`,
-        location: 'Amsterdam Chapter',
+        coverImage: DEFAULT_COVER_URL,
+        bio: '',
+        location: '',
         website: '',
         joinDate: '2025',
         isVerified: !!postWithAuthor.author.isVerified,
         isPrivate: false,
-        followersCount: 140,
-        followingCount: 75,
+        followersCount: 0,
+        followingCount: 0,
         postsCount: p.posts.filter(item => item.author.id === userId).length,
-        totalLikes: 420,
+        totalLikes: 0,
         subscriptionPrice: 0,
         membershipTier: 'standard',
         isSubscribed: false,
         isFollowing: p.followingIds.includes(userId),
-        age: 28,
-        gender: 'Individual',
-        orientation: 'Hetero / Bi-Curious',
+        gender: 'unspecified',
+        orientation: '',
+        interests: [],
+        lookingFor: [],
+        boundaries: [],
       });
       p.setCurrentView('profile');
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -106,14 +173,19 @@ export function App() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [p.currentView]);
 
+  useEffect(() => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    document.documentElement.lang = language;
+  }, [language]);
+
   // V1 Direct Messaging (Dispatches) — 100% Realtime Database & WebSockets
   const handleSendMessage = async (
-    conversationId: string, 
+    conversationId: string,
     text: string
   ) => {
     if (p.currentUser.isGuest) {
       p.showToast('Mesaj göndermek için lütfen giriş yapın veya üye olun.', 'info');
-      p.setIsAuthOpen(true);
+      openAuth('signin');
       return;
     }
 
@@ -150,7 +222,7 @@ export function App() {
   const handleSubmitNewPost = async (postData: Partial<Post>) => {
     if (p.currentUser.isGuest) {
       p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
-      p.setIsAuthOpen(true);
+      openAuth('signin');
       return;
     }
 
@@ -163,6 +235,7 @@ export function App() {
         content: postData.content || '',
         type: postData.type || (postData.mediaUrl ? 'photo' : 'text'),
         mediaUrl: postData.mediaUrl,
+        isSensitive: postData.isSensitive ?? false,
       });
 
       if (created) {
@@ -195,15 +268,15 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07080A] text-[#F3F4F6] antialiased overflow-x-hidden w-full max-w-full selection:bg-white/20">
+    <LanguageProvider language={language}>
+    <div className="min-h-screen bg-[#09090B] text-[#F1EFEA] antialiased overflow-x-hidden w-full max-w-full selection:bg-[#C5A880]/15 selection:text-[#F1EFEA]">
       <PrototypeBanner />
 
       {/* Top Navigation */}
       <Navbar
         currentUser={p.currentUser}
         currentView={p.currentView}
-        walletBalance={p.walletBalance}
-        isUserSubscribed={p.effectiveIsSubscribed}
+        unreadChatCount={unreadChatCount}
         unreadNotificationsCount={p.notifications.filter(n => !n.isRead).length}
         currency={currency}
         language={language}
@@ -211,66 +284,46 @@ export function App() {
         onSearchChange={setSearchQuery}
         onCurrencyChange={setCurrency}
         onLanguageChange={setLanguage}
-        onOpenWallet={() => p.setIsWalletOpen(true)}
         onOpenCreatePost={() => p.setIsCreatePostOpen(true)}
-        onOpenMembershipModal={() => p.setIsMembershipModalOpen(true)}
         onOpenNotifications={() => p.setIsNotificationsOpen(true)}
-        onOpenAuth={() => p.setIsAuthOpen(true)}
+        onOpenAuth={() => openAuth('signin')}
         onLogout={p.handleLogout}
         onToggleCamouflage={p.toggleCamouflageMode}
-        onNavigate={(view) => {
-          if (view === 'profile') setViewingProfileUser(null);
-          p.setCurrentView(view);
-        }}
-        isDarkMode={p.isDarkMode}
-        onToggleDarkMode={() => p.setIsDarkMode(!p.isDarkMode)}
+        onNavigate={handlePrimaryNavigate}
       />
 
       {/* Main Layout Grid */}
       <div className="max-w-7xl mx-auto flex">
         <Sidebar
           currentView={p.currentView}
-          onNavigate={(view) => {
-            if (view === 'profile') setViewingProfileUser(null);
-            p.setCurrentView(view);
-          }}
+          onNavigate={handlePrimaryNavigate}
           currentUser={p.currentUser}
-          walletBalance={p.walletBalance}
-          isUserSubscribed={p.effectiveIsSubscribed}
-          language={language}
-          currency={currency}
-          onOpenWallet={() => p.setIsWalletOpen(true)}
+          unreadChatCount={unreadChatCount}
           onOpenCreatePost={() => {
             if (p.currentUser.isGuest) {
               p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
-              p.setIsAuthOpen(true);
+              openAuth('signin');
             } else {
               p.setIsCreatePostOpen(true);
             }
           }}
-          onOpenMembershipModal={() => p.setIsMembershipModalOpen(true)}
-          onOpenKYCModal={() => p.setIsKYCModalOpen(true)}
-          onOpenVisitorsModal={() => p.setIsVisitorsModalOpen(true)}
-          onOpenPayoutModal={() => p.setIsPayoutModalOpen(true)}
-          onOpenAuth={() => p.setIsAuthOpen(true)}
+          onOpenAuth={() => openAuth('signin')}
           onLogout={p.handleLogout}
         />
 
         <main className="flex-1 min-w-0 p-3 sm:p-5 pb-24 md:pb-8">
           {/* Guest Portal Landing View (Hero, Infographic, Categories Grid, Ethos, FAQ, Imprint) */}
-          {p.currentView === 'home' && (
+          {p.currentView === 'home' && p.currentUser.isGuest && (
             <GuestLandingView
-              onNavigate={(view) => {
-                if (view === 'profile') setViewingProfileUser(null);
-                p.setCurrentView(view);
-              }}
-              onOpenAuth={() => p.setIsAuthOpen(true)}
-              totalMembersCount={14200}
+              onNavigate={handlePrimaryNavigate}
+              onOpenAuth={() => openAuth('signup')}
+              onViewProfile={(userId) => handleViewProfile(userId)}
+              profiles={p.discoveryProfiles}
             />
           )}
 
           {/* V1: The Gazette Feed */}
-          {p.currentView === 'feed' && (
+          {(p.currentView === 'feed' || (p.currentView === 'home' && !p.currentUser.isGuest)) && (
             <Feed
               currentUser={p.currentUser}
               posts={p.posts}
@@ -298,7 +351,7 @@ export function App() {
               onOpenCreatePost={() => {
                 if (p.currentUser.isGuest) {
                   p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
-                  p.setIsAuthOpen(true);
+                  openAuth('signin');
                 } else {
                   p.setIsCreatePostOpen(true);
                 }
@@ -310,6 +363,10 @@ export function App() {
                 p.setPosts(fresh);
                 p.showToast('The Gazette refreshed from cloud archives.', 'success');
               }}
+              hasMorePosts={p.hasMorePosts}
+              isLoadingMore={p.isLoadingMorePosts}
+              onLoadMore={p.loadMorePosts}
+              onDeletePost={p.handleDeletePost}
             />
           )}
 
@@ -327,7 +384,7 @@ export function App() {
               onOpenCreatePost={() => {
                 if (p.currentUser.isGuest) {
                   p.showToast('Gönderi paylaşmak için lütfen giriş yapın veya üye olun.', 'info');
-                  p.setIsAuthOpen(true);
+                  openAuth('signin');
                 } else {
                   p.setIsCreatePostOpen(true);
                 }
@@ -349,7 +406,7 @@ export function App() {
               }}
               onOpenMedia={(post) => p.setSelectedMediaPost(post)}
               onUnlockPPV={() => {}}
-              onShare={() => p.showToast('Dossier link copied.', 'success')}
+              onShare={() => p.showToast('Profil bağlantısı kopyalandı.', 'success')}
               onToast={(msg) => p.showToast(msg.text, msg.type)}
               onBack={() => {
                 setViewingProfileUser(null);
@@ -363,28 +420,42 @@ export function App() {
                   username: targetUser.username,
                   avatar: targetUser.avatar,
                   bio: targetUser.bio,
-                  age: targetUser.age || 28,
-                  gender: (targetUser.gender as any) || 'woman',
-                  city: targetUser.location || 'Amsterdam',
-                  distanceKm: 4,
+                  coverImage: targetUser.coverImage || DEFAULT_COVER_URL,
+                  age: targetUser.age,
+                  gender: targetUser.gender || 'unspecified',
+                  orientation: targetUser.orientation,
+                  city: targetUser.location || '',
                   isOnline: true,
                   isVerified: targetUser.isVerified,
                   membershipTier: targetUser.membershipTier,
-                  interests: [],
-                  matchRate: 90,
+                  interests: targetUser.interests || [],
+                  lookingFor: targetUser.lookingFor || [],
+                  boundaries: targetUser.boundaries || [],
+                  matchRate: 0,
                 };
                 p.handleStartConversationWithProfile(discTarget);
               }}
-              onOpenAuth={() => p.setIsAuthOpen(true)}
+              onOpenAuth={() => openAuth('signin')}
               onUpdateUser={async (updated) => {
                 if (p.currentUser.isGuest) {
                   p.showToast('Profili kaydetmek için lütfen giriş yapın veya üye olun.', 'info');
-                  p.setIsAuthOpen(true);
-                  return;
+                  openAuth('signin');
+                  return false;
                 }
-                p.setCurrentUser(prev => ({ ...prev, ...updated }));
-                await noirApi.updateProfile(p.currentUser.id, updated);
-                p.showToast('Dossier güncellendi ve arşive kaydedildi.', 'success');
+                try {
+                  const success = await noirApi.updateProfile(p.currentUser.id, updated);
+                  if (success) {
+                    p.setCurrentUser(prev => ({ ...prev, ...updated }));
+                    p.showToast('Profil güncellendi ve kaydedildi.', 'success');
+                    return true;
+                  } else {
+                    p.showToast('Profil güncellenemedi. Lütfen bilgilerinizi kontrol edin.', 'error');
+                    return false;
+                  }
+                } catch (err: any) {
+                  p.showToast(err?.message || 'Güncelleme sırasında hata oluştu.', 'error');
+                  return false;
+                }
               }}
             />
           )}
@@ -397,6 +468,7 @@ export function App() {
               activeConversationId={p.activeConversationId}
               onSendMessage={handleSendMessage}
               onReportUser={(u) => p.setReportingTarget({ type: 'user', title: u.name, id: u.id })}
+              onMarkConversationAsRead={p.handleMarkConversationAsRead}
             />
           )}
 
@@ -413,24 +485,61 @@ export function App() {
               onViewProfile={(userId) => handleViewProfile(userId)}
             />
           )}
+
+          {/* Events & Calendar System */}
+          {p.currentView === 'events' && (
+            <EventsView
+              events={p.events}
+              currentUser={p.currentUser}
+              walletBalance={p.walletBalance}
+              isUserSubscribed={p.effectiveIsSubscribed}
+              currency={currency}
+              language={language}
+              onApplyToEvent={(event, data) => {
+                p.handleRegisterForEvent(event.id, {
+                  participationType: data.participationType as any,
+                  note: data.note,
+                });
+              }}
+              onPayForTicket={(event) => {
+                p.handleRegisterForEvent(event.id, {
+                  participationType: 'couple',
+                  note: 'Direct Admission Payment',
+                });
+              }}
+              onSignNdaForEvent={(eventId) => p.handleSignNda(eventId)}
+              onCheckIn={(eventId) => p.handleCheckInAttendee(eventId)}
+              onCreateEvent={p.handleCreateEvent}
+              onSaveEvent={p.handleSaveEvent}
+              onCancelRegistration={p.handleCancelRegistration}
+              onApproveEventApplication={(eventId, applicantName) => {
+                p.showToast(`${applicantName || 'Üye'} başvurusu onaylandı.`, 'success');
+              }}
+              onToast={(msg) => p.showToast(msg.text, msg.type)}
+            />
+          )}
+
+          {/* High Curatorship & Governance Admin Panel */}
+          {p.currentView === 'admin' && (
+            <AdminPanelView
+              currentUser={p.currentUser}
+              onToast={(msg) => p.showToast(msg.text, msg.type)}
+              onEventApproved={p.loadEvents}
+              onNavigateHome={() => handlePrimaryNavigate('feed')}
+            />
+          )}
         </main>
 
-        {p.currentView !== 'home' && (
+        {p.currentView !== 'chat' && p.currentView !== 'admin' && !(p.currentView === 'home' && p.currentUser.isGuest) && (
           <RightBar
-            walletBalance={p.walletBalance}
-            isUserSubscribed={p.effectiveIsSubscribed}
             currentUser={p.currentUser}
+            currentView={p.currentView}
             followingIds={p.followingIds}
             suggestedProfiles={p.discoveryProfiles}
             onFollow={p.handleFollow}
-            onOpenWallet={() => p.setIsWalletOpen(true)}
-            onSubscribeClick={() => p.setIsMembershipModalOpen(true)}
+            onOpenAuth={() => openAuth('signup')}
             onNavigateToProfile={(userId) => handleViewProfile(userId)}
-            onTopicClick={(tag) => {
-              setSearchQuery(tag);
-              p.setCurrentView('feed');
-              p.showToast(`Exploring #${tag} dispatches.`, 'info');
-            }}
+            onNavigateToDiscovery={() => p.setCurrentView('discovery')}
           />
         )}
       </div>
@@ -454,8 +563,9 @@ export function App() {
       )}
 
       {/* Modals & Drawers */}
-      <AppModals p={p} onSubmitPost={handleSubmitNewPost} />
+      <AppModals p={p} authMode={authMode} onRequestAuth={() => openAuth('signin')} onSubmitPost={handleSubmitNewPost} />
     </div>
+    </LanguageProvider>
   );
 }
 export default App;

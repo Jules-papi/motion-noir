@@ -226,7 +226,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSendAudio, onCan
   }
 
   return (
-    <div className="flex items-center justify-between gap-2.5 p-2 px-4 bg-[#181B22] border border-[#E5C590]/40 rounded-full shadow-lg w-full animate-fadeIn">
+    <div className="flex items-center justify-between gap-2.5 p-2 px-4 bg-[#1A1A1E] border border-[#C5A880]/40 rounded-full shadow-lg w-full animate-fadeIn">
       {/* Delete / Discard */}
       <button
         type="button"
@@ -252,7 +252,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSendAudio, onCan
                 <span
                   key={i}
                   style={{ height: `${height}px` }}
-                  className="w-1 sm:w-1.5 rounded-full bg-[#E5C590] transition-all duration-75"
+                  className="w-1 sm:w-1.5 rounded-full bg-[#C5A880] transition-all duration-75"
                 />
               ))}
             </div>
@@ -263,7 +263,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSendAudio, onCan
             <button
               type="button"
               onClick={handleTogglePreviewPlay}
-              className="p-1.5 rounded-full bg-[#E5C590] text-black hover:bg-[#d9b880] transition-colors cursor-pointer"
+              className="p-1.5 rounded-full bg-[#C5A880] text-black hover:bg-[#B89B6E] transition-colors cursor-pointer"
             >
               {isPlayingPreview ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 ml-0.5 fill-current" />}
             </button>
@@ -273,7 +273,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSendAudio, onCan
                 <span
                   key={i}
                   style={{ height: `${h}px` }}
-                  className={`w-1 rounded-full ${isPlayingPreview ? 'bg-[#E5C590]' : 'bg-white/30'}`}
+                  className={`w-1 rounded-full ${isPlayingPreview ? 'bg-[#C5A880]' : 'bg-white/30'}`}
                 />
               ))}
             </div>
@@ -299,7 +299,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSendAudio, onCan
           type="button"
           onClick={handleSend}
           title="Send Encrypted Voice Note"
-          className="p-2.5 rounded-full bg-[#E5C590] hover:bg-[#d9b880] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
+          className="p-2.5 rounded-full bg-[#C5A880] hover:bg-[#B89B6E] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
         >
           <Send className="w-4 h-4" />
         </button>

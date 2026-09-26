@@ -1,0 +1,3 @@
+.env*
+scripts/security-audit-test.mjs
+qa-reports/

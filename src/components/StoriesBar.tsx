@@ -59,26 +59,26 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
         {/* Left Scroll Button */}
         <button
           onClick={() => scrollStories('left')}
-          className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#181B22] shadow-xl border border-white/15 items-center justify-center text-zinc-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+          className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1A1A1E] shadow-xl border border-white/15 items-center justify-center text-zinc-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
           aria-label="Previous Stories"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
         {/* Stories Scroll Container */}
-        <div 
+        <div
           ref={scrollContainerRef}
           className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth py-1"
         >
           {/* Add Vignette Card */}
-          <div 
+          <div
             onClick={onAddStory}
             className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group/btn"
           >
-            <div className="relative w-20 h-28 rounded-2xl border border-dashed border-white/15 group-hover/btn:border-white/35 bg-[#121419] flex flex-col items-center justify-center p-1 transition-all overflow-hidden shadow-sm">
-              <img 
-                src={currentUser.avatar} 
-                alt={currentUser.name} 
+            <div className="relative w-20 h-28 rounded-2xl border border-dashed border-white/15 group-hover/btn:border-white/35 bg-[#111113] flex flex-col items-center justify-center p-1 transition-all overflow-hidden shadow-sm">
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
                 className="w-9 h-9 rounded-full object-cover opacity-60 group-hover/btn:opacity-90 transition-opacity mb-1.5"
               />
               <div className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center text-xs shadow-md">
@@ -101,8 +101,8 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
               className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group/item"
             >
               <div className={`w-20 h-28 rounded-2xl overflow-hidden relative transition-all duration-300 group-hover/item:scale-[1.03] shadow-md ${
-                story.isViewed 
-                  ? 'border border-white/10 opacity-70' 
+                story.isViewed
+                  ? 'border border-white/10 opacity-70'
                   : 'border border-white/25 ring-1 ring-white/10'
               }`}>
                 <img
@@ -129,7 +129,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
         {/* Right Scroll Button */}
         <button
           onClick={() => scrollStories('right')}
-          className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#181B22] shadow-xl border border-white/15 items-center justify-center text-zinc-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+          className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1A1A1E] shadow-xl border border-white/15 items-center justify-center text-zinc-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
           aria-label="Next Stories"
         >
           <ChevronRight className="w-4 h-4" />
@@ -144,7 +144,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
             <div className="absolute top-3 left-3 right-3 z-20 flex gap-1">
               {stories.map((s, idx) => (
                 <div key={s.id} className="h-0.5 flex-1 bg-white/20 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-[#F4F1EC] transition-all"
                     style={{
                       width: idx < activeStoryIndex! ? '100%' : idx === activeStoryIndex ? `${progress}%` : '0%'

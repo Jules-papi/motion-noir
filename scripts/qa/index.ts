@@ -89,7 +89,7 @@ async function main() {
     // 6. Visual Regression Check
     if (['full', 'regression'].includes(command)) {
       console.log(`[QA] Running Visual Regression Checks...`);
-      const regressionIssues = await runRegressionCheck(page, '/');
+      const regressionIssues = await runRegressionCheck(page, targetUrl, '/');
       allIssues.push(...regressionIssues);
       if (regressionIssues.length > 0) results.visualRegression = false;
     }

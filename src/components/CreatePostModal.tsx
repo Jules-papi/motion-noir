@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Post, UserProfile } from '../types';
-import { 
-  X, 
+import {
+  X,
   ArrowLeft,
   ArrowRight,
-  Camera, 
-  Image as ImageIcon, 
+  Camera,
+  Image as ImageIcon,
   FlipHorizontal,
   RefreshCw,
   Check,
@@ -63,9 +63,11 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   // Media & Form State - REAL DEVICE PHOTOS ONLY
   const [capturedImage, setCapturedImage] = useState<string>('');
+  const [selectedFileOrBlob, setSelectedFileOrBlob] = useState<File | Blob | null>(null);
   const [devicePhotos, setDevicePhotos] = useState<string[]>([]);
   const [caption, setCaption] = useState<string>('');
-  
+  const [isSensitive, setIsSensitive] = useState<boolean>(false);
+
   // Free OpenStreetMap Geocoding & GPS Location State
   const [selectedLocation, setSelectedLocation] = useState<string>('Amsterdam Chapter');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lon: number } | null>({ lat: 52.3676, lon: 4.9041 });
@@ -172,8 +174,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-    setCapturedImage(dataUrl);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        setSelectedFileOrBlob(blob);
+        const previewUrl = URL.createObjectURL(blob);
+        setCapturedImage(previewUrl);
+        setDevicePhotos(prev => [previewUrl, ...prev.filter(item => item !== previewUrl)]);
+      }
+    }, 'image/jpeg', 0.92);
     stopCamera();
 
     if ('vibrate' in navigator) {
@@ -186,16 +194,24 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        setCapturedImage(result);
-        setDevicePhotos(prev => [result, ...prev.filter(item => item !== result)]);
-        stopCamera();
-      }
-    };
-    reader.readAsDataURL(file);
+    // Strict client validation: MIME and Max Size 5MB
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      alert('Yalnızca JPEG, PNG veya WebP görseli yükleyebilirsiniz.');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Görsel boyutu 5MB sınırını aşamaz.');
+      e.target.value = '';
+      return;
+    }
+
+    setSelectedFileOrBlob(file);
+    const previewUrl = URL.createObjectURL(file);
+    setCapturedImage(previewUrl);
+    setDevicePhotos(prev => [previewUrl, ...prev.filter(item => item !== previewUrl)]);
+    stopCamera();
     e.target.value = '';
   };
 
@@ -304,12 +320,26 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      let finalMediaUrl = capturedImage;
+
+      // Real Supabase Storage upload: replaces Base64 with HTTPS public URL
+      if (selectedFileOrBlob) {
+        const uploadedUrl = await noirApi.uploadImage(selectedFileOrBlob, 'posts');
+        if (!uploadedUrl) {
+          alert('Görsel sunucuya yüklenemedi. Lütfen tekrar deneyin.');
+          setIsSubmitting(false);
+          return;
+        }
+        finalMediaUrl = uploadedUrl;
+      }
+
       const newPost: Partial<Post> = {
         author: currentUser,
         type: 'photo',
         content: caption.trim() || undefined,
-        mediaUrl: capturedImage,
+        mediaUrl: finalMediaUrl,
         hasFaceMask,
+        isSensitive,
         isSubscribersOnly: privacyTier === 'vip',
         isPPV: privacyTier === 'vip',
         unlockPrice: privacyTier === 'vip' ? 50 : undefined,
@@ -324,54 +354,55 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
       onSubmitPost(newPost);
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Publish error:', err);
+      alert(err.message || 'Gönderi paylaşılırken bir hata oluştu.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div 
+    <div
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
     >
-      <div 
+      <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0A0C10] border border-white/10 w-full sm:max-w-xl h-full sm:h-[88vh] sm:rounded-3xl flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
+        className="bg-[#111113] border border-white/[0.08] w-full sm:max-w-xl h-full sm:h-[88vh] sm:rounded-xl flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
       >
         {/* ========================================================
-            1. INSTAGRAM TOP NAVIGATION BAR
+            1. TOP NAVIGATION BAR
             ======================================================== */}
-        <header className="h-14 px-4 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-[#0E1015]">
+        <header className="h-14 px-4 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-[#111113]">
           {step === 'media' ? (
             <button
               onClick={() => {
                 stopCamera();
                 onClose();
               }}
-              className="text-xs font-sans text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="text-xs font-sans text-[#9A9996] hover:text-[#F1EFEA] transition-colors cursor-pointer"
             >
               Vazgeç
             </button>
           ) : (
             <button
               onClick={() => setStep('media')}
-              className="p-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 text-[#9A9996] hover:text-[#F1EFEA] transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
           )}
 
-          <h2 className="text-sm font-sans font-semibold tracking-wide text-white">
-            {step === 'media' ? 'Yeni Gönderi' : 'Yeni Paylaşım'}
+          <h2 className="text-xs font-sans font-medium tracking-wide text-[#F1EFEA]">
+            {step === 'media' ? 'Yeni Gönderi' : 'Gönderi Detayları'}
           </h2>
 
           {step === 'media' ? (
             <button
               onClick={() => setStep('details')}
               disabled={!capturedImage}
-              className="text-xs font-sans font-semibold text-[#E5C590] hover:text-[#d9b880] transition-colors cursor-pointer disabled:opacity-40"
+              className="text-xs font-sans font-medium text-[#C5A880] hover:text-[#F1EFEA] transition-colors cursor-pointer disabled:opacity-40"
             >
               İleri
             </button>
@@ -379,7 +410,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
             <button
               onClick={handlePublish}
               disabled={isSubmitting}
-              className="px-3.5 py-1.5 rounded-full bg-linear-to-r from-[#E5C590] to-[#C9A96E] text-black font-semibold text-xs hover:brightness-110 transition-all cursor-pointer disabled:opacity-40"
+              className="px-3.5 py-1.5 rounded-lg bg-[#F1EFEA] hover:bg-white text-[#09090B] font-medium text-xs transition-all cursor-pointer disabled:opacity-40"
             >
               {isSubmitting ? 'Paylaşılıyor...' : 'Paylaş'}
             </button>
@@ -419,9 +450,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     {/* Circular Shutter Button */}
                     <button
                       onClick={handleCapturePhoto}
-                      className="w-18 h-18 rounded-full border-4 border-[#E5C590] p-1.5 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer shadow-[0_0_20px_rgba(229,197,144,0.4)]"
+                      className="w-18 h-18 rounded-full border-4 border-[#C5A880] p-1.5 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer shadow-[0_0_20px_rgba(229,197,144,0.4)]"
                     >
-                      <div className="w-full h-full rounded-full bg-white active:bg-[#E5C590] transition-colors" />
+                      <div className="w-full h-full rounded-full bg-white active:bg-[#C5A880] transition-colors" />
                     </button>
 
                     {/* Switch to gallery */}
@@ -437,7 +468,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   {/* Camera Error / Permission Notice */}
                   {cameraError && (
                     <div className="absolute inset-0 bg-black/90 p-6 flex flex-col items-center justify-center text-center space-y-4">
-                      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-[#E5C590]">
+                      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-[#C5A880]">
                         <Camera className="w-6 h-6" />
                       </div>
                       <p className="text-xs text-zinc-300 max-w-xs leading-relaxed font-sans">
@@ -446,7 +477,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       <div className="flex gap-2">
                         <button
                           onClick={() => startCamera()}
-                          className="px-4 py-2 rounded-full bg-[#E5C590] text-black font-semibold text-xs hover:brightness-110 cursor-pointer"
+                          className="px-4 py-2 rounded-full bg-[#C5A880] text-black font-semibold text-xs hover:brightness-110 cursor-pointer"
                         >
                           Tekrar Dene
                         </button>
@@ -496,11 +527,11 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div 
+                  <div
                     onClick={() => fileInputRef.current?.click()}
                     className="flex flex-col items-center justify-center p-8 text-center cursor-pointer group hover:bg-white/[0.02] rounded-3xl transition-all"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/15 group-hover:border-[#E5C590] flex items-center justify-center text-[#E5C590] mb-3 group-hover:scale-105 transition-all shadow-xl">
+                    <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/15 group-hover:border-[#C5A880] flex items-center justify-center text-[#C5A880] mb-3 group-hover:scale-105 transition-all shadow-xl">
                       <ImageIcon className="w-8 h-8 stroke-[1.5]" />
                     </div>
                     <h3 className="text-white font-medium text-sm font-sans mb-1">
@@ -529,7 +560,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-xl overflow-hidden border-2 ${
-                    selectedFilter.id === f.id ? 'border-[#E5C590]' : 'border-white/10'
+                    selectedFilter.id === f.id ? 'border-[#C5A880]' : 'border-white/10'
                   }`}>
                     {capturedImage ? (
                       <img
@@ -539,14 +570,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div 
+                      <div
                         style={{ filter: f.css }}
-                        className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900" 
+                        className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900"
                       />
                     )}
                   </div>
                   <span className={`text-[10px] font-sans ${
-                    selectedFilter.id === f.id ? 'text-[#E5C590] font-semibold' : 'text-zinc-400'
+                    selectedFilter.id === f.id ? 'text-[#C5A880] font-semibold' : 'text-zinc-400'
                   }`}>
                     {f.name}
                   </span>
@@ -557,14 +588,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
             {/* Bottom Gallery Grid & Mode Selector */}
             <div className="h-44 bg-[#0E1015] border-t border-white/[0.08] flex flex-col shrink-0">
               {/* Mode Switcher Tabs */}
-              <div className="flex border-b border-white/[0.06] bg-[#07080A]">
+              <div className="flex border-b border-white/[0.06] bg-[#09090B]">
                 <button
                   onClick={() => {
                     setMode('gallery');
                     stopCamera();
                   }}
                   className={`flex-1 py-2 text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    mode === 'gallery' ? 'text-white border-b-2 border-[#E5C590]' : 'text-zinc-500 hover:text-zinc-300'
+                    mode === 'gallery' ? 'text-white border-b-2 border-[#C5A880]' : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
                   <ImageIcon className="w-3.5 h-3.5" />
@@ -577,7 +608,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     startCamera();
                   }}
                   className={`flex-1 py-2 text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    mode === 'camera' ? 'text-white border-b-2 border-[#E5C590]' : 'text-zinc-500 hover:text-zinc-300'
+                    mode === 'camera' ? 'text-white border-b-2 border-[#C5A880]' : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
                   <Camera className="w-3.5 h-3.5" />
@@ -589,8 +620,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <div className="flex-1 p-3 overflow-y-auto">
                 <div className="grid grid-cols-4 gap-2">
                   {/* Upload from Device Button */}
-                  <label className="aspect-square rounded-xl bg-white/[0.04] border border-dashed border-white/20 hover:border-[#E5C590]/50 flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white cursor-pointer transition-colors group">
-                    <Upload className="w-4 h-4 text-[#E5C590] group-hover:scale-110 transition-transform" />
+                  <label className="aspect-square rounded-xl bg-white/[0.04] border border-dashed border-white/20 hover:border-[#C5A880]/50 flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white cursor-pointer transition-colors group">
+                    <Upload className="w-4 h-4 text-[#C5A880] group-hover:scale-110 transition-transform" />
                     <span className="text-[10px] font-sans">Fotoğraf Seç</span>
                     <input
                       ref={fileInputRef}
@@ -610,12 +641,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                         stopCamera();
                       }}
                       className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border transition-all ${
-                        capturedImage === url ? 'border-[#E5C590] ring-2 ring-[#E5C590]/30' : 'border-transparent hover:border-white/20'
+                        capturedImage === url ? 'border-[#C5A880] ring-2 ring-[#C5A880]/30' : 'border-transparent hover:border-white/20'
                       }`}
                     >
                       <img src={url} alt={`Device Photo ${index}`} className="w-full h-full object-cover" />
                       {capturedImage === url && (
-                        <div className="absolute inset-0 bg-[#E5C590]/20 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[#C5A880]/20 flex items-center justify-center">
                           <Check className="w-4 h-4 text-white drop-shadow-md" />
                         </div>
                       )}
@@ -623,13 +654,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   ))}
 
                   {devicePhotos.length === 0 && (
-                    <div 
+                    <div
                       onClick={() => fileInputRef.current?.click()}
                       className="col-span-3 aspect-auto rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 flex items-center gap-3 cursor-pointer hover:bg-white/[0.04] transition-colors"
                     >
                       <Compass className="w-5 h-5 text-zinc-500 shrink-0" />
                       <p className="text-[11px] text-zinc-400 font-sans leading-tight">
-                        Cihazınızdaki fotoğraflardan birini seçmek için sol taraftaki <span className="text-[#E5C590] font-medium">Fotoğraf Seç</span> butonuna tıklayın.
+                        Cihazınızdaki fotoğraflardan birini seçmek için sol taraftaki <span className="text-[#C5A880] font-medium">Fotoğraf Seç</span> butonuna tıklayın.
                       </p>
                     </div>
                   )}
@@ -661,16 +692,16 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   onChange={(e) => setCaption(e.target.value)}
                   placeholder="Bir açıklama yaz... (#etiketler ekleyebilirsiniz)"
                   rows={4}
-                  className="w-full p-3 rounded-xl bg-[#121419] border border-white/[0.08] text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#E5C590]/50 font-sans resize-none leading-relaxed"
+                  className="w-full p-3 rounded-xl bg-[#111113] border border-white/[0.08] text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#C5A880]/50 font-sans resize-none leading-relaxed"
                 />
               </div>
             </div>
 
             {/* Free OpenStreetMap & GPS Location Selector */}
-            <div className="space-y-3 p-3.5 rounded-2xl bg-[#121419] border border-white/[0.08]">
+            <div className="space-y-3 p-3.5 rounded-2xl bg-[#111113] border border-white/[0.08]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-sans text-zinc-300">
-                  <MapPin className="w-3.5 h-3.5 text-[#E5C590]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#C5A880]" />
                   <span className="font-medium">Konum Ekle</span>
                   <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-500/20">
                     Ücretsiz Harita & GPS
@@ -687,12 +718,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   >
                     {isLocating ? (
                       <>
-                        <Loader2 className="w-3 h-3 animate-spin text-[#E5C590]" />
+                        <Loader2 className="w-3 h-3 animate-spin text-[#C5A880]" />
                         <span>Bulunuyor...</span>
                       </>
                     ) : (
                       <>
-                        <Navigation className="w-3 h-3 text-[#E5C590]" />
+                        <Navigation className="w-3 h-3 text-[#C5A880]" />
                         <span>Mevcut Konumum</span>
                       </>
                     )}
@@ -702,8 +733,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     type="button"
                     onClick={() => setShowLocationSearch(!showLocationSearch)}
                     className={`px-2.5 py-1 rounded-full text-[11px] font-sans border transition-colors cursor-pointer flex items-center gap-1 ${
-                      showLocationSearch 
-                        ? 'bg-[#E5C590] text-black border-[#E5C590] font-medium'
+                      showLocationSearch
+                        ? 'bg-[#C5A880] text-black border-[#C5A880] font-medium'
                         : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 border-white/10'
                     }`}
                   >
@@ -723,16 +754,16 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       value={locationSearchQuery}
                       onChange={(e) => handleSearchLocations(e.target.value)}
                       placeholder="Şehir, ilçe veya mekan ara (örn: Kadıköy, Bebek, Amsterdam, Berlin)..."
-                      className="w-full pl-8.5 pr-8 py-2 rounded-xl bg-[#181B22] border border-white/15 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#E5C590]/50 font-sans"
+                      className="w-full pl-8.5 pr-8 py-2 rounded-xl bg-[#1A1A1E] border border-white/15 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#C5A880]/50 font-sans"
                     />
                     {isSearchingLocation && (
-                      <Loader2 className="w-3.5 h-3.5 text-[#E5C590] animate-spin absolute right-3 top-1/2 -translate-y-1/2" />
+                      <Loader2 className="w-3.5 h-3.5 text-[#C5A880] animate-spin absolute right-3 top-1/2 -translate-y-1/2" />
                     )}
                   </div>
 
                   {/* Suggestions Dropdown */}
                   {locationSuggestions.length > 0 && (
-                    <div className="rounded-xl bg-[#181B22] border border-white/15 overflow-hidden shadow-2xl divide-y divide-white/[0.06] max-h-40 overflow-y-auto">
+                    <div className="rounded-xl bg-[#1A1A1E] border border-white/15 overflow-hidden shadow-2xl divide-y divide-white/[0.06] max-h-40 overflow-y-auto">
                       {locationSuggestions.map((item, idx) => (
                         <div
                           key={idx}
@@ -744,7 +775,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                           }}
                           className="p-2.5 hover:bg-white/[0.06] text-xs text-zinc-300 hover:text-white flex items-center gap-2 cursor-pointer transition-colors"
                         >
-                          <MapPin className="w-3.5 h-3.5 text-[#E5C590] shrink-0" />
+                          <MapPin className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
                           <span className="truncate">{item.displayName}</span>
                         </div>
                       ))}
@@ -788,7 +819,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     className="w-full h-full opacity-80 filter contrast-125"
                     title="OpenStreetMap"
                   />
-                  <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md text-[9px] font-mono text-[#E5C590] border border-white/10 pointer-events-none flex items-center gap-1">
+                  <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-md text-[9px] font-mono text-[#C5A880] border border-white/10 pointer-events-none flex items-center gap-1">
                     <Compass className="w-2.5 h-2.5" />
                     <span>OpenStreetMap</span>
                   </div>
@@ -815,8 +846,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     }}
                     className={`px-2.5 py-1 rounded-full text-[11px] font-sans transition-all cursor-pointer ${
                       selectedLocation === item.name
-                        ? 'bg-[#E5C590] text-black font-semibold shadow-xs'
-                        : 'bg-[#181B22] text-zinc-400 border border-white/[0.06] hover:text-white hover:border-white/20'
+                        ? 'bg-[#C5A880] text-black font-semibold shadow-xs'
+                        : 'bg-[#1A1A1E] text-zinc-400 border border-white/[0.06] hover:text-white hover:border-white/20'
                     }`}
                   >
                     {item.name}
@@ -830,7 +861,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-xs font-sans font-medium text-white flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-[#E5C590]" />
+                    <Shield className="w-3.5 h-3.5 text-[#C5A880]" />
                     <span>Discreet Yüz Maskesi</span>
                   </div>
                   <div className="text-[11px] text-zinc-500 font-sans">
@@ -841,11 +872,35 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   type="button"
                   onClick={() => setHasFaceMask(!hasFaceMask)}
                   className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                    hasFaceMask ? 'bg-[#E5C590]' : 'bg-white/10'
+                    hasFaceMask ? 'bg-[#C5A880]' : 'bg-white/10'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5 ${
                     hasFaceMask ? 'left-5.5' : 'left-0.5'
+                  }`} />
+                </button>
+              </div>
+
+              {/* Sensitive Media (NSFW Blur) Toggle */}
+              <div className="flex items-center justify-between pt-1">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-sans font-medium text-white flex items-center gap-1.5">
+                    <EyeOff className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Hassas İçerik Sansürü (NSFW Blur)</span>
+                  </div>
+                  <div className="text-[11px] text-zinc-500 font-sans">
+                    Akışta koruyucu buzlu perdeyle sunulur; kullanıcı onayladığında açılır.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSensitive(!isSensitive)}
+                  className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                    isSensitive ? 'bg-amber-500' : 'bg-white/10'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5 ${
+                    isSensitive ? 'left-5.5' : 'left-0.5'
                   }`} />
                 </button>
               </div>
@@ -859,8 +914,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     onClick={() => setPrivacyTier('public')}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       privacyTier === 'public'
-                        ? 'bg-[#E5C590]/15 border-[#E5C590] text-[#E5C590]'
-                        : 'bg-[#121419] border-white/10 text-zinc-400'
+                        ? 'bg-[#C5A880]/15 border-[#C5A880] text-[#C5A880]'
+                        : 'bg-[#111113] border-white/10 text-zinc-400'
                     }`}
                   >
                     <div className="text-xs font-semibold">Tüm Üyeler</div>
@@ -872,8 +927,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     onClick={() => setPrivacyTier('verified')}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       privacyTier === 'verified'
-                        ? 'bg-[#E5C590]/15 border-[#E5C590] text-[#E5C590]'
-                        : 'bg-[#121419] border-white/10 text-zinc-400'
+                        ? 'bg-[#C5A880]/15 border-[#C5A880] text-[#C5A880]'
+                        : 'bg-[#111113] border-white/10 text-zinc-400'
                     }`}
                   >
                     <div className="text-xs font-semibold">Doğrulanmış</div>
@@ -885,8 +940,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                     onClick={() => setPrivacyTier('vip')}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       privacyTier === 'vip'
-                        ? 'bg-[#E5C590]/15 border-[#E5C590] text-[#E5C590]'
-                        : 'bg-[#121419] border-white/10 text-zinc-400'
+                        ? 'bg-[#C5A880]/15 border-[#C5A880] text-[#C5A880]'
+                        : 'bg-[#111113] border-white/10 text-zinc-400'
                     }`}
                   >
                     <div className="text-xs font-semibold">Özel Kilitli</div>

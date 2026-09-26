@@ -47,7 +47,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const finalUrl = mediaUrl || (selectedPresetIndex !== null ? presets[selectedPresetIndex] : presets[0]);
-    
+
     const newStory: Story = {
       id: `story-${Date.now()}`,
       type: 'photo',
@@ -71,17 +71,17 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div 
-        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      <div
+        className="bg-[#09090B] border border-white/[0.12] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 px-5 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-[#121419]">
+        <div className="p-4 px-5 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-[#111113]">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#E5C590] animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#C5A880] animate-pulse" />
             <h3 className="font-serif text-sm text-white font-medium">Publish 24h Vignette (Story)</h3>
           </div>
-          <button 
+          <button
             onClick={onClose}
             aria-label="Close modal"
             className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
@@ -93,13 +93,13 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
         {/* Content */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 flex-1 overflow-y-auto">
           {/* Media Preview Box */}
-          <div className="relative aspect-[9/14] max-h-[280px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-[#181B22] flex flex-col items-center justify-center group shadow-inner">
+          <div className="relative aspect-[9/14] max-h-[280px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-[#1A1A1E] flex flex-col items-center justify-center group shadow-inner">
             {mediaUrl || selectedPresetIndex !== null ? (
               <>
-                <img 
-                  src={mediaUrl || presets[selectedPresetIndex!]} 
+                <img
+                  src={mediaUrl || presets[selectedPresetIndex!]}
                   alt="Story preview"
-                  className="w-full h-full object-cover" 
+                  className="w-full h-full object-cover"
                 />
                 <button
                   type="button"
@@ -113,11 +113,11 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
                 </button>
               </>
             ) : (
-              <div 
+              <div
                 onClick={() => fileInputRef.current?.click()}
                 className="flex flex-col items-center justify-center p-6 text-center cursor-pointer w-full h-full hover:bg-white/[0.02] transition-colors"
               >
-                <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#E5C590] mb-2 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#C5A880] mb-2 group-hover:scale-110 transition-transform">
                   <Upload className="w-5 h-5" />
                 </div>
                 <span className="text-xs font-medium text-zinc-200 block">Select Photo from Device</span>
@@ -126,12 +126,12 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
             )}
           </div>
 
-          <input 
+          <input
             ref={fileInputRef}
-            type="file" 
-            accept="image/*" 
-            className="hidden" 
-            onChange={handleFileUpload} 
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileUpload}
           />
 
           {/* Quick Preset Selection */}
@@ -149,13 +149,13 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
                   }}
                   className={`aspect-square rounded-xl overflow-hidden border transition-all relative cursor-pointer ${
                     selectedPresetIndex === idx && !mediaUrl
-                      ? 'border-[#E5C590] ring-2 ring-[#E5C590]/40'
+                      ? 'border-[#C5A880] ring-2 ring-[#C5A880]/40'
                       : 'border-white/10 opacity-70 hover:opacity-100'
                   }`}
                 >
                   <img src={src} alt="preset" className="w-full h-full object-cover" />
                   {selectedPresetIndex === idx && !mediaUrl && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[#E5C590]">
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[#C5A880]">
                       <Check className="w-4 h-4" />
                     </div>
                   )}
@@ -172,12 +172,12 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
               value={caption}
               onChange={e => setCaption(e.target.value)}
               placeholder="Private thought or invitation..."
-              className="w-full px-3.5 py-2.5 bg-[#181B22] border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 outline-none focus:border-[#E5C590]/50"
+              className="w-full px-3.5 py-2.5 bg-[#1A1A1E] border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 outline-none focus:border-[#C5A880]/50"
             />
           </div>
 
           <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.04]">
-            <Clock className="w-3.5 h-3.5 text-[#E5C590]" />
+            <Clock className="w-3.5 h-3.5 text-[#C5A880]" />
             <span>Ephemeral Vignettes self-archive automatically after 24 hours.</span>
           </div>
 
@@ -192,7 +192,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-xs rounded-full bg-[#E5C590] hover:bg-[#d9b880] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
+              className="px-5 py-2 text-xs rounded-full bg-[#C5A880] hover:bg-[#B89B6E] text-black font-semibold shadow-md active:scale-95 transition-all cursor-pointer"
             >
               Post Vignette
             </button>

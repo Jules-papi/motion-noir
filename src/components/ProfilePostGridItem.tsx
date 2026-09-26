@@ -30,14 +30,14 @@ export const ProfilePostGridItem: React.FC<ProfilePostGridItemProps> = ({
   return (
     <div
       onClick={handleClick}
-      className="group relative aspect-square rounded-2xl overflow-hidden bg-[#121419] cursor-pointer border border-white/[0.08] hover:border-white/25 transition-all duration-300 shadow-md"
+      className="group relative aspect-square rounded-xl overflow-hidden bg-[#111113] cursor-pointer border border-white/[0.08] hover:border-white/25 transition-all duration-300 shadow-md"
     >
       {post.type === 'text' ? (
-        <div className="w-full h-full p-4 flex flex-col justify-between bg-[#181B22]">
-          <p className="text-xs text-zinc-300 line-clamp-4 leading-relaxed font-serif italic">
+        <div className="w-full h-full p-4 flex flex-col justify-between bg-[#1A1A1E]">
+          <p className="text-xs text-[#F1EFEA] line-clamp-4 leading-relaxed font-serif italic">
             "{post.content}"
           </p>
-          <span className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase">
+          <span className="text-[9px] font-mono tracking-widest text-[#66666A] uppercase">
             Salon Dispatch
           </span>
         </div>
@@ -57,28 +57,28 @@ export const ProfilePostGridItem: React.FC<ProfilePostGridItemProps> = ({
 
           {/* Locked Overlays */}
           {isPpvLocked ? (
-            <div className="absolute inset-0 bg-[#07080A]/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-zinc-200">
-              <div className="w-9 h-9 rounded-full bg-[#181B22] border border-[#E5C590]/40 flex items-center justify-center mb-1.5 text-[#E5C590]">
+            <div className="absolute inset-0 bg-[#09090B]/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-[#F1EFEA]">
+              <div className="w-9 h-9 rounded-full bg-[#1A1A1E] border border-[#C5A880]/40 flex items-center justify-center mb-1.5 text-[#C5A880]">
                 <Lock className="w-4 h-4" />
               </div>
-              <span className="text-xs font-mono font-medium text-[#E5C590]">
+              <span className="text-xs font-mono font-medium text-[#C5A880]">
                 {post.unlockPrice} €
               </span>
-              <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-400 mt-0.5">
+              <span className="text-[9px] font-mono uppercase tracking-widest text-[#9A9996] mt-0.5">
                 Confidential Plate
               </span>
             </div>
           ) : isSubLocked ? (
-            <div className="absolute inset-0 bg-[#07080A]/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-zinc-200">
-              <div className="w-9 h-9 rounded-full bg-[#181B22] border border-[#E5C590]/40 flex items-center justify-center mb-1.5 text-[#E5C590]">
+            <div className="absolute inset-0 bg-[#09090B]/85 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-[#F1EFEA]">
+              <div className="w-9 h-9 rounded-full bg-[#1A1A1E] border border-[#C5A880]/40 flex items-center justify-center mb-1.5 text-[#C5A880]">
                 <Crown className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-sans uppercase tracking-wider text-[#E5C590]">
+              <span className="text-[10px] font-sans uppercase tracking-wider text-[#C5A880]">
                 Privé Patron Only
               </span>
             </div>
           ) : (
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white font-mono text-xs">
+            <div className="absolute inset-0 bg-[#09090B]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-[#F1EFEA] font-mono text-xs">
               <span>{post.likesCount} applauds</span>
               <span>{post.commentsCount} notes</span>
             </div>
@@ -87,17 +87,17 @@ export const ProfilePostGridItem: React.FC<ProfilePostGridItemProps> = ({
           {/* Corner Badges */}
           <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
             {post.type === 'video' && (
-              <span className="p-1.5 rounded-full bg-black/70 backdrop-blur-md text-white border border-white/10">
+              <span className="p-1.5 rounded-full bg-[#09090B]/70 backdrop-blur-md text-[#F1EFEA] border border-white/10">
                 <Play className="w-2.5 h-2.5 fill-current" />
               </span>
             )}
             {post.isPPV && !isPpvLocked && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#181B22] border border-[#E5C590]/40 text-[#E5C590] text-[9px] font-mono uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#1A1A1E] border border-[#C5A880]/40 text-[#C5A880] text-[9px] font-mono uppercase tracking-wider">
                 Unsealed
               </span>
             )}
             {post.isSubscribersOnly && !isSubLocked && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#181B22] border border-[#E5C590]/40 text-[#E5C590] text-[9px] font-mono uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#1A1A1E] border border-[#C5A880]/40 text-[#C5A880] text-[9px] font-mono uppercase tracking-wider">
                 Privé
               </span>
             )}

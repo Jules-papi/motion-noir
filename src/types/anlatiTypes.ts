@@ -40,7 +40,7 @@ export interface PartnerConnection {
 }
 
 export type SupportedCurrency = 'EUR' | 'TRY';
-export type SupportedLanguage = 'nl' | 'en' | 'tr';
+export type SupportedLanguage = 'tr' | 'en' | 'nl' | 'de' | 'fr';
 
 export interface PrivateVaultItem {
   id: string;

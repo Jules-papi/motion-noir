@@ -14,6 +14,9 @@ export interface UserProfile {
   website: string;
   joinDate: string;
   isVerified: boolean;
+  isOrganizer?: boolean;
+  organizerStatus?: 'none' | 'pending' | 'verified' | 'rejected';
+  isAdmin?: boolean;
   isPrivate?: boolean;
   followersCount: number;
   followingCount: number;
@@ -26,6 +29,9 @@ export interface UserProfile {
   age?: number;
   gender?: string;
   orientation?: string;
+  interests?: string[];
+  lookingFor?: string[];
+  boundaries?: string[];
   dualVerifiedCouple?: boolean;
   partnerName?: string;
   partnerUsername?: string;
@@ -127,6 +133,7 @@ export interface ChatMessage {
   audioWaveform?: number[];
   status: MessageDeliveryStatus;
   createdAt: string;
+  rawCreatedAt?: string;
   isViewOnce?: boolean;
   isViewedOnce?: boolean;
   viewOnceTimer?: number;
@@ -171,25 +178,168 @@ export interface EventAttendeeRatio {
   singleMenQuotaFull?: boolean;
 }
 
+export interface Venue {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  city: string;
+  address?: string;
+  venueType: 'villa' | 'club' | 'suite' | 'bunker' | 'hotel' | 'outdoor' | 'resort' | string;
+  capacity?: number;
+  coverImage: string;
+  photos: string[];
+  amenities: string[];
+  rules: string[];
+  isVerified: boolean;
+  ownerId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface OrganizerApplication {
+  id: string;
+  userId: string;
+  user?: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+    isVerified?: boolean;
+    membershipTier?: MembershipTier;
+  };
+  experience: string;
+  intendedEvents: string;
+  socialLinks?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewerNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  description?: string;
+  sortOrder?: number;
+}
+
+export interface EventAttendee {
+  id: string;
+  eventId: string;
+  userId: string;
+  userName: string;
+  userUsername: string;
+  userAvatar: string;
+  isVerified?: boolean;
+  status: 'pending' | 'approved' | 'rejected' | 'waitlisted' | 'cancelled';
+  participationType?: string;
+  note?: string;
+  ticketCode?: string;
+  isPaid: boolean;
+  isCheckedIn: boolean;
+  checkedInAt?: string;
+  ndaSigned: boolean;
+  ndaSignedAt?: string;
+  createdAt: string;
+}
+
+export interface EventComment {
+  id: string;
+  eventId: string;
+  user: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+    isVerified?: boolean;
+  };
+  content: string;
+  createdAt: string;
+}
+
+export interface EventFilters {
+  city?: string;
+  categoryId?: string;
+  startAfter?: string;
+  startBefore?: string;
+  search?: string;
+  organizerId?: string;
+  status?: 'published' | 'draft';
+  savedOnly?: boolean;
+  registeredOnly?: boolean;
+}
+
+export interface CreateEventPayload {
+  title: string;
+  description?: string;
+  coverImage?: string;
+  categoryId?: string;
+  startAt: string;
+  endAt?: string;
+  timezone?: string;
+  city?: string;
+  venue?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
+  price?: number;
+  currency?: string;
+  vipFree?: boolean;
+  requiresApproval?: boolean;
+  ndaRequired?: boolean;
+  dressCode?: string;
+  participationTarget?: 'couples_only' | 'trio_couples' | 'mixed' | 'all';
+  orientationNotice?: string;
+  minAge?: number;
+  isPrivate?: boolean;
+  venueId?: string;
+  status?: 'draft' | 'pending_review' | 'published';
+}
+
+export interface RegistrationPayload {
+  participationType?: string;
+  note?: string;
+}
+
 export interface PlatformEvent {
   id: string;
+  organizerId?: string;
+  seriesId?: string | null;
   title: string;
   description: string;
   category: 'party' | 'arts' | 'networking' | 'lifestyle' | 'outdoor' | 'swinger' | 'trio' | 'sexparty' | 'kink' | 'cocktail' | 'dinner' | string;
+  categoryId?: string;
+  status?: 'draft' | 'pending_review' | 'published' | 'cancelled' | 'completed';
+  venueId?: string;
+  venueData?: Venue;
   city: string;
   venue: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   coverImage: string;
   capacity: number;
   attendeesCount: number;
+  savesCount?: number;
+  viewsCount?: number;
   price: number; // 0 for free, or 150 TL, 250 TL
+  currency?: string;
   vipFree: boolean; // free for VIP members
+  requiresApproval?: boolean;
+  minAge?: number;
+  isPrivate?: boolean;
   startsAt: string;
   endsAt: string;
+  timezone?: string;
   dressCode?: string;
   isUserRegistered: boolean;
   isCheckedIn: boolean;
-  applicationStatus?: 'none' | 'pending' | 'approved' | 'approved_unpaid' | 'paid' | 'rejected' | 'checked_in';
+  isSaved?: boolean;
+  applicationStatus?: 'none' | 'pending' | 'approved' | 'approved_unpaid' | 'paid' | 'rejected' | 'waitlisted' | 'cancelled' | 'checked_in';
   participationTarget?: 'couples_only' | 'trio_couples' | 'mixed' | 'all';
   orientationNotice?: string;
   isNetherlandsHosted?: boolean;
@@ -198,12 +348,15 @@ export interface PlatformEvent {
   ndaRequired?: boolean;
   attendeeRatio?: EventAttendeeRatio;
   organizer: {
+    id?: string;
     name: string;
     username: string;
     avatar: string;
     isVerified: boolean;
   };
   attendeeAvatars?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // -------------------------------------------------------------
@@ -269,15 +422,18 @@ export interface DiscoveryProfile {
   avatar: string;
   coverImage?: string;
   bio: string;
-  age: number;
-  gender: 'man' | 'woman' | 'couple_mf' | 'non_binary';
+  age?: number;
+  gender?: 'man' | 'woman' | 'couple' | 'couple_mf' | 'non_binary' | 'unspecified' | string;
+  orientation?: string;
   city: string;
-  distanceKm: number;
+  distanceKm?: number;
   isOnline: boolean;
   isVerified: boolean;
   isPrivate?: boolean;
   membershipTier: MembershipTier;
   interests: string[];
+  lookingFor?: string[];
+  boundaries?: string[];
   matchRate: number; // percentage e.g. 94%
 }
 
@@ -353,7 +509,8 @@ export interface ProfileVisitor {
 // -------------------------------------------------------------
 export interface AppNotification {
   id: string;
-  type: 'ppv_unlock' | 'event_reminder' | 'event_approval' | 'chat_message' | 'forum_reply' | 'kyc' | 'system';
+  actorId?: string;
+  type: 'ppv_unlock' | 'event_reminder' | 'event_approval' | 'chat_message' | 'forum_reply' | 'kyc' | 'system' | 'like' | 'comment' | 'follow' | 'follow_request';
   title: string;
   message: string;
   isRead: boolean;

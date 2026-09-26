@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Play, 
-  Pause, 
-  Check, 
-  CheckCheck, 
-  Flame, 
-  Lock, 
-  Eye, 
-  Clock, 
-  X, 
+import {
+  Play,
+  Pause,
+  Check,
+  CheckCheck,
+  Flame,
+  Lock,
+  Eye,
+  Clock,
+  X,
   ShieldAlert,
   Sparkles
 } from 'lucide-react';
@@ -68,7 +68,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       {!isMe && msg.senderName && (
-        <div className="flex items-center gap-1.5 mb-1 ml-1 text-[10px] font-mono text-[#E5C590]">
+        <div className="flex items-center gap-1.5 mb-1 ml-1 text-[10px] font-mono text-[#C5A880]">
           {msg.senderAvatar && (
             <img src={msg.senderAvatar} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
           )}
@@ -78,8 +78,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       <div
         className={`max-w-[85%] sm:max-w-md rounded-2xl px-4 py-3 text-xs shadow-md ${
           isMe
-            ? 'bg-[#181B22] text-white border border-white/[0.14] rounded-br-xs'
-            : 'bg-[#121419] text-zinc-200 border border-white/[0.08] rounded-bl-xs'
+            ? 'bg-[#1A1A1E] text-white border border-white/[0.14] rounded-br-xs'
+            : 'bg-[#111113] text-zinc-200 border border-white/[0.08] rounded-bl-xs'
         }`}
       >
         {/* View-Once Ephemeral Plate */}
@@ -88,7 +88,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             {hasViewedLocal ? (
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-black/40 border border-white/[0.06] text-zinc-500">
                 <Flame className="w-4 h-4 text-zinc-600" />
-                <span className="font-serif italic text-[11px] text-zinc-400">
+                <span className="font-sans italic text-[11px] text-zinc-400">
                   Ephemeral media viewed and permanently destroyed.
                 </span>
               </div>
@@ -96,14 +96,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               <button
                 type="button"
                 onClick={handleOpenViewOnce}
-                className="w-full flex items-center justify-between gap-3 p-3 rounded-xl transition-all cursor-pointer bg-[#181B22] border border-[#E5C590]/30 hover:border-[#E5C590]/60 text-[#E5C590]"
+                className="w-full flex items-center justify-between gap-3 p-3 rounded-xl transition-all cursor-pointer bg-[#1A1A1E] border border-[#C5A880]/30 hover:border-[#C5A880]/60 text-[#C5A880]"
               >
                 <div className="flex items-center gap-2.5 text-left">
-                  <div className="w-7 h-7 rounded-full bg-[#E5C590] text-black flex items-center justify-center font-mono font-bold text-[11px]">
+                  <div className="w-7 h-7 rounded-full bg-[#C5A880] text-black flex items-center justify-center font-mono font-bold text-[11px]">
                     1x
                   </div>
                   <div>
-                    <span className="font-serif font-medium block text-xs text-white">
+                    <span className="font-sans font-medium block text-xs text-white">
                       Confidential Ephemeral Plate
                     </span>
                     <span className="text-[10px] text-zinc-400 font-sans block">
@@ -111,7 +111,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     </span>
                   </div>
                 </div>
-                <Eye className="w-4 h-4 shrink-0 text-[#E5C590]" />
+                <Eye className="w-4 h-4 shrink-0 text-[#C5A880]" />
               </button>
             )}
             {msg.text && <p className="mt-2 text-zinc-300 font-sans leading-relaxed">{msg.text}</p>}
@@ -122,9 +122,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             <button
               onClick={() => onToggleAudio(msg)}
               className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-xs transition-transform active:scale-95 cursor-pointer ${
-                isMe 
-                  ? 'bg-[#E5C590] text-black hover:bg-[#d9b880]' 
-                  : 'bg-[#181B22] text-[#E5C590] border border-[#E5C590]/30 hover:bg-[#20242e]'
+                isMe
+                  ? 'bg-[#C5A880] text-black hover:bg-[#B89B6E]'
+                  : 'bg-[#1A1A1E] text-[#C5A880] border border-[#C5A880]/30 hover:bg-[#1A1A1E]'
               }`}
               aria-label={isPlayingAudio ? 'Pause' : 'Play'}
             >
@@ -149,8 +149,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       key={i}
                       style={{ height: `${h}px` }}
                       className={`w-1 sm:w-1.5 rounded-full transition-all duration-150 ${
-                        isActive 
-                          ? 'bg-[#E5C590]' 
+                        isActive
+                          ? 'bg-[#C5A880]'
                           : 'bg-white/20'
                       }`}
                     />
@@ -177,7 +177,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {isMe && (
             <span>
               {msg.status === 'seen' ? (
-                <CheckCheck className="w-3.5 h-3.5 text-[#E5C590]" />
+                <CheckCheck className="w-3.5 h-3.5 text-[#C5A880]" />
               ) : msg.status === 'delivered' ? (
                 <CheckCheck className="w-3.5 h-3.5 text-zinc-400" />
               ) : (
@@ -193,21 +193,22 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         <div className="fixed inset-0 z-70 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 select-none">
           {/* Top Bar with Countdown */}
           <div className="max-w-md w-full flex items-center justify-between text-white mb-4">
-            <div className="flex items-center gap-2 bg-[#121419] border border-[#E5C590]/40 px-3.5 py-1.5 rounded-full text-xs font-mono text-[#E5C590] shadow-xl">
-              <Flame className="w-4 h-4 text-[#E5C590]" />
+            <div className="flex items-center gap-2 bg-[#111113] border border-[#C5A880]/40 px-3.5 py-1.5 rounded-full text-xs font-mono text-[#C5A880] shadow-xl">
+              <Flame className="w-4 h-4 text-[#C5A880]" />
               <span>Self-destructing in {secondsRemaining}s</span>
             </div>
 
             <button
               onClick={handleCloseViewOnceEarly}
-              className="p-2 rounded-full bg-[#181B22] border border-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-full bg-[#1A1A1E] border border-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              aria-label="Close private media"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Ephemeral Photo */}
-          <div className="max-w-md w-full max-h-[75vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-[#121419]">
+          <div className="max-w-md w-full max-h-[75vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-[#111113]">
             <img
               src={msg.mediaUrl || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1000&auto=format&fit=crop&q=80'}
               alt="View Once Private Media"
@@ -217,7 +218,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           </div>
 
           <div className="mt-4 flex items-center gap-2 text-zinc-400 text-xs font-sans">
-            <ShieldAlert className="w-4 h-4 text-[#E5C590]" />
+            <ShieldAlert className="w-4 h-4 text-[#C5A880]" />
             <span>Screen capture prohibited · Auto-destruction protocol active</span>
           </div>
         </div>

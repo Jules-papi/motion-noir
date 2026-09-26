@@ -34,7 +34,7 @@ export const DecoyScreen: React.FC<DecoyScreenProps> = ({ onDismiss }) => {
       </header>
 
       {/* Market Ticker */}
-      <div className="bg-[#14161C] border-b border-zinc-800/80 px-6 py-1.5 overflow-x-auto text-[11px] font-mono text-zinc-400 flex items-center gap-8 no-scrollbar">
+      <div className="bg-[#111113] border-b border-zinc-800/80 px-6 py-1.5 overflow-x-auto text-[11px] font-mono text-zinc-400 flex items-center gap-8 no-scrollbar">
         <div className="flex items-center gap-1.5">
           <span className="text-zinc-500">S&P 500</span>
           <span className="text-zinc-200">5,864.20</span>
@@ -113,7 +113,7 @@ export const DecoyScreen: React.FC<DecoyScreenProps> = ({ onDismiss }) => {
 
           {/* Sidebar Analysis */}
           <div className="space-y-6">
-            <div className="p-4 rounded-xl bg-[#14161C] border border-zinc-800 space-y-3">
+            <div className="p-4 rounded-xl bg-[#111113] border border-zinc-800 space-y-3">
               <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
                 Key Economic Indicators
@@ -138,7 +138,7 @@ export const DecoyScreen: React.FC<DecoyScreenProps> = ({ onDismiss }) => {
               </ul>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#14161C] border border-zinc-800 text-xs space-y-2">
+            <div className="p-4 rounded-xl bg-[#111113] border border-zinc-800 text-xs space-y-2">
               <span className="font-serif text-sm text-zinc-200 font-medium block">
                 Contemporary Art Index Notice
               </span>

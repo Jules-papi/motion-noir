@@ -24,13 +24,13 @@ export const MatchCelebrationModal: React.FC<MatchCelebrationModalProps> = ({
   }, [onClose]);
 
   return (
-    <div 
+    <div
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-150"
     >
-      <div 
+      <div
         onClick={e => e.stopPropagation()}
-        className="bg-[#0c0c0e] border border-amber-600/30 rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative cursor-default"
+        className="bg-[#09090B] border border-amber-600/30 rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative cursor-default"
       >
         <button
           onClick={onClose}
@@ -39,7 +39,7 @@ export const MatchCelebrationModal: React.FC<MatchCelebrationModalProps> = ({
           <X className="w-4 h-4" />
         </button>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xs bg-[#161512] border border-amber-600/30 text-amber-200 text-[10px] font-mono uppercase tracking-[0.2em]">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xs bg-[#1A1A1E] border border-amber-600/30 text-amber-200 text-[10px] font-mono uppercase tracking-[0.2em]">
           <span>Reciprocal Circle Accord</span>
         </div>
 
@@ -86,7 +86,7 @@ export const MatchCelebrationModal: React.FC<MatchCelebrationModalProps> = ({
               onStartChat(matchedProfile);
               onClose();
             }}
-            className="w-full py-2.5 rounded-xs font-serif text-xs uppercase tracking-[0.14em] bg-[#161512] hover:bg-[#201d18] text-amber-200 border border-amber-600/40 hover:border-amber-400 transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-xs font-serif text-xs uppercase tracking-[0.14em] bg-[#1A1A1E] hover:bg-[#1A1A1E] text-amber-200 border border-amber-600/40 hover:border-amber-400 transition-all flex items-center justify-center gap-2"
           >
             <MessageSquare className="w-3.5 h-3.5 text-amber-300" />
             <span>Open Direct Correspondence</span>

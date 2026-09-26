@@ -59,13 +59,13 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   ];
 
   return (
-    <div 
+    <div
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-150"
     >
-      <div 
+      <div
         onClick={e => e.stopPropagation()}
-        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl relative cursor-default"
+        className="bg-[#09090B] border border-white/[0.12] rounded-2xl p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl relative cursor-default"
       >
         <button
           onClick={onClose}
@@ -103,7 +103,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                   className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                     reason === r
                       ? 'border-rose-500/60 bg-rose-500/10 text-white font-medium'
-                      : 'border-white/[0.08] bg-[#14161C] hover:border-white/20 text-zinc-400 hover:text-white'
+                      : 'border-white/[0.08] bg-[#111113] hover:border-white/20 text-zinc-400 hover:text-white'
                   }`}
                 >
                   <span className="text-xs">{r}</span>
@@ -129,11 +129,11 @@ export const ReportModal: React.FC<ReportModalProps> = ({
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Provide context or observe conduct regarding this incident..."
-              className="w-full p-3 rounded-xl bg-[#14161C] border border-white/[0.08] text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#E5C590]/50"
+              className="w-full p-3 rounded-xl bg-[#111113] border border-white/[0.08] text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-[#C5A880]/50"
             />
           </div>
 
-          <div className="bg-[#181B22] p-3 rounded-xl border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed font-sans">
+          <div className="bg-[#1A1A1E] p-3 rounded-xl border border-white/[0.06] text-[11px] text-zinc-400 leading-relaxed font-sans">
             Your incident record is encrypted and forwarded directly to the Major Club Trust & Discretion council.
           </div>
 

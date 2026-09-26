@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Send, 
-  Paperclip, 
-  Mic, 
-  Smile, 
-  MoreVertical, 
-  ShieldAlert, 
-  Phone, 
+import {
+  Send,
+  Paperclip,
+  Mic,
+  Smile,
+  MoreVertical,
+  ShieldAlert,
+  Phone,
   Video,
   ArrowLeft,
   Lock,
@@ -23,12 +23,13 @@ interface ChatViewProps {
   currentUser: UserProfile;
   activeConversationId?: string;
   onSendMessage: (
-    conversationId: string, 
-    text: string, 
+    conversationId: string,
+    text: string,
     isAudio?: boolean,
     audioDetails?: { blobUrl?: string; duration?: string; waveform?: number[] }
   ) => void;
   onReportUser: (targetUser: { id: string; name: string }) => void;
+  onMarkConversationAsRead?: (conversationId: string) => void;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
@@ -37,6 +38,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   activeConversationId,
   onSendMessage,
   onReportUser,
+  onMarkConversationAsRead,
 }) => {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedConvId, setSelectedConvId] = useState<string>(() => {
@@ -78,6 +80,12 @@ export const ChatView: React.FC<ChatViewProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [selectedConvId, conversations]);
+
+  useEffect(() => {
+    if (selectedConvId && onMarkConversationAsRead) {
+      onMarkConversationAsRead(selectedConvId);
+    }
+  }, [selectedConvId, onMarkConversationAsRead]);
 
   const activeConversation = conversations.find(c => c.id === selectedConvId) || conversations[0];
 
@@ -242,7 +250,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   if (!activeConversation) {
     return (
-      <div className="p-12 text-center bg-[#121419] rounded-2xl border border-white/[0.08] text-zinc-400 font-serif">
+      <div className="p-12 text-center bg-[#111113] rounded-xl border border-white/[0.08] text-[#9A9996] font-sans">
         No active dispatches found. Initialize a conversation from the Registry.
       </div>
     );
@@ -254,7 +262,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   );
 
   return (
-    <div className="bg-[#0c0d11] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[calc(100vh-140px)] min-h-[560px]">
+    <div className="bg-[#09090B] border border-white/[0.08] rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[calc(100dvh-9rem)] min-h-[30rem] md:h-[calc(100dvh-8.75rem)] md:min-h-[35rem]">
       {/* Left Conversations Sidebar */}
       <ChatSidebarList
         conversations={conversations}
@@ -264,6 +272,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
         onSearchChange={setSearchQuery}
         onSelectConversation={(id) => {
           setSelectedConvId(id);
+          onMarkConversationAsRead?.(id);
           setConversations(prev =>
             prev.map(c => c.id === id ? { ...c, unreadCount: 0 } : c)
           );
@@ -271,18 +280,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
       />
 
       {/* Right Chat Area */}
-      <div className={`flex-1 flex-col bg-[#07080a] min-w-0 ${
+      <div className={`flex-1 flex-col bg-[#09090B] min-w-0 ${
         !selectedConvId ? 'hidden md:flex' : 'flex'
       }`}>
         {/* Chat Header */}
-        <div className="p-3.5 px-5 bg-[#121419] border-b border-white/[0.08] flex items-center justify-between shrink-0">
+        <div className="p-3.5 px-5 bg-[#111113] border-b border-white/[0.08] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSelectedConvId('')}
               className="md:hidden flex items-center gap-1.5 py-1 px-2.5 -ml-1 rounded-full text-zinc-300 hover:text-white bg-white/5 border border-white/10"
               aria-label="Return to salon list"
             >
-              <ArrowLeft className="w-4 h-4 text-[#E5C590]" />
+              <ArrowLeft className="w-4 h-4 text-[#C5A880]" />
               <span className="text-xs font-mono">Salons</span>
             </button>
             <div className="relative">
@@ -292,16 +301,16 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 className="w-10 h-10 rounded-full object-cover border border-white/10"
               />
               {activeConversation.participant.isOnline && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#121419] rounded-full" />
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#111113] rounded-full" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-serif text-sm text-white">
+                <span className="font-sans font-medium text-sm text-white">
                   {activeConversation.participant.name}
                 </span>
                 {activeConversation.participant.membershipTier === 'vip' && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#181B22] text-[#E5C590] font-mono border border-[#E5C590]/30">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1A1A1E] text-[#C5A880] font-mono border border-[#C5A880]/30">
                     VIP
                   </span>
                 )}
@@ -319,19 +328,21 @@ export const ChatView: React.FC<ChatViewProps> = ({
           {/* Actions */}
           <div className="flex items-center gap-1.5 relative">
             <div className="hidden sm:flex items-center gap-1.5 mr-2 px-3 py-1 rounded-full bg-black/40 border border-white/[0.06] text-[11px] font-mono text-zinc-400">
-              <Lock className="w-3 h-3 text-[#E5C590]" />
+              <Lock className="w-3 h-3 text-[#C5A880]" />
               <span>End-to-End Encrypted</span>
             </div>
-            
+
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer"
+              aria-label="Conversation actions"
+              aria-expanded={menuOpen}
             >
               <MoreVertical className="w-4 h-4" />
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-11 w-52 bg-[#181B22] border border-white/10 rounded-2xl shadow-2xl p-1.5 z-30">
+              <div className="absolute right-0 top-11 w-52 bg-[#1A1A1E] border border-white/10 rounded-2xl shadow-2xl p-1.5 z-30">
                 <button
                   onClick={() => {
                     setMenuOpen(false);
@@ -362,7 +373,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
           {isTyping && (
             <div className="flex items-center gap-2 text-xs text-zinc-400 font-sans italic">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E5C590] animate-ping" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880] animate-ping" />
               <span>{activeConversation.participant.name} is composing...</span>
             </div>
           )}
@@ -370,10 +381,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
         </div>
 
         {/* Message Input Box */}
-        <div className="p-3.5 bg-[#121419] border-t border-white/[0.08] shrink-0 pb-[max(0.85rem,env(safe-area-inset-bottom))] relative">
+        <div className="p-3.5 bg-[#111113] border-t border-white/[0.08] shrink-0 pb-[max(0.85rem,env(safe-area-inset-bottom))] relative">
           {/* Emoji Picker Popover */}
           {showEmojiPicker && (
-            <div className="absolute bottom-16 left-4 bg-[#181B22] border border-white/10 rounded-2xl p-2.5 shadow-2xl z-30 flex items-center gap-1.5 animate-fadeIn">
+            <div className="absolute bottom-16 left-4 bg-[#1A1A1E] border border-white/10 rounded-2xl p-2.5 shadow-2xl z-30 flex items-center gap-1.5 animate-fadeIn">
               {emojis.map((emoji, idx) => (
                 <button
                   key={idx}
@@ -383,6 +394,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                     setShowEmojiPicker(false);
                   }}
                   className="p-1.5 hover:bg-white/10 rounded-lg text-base cursor-pointer transition-transform hover:scale-125"
+                  aria-label={`Add ${emoji} emoji`}
                 >
                   {emoji}
                 </button>
@@ -410,9 +422,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className={`p-2 rounded-full transition-colors cursor-pointer ${
-                showEmojiPicker ? 'text-[#E5C590] bg-[#E5C590]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                showEmojiPicker ? 'text-[#C5A880] bg-[#C5A880]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
               }`}
               title="Salon Emotes"
+              aria-label="Open emoji picker"
+              aria-expanded={showEmojiPicker}
             >
               <Smile className="w-4 h-4" />
             </button>
@@ -422,6 +436,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-white/5 transition-colors cursor-pointer"
               title="Attach Photo from Device"
+              aria-label="Attach photo"
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -429,6 +444,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             <input
               type="text"
               value={inputText}
+              onFocus={() => setTimeout(scrollToBottom, 300)}
               onChange={e => {
                 setInputText(e.target.value);
                 if (!isTyping && e.target.value) {
@@ -437,7 +453,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 }
               }}
               placeholder="Compose confidential dispatch..."
-              className="flex-1 px-4 py-2.5 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 outline-none font-sans"
+              aria-label="Message"
+              className="flex-1 px-4 py-2.5 text-xs rounded-full bg-[#1A1A1E] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-white/20 outline-none font-sans"
             />
 
             <button
@@ -445,9 +462,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
               disabled={!inputText.trim()}
               className={`p-2.5 rounded-full font-semibold shadow-md active:scale-95 transition-all cursor-pointer ${
                 inputText.trim()
-                  ? 'bg-[#E5C590] hover:bg-[#d9b880] text-black'
+                  ? 'bg-[#C5A880] hover:bg-[#B89B6E] text-black'
                   : 'bg-white/5 text-zinc-600 cursor-not-allowed'
               }`}
+              aria-label="Send message"
             >
               <Send className="w-4 h-4" />
             </button>

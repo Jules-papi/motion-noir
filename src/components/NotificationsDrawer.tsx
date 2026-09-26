@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
-import { 
-  Bell, 
-  Coins, 
-  Calendar, 
-  MessageSquare, 
-  ShieldCheck, 
-  X, 
-  CheckCheck 
+import {
+  Bell,
+  Coins,
+  Calendar,
+  MessageSquare,
+  ShieldCheck,
+  Heart,
+  UserPlus,
+  X,
+  CheckCheck
 } from 'lucide-react';
 import { AppNotification } from '../types';
 
@@ -16,6 +18,7 @@ interface NotificationsDrawerProps {
   notifications: AppNotification[];
   onMarkAllAsRead: () => void;
   onSelectNotification: (notification: AppNotification) => void;
+  onRespondToFollowRequest: (notification: AppNotification, accept: boolean) => void;
 }
 
 export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
@@ -24,6 +27,7 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   notifications,
   onMarkAllAsRead,
   onSelectNotification,
+  onRespondToFollowRequest,
 }) => {
   useEffect(() => {
     if (!isOpen) return;
@@ -46,6 +50,13 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
         return <Calendar className="w-3.5 h-3.5 text-stone-300" />;
       case 'chat_message':
         return <MessageSquare className="w-3.5 h-3.5 text-amber-300" />;
+      case 'comment':
+        return <MessageSquare className="w-3.5 h-3.5 text-stone-300" />;
+      case 'like':
+        return <Heart className="w-3.5 h-3.5 text-rose-300" />;
+      case 'follow':
+      case 'follow_request':
+        return <UserPlus className="w-3.5 h-3.5 text-amber-300" />;
       case 'forum_reply':
         return <MessageSquare className="w-3.5 h-3.5 text-stone-300" />;
       case 'kyc':
@@ -56,11 +67,11 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   };
 
   return (
-    <div 
+    <div
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex justify-end animate-in fade-in duration-150"
     >
-      <div 
+      <div
         onClick={e => e.stopPropagation()}
         className="w-full max-w-sm bg-[#09090b] h-full shadow-2xl border-l border-white/[0.08] flex flex-col animate-in slide-in-from-right duration-200"
       >
@@ -71,7 +82,7 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
               Transmissions & Dispatches
             </h3>
             {unreadCount > 0 && (
-              <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono tracking-wider bg-[#161512] text-amber-200 border border-amber-600/30 uppercase">
+              <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono tracking-wider bg-[#1A1A1E] text-amber-200 border border-amber-600/30 uppercase">
                 {unreadCount} unread
               </span>
             )}
@@ -107,10 +118,10 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                 key={notif.id}
                 onClick={() => onSelectNotification(notif)}
                 className={`p-4 transition-colors cursor-pointer hover:bg-white/[0.02] flex gap-3.5 ${
-                  !notif.isRead ? 'bg-[#121215]/80' : ''
+                  !notif.isRead ? 'bg-[#111113]/80' : ''
                 }`}
               >
-                <div className="p-2 rounded-xs bg-[#141417] border border-white/[0.06] shrink-0 h-fit">
+                <div className="p-2 rounded-xs bg-[#111113] border border-white/[0.06] shrink-0 h-fit">
                   {getIcon(notif.type)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -125,6 +136,30 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                   <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 leading-relaxed">
                     {notif.message}
                   </p>
+                  {notif.type === 'follow_request' && notif.actorId && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={event => {
+                          event.stopPropagation();
+                          onRespondToFollowRequest(notif, true);
+                        }}
+                        className="rounded-full bg-[#F1EFEA] px-3 py-1.5 text-[11px] font-medium text-[#09090B] hover:bg-white"
+                      >
+                        Kabul et
+                      </button>
+                      <button
+                        type="button"
+                        onClick={event => {
+                          event.stopPropagation();
+                          onRespondToFollowRequest(notif, false);
+                        }}
+                        className="rounded-full border border-white/[0.1] px-3 py-1.5 text-[11px] text-stone-300 hover:border-white/25 hover:text-white"
+                      >
+                        Reddet
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {!notif.isRead && (
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 self-center" />
@@ -135,7 +170,7 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-3 border-t border-white/[0.08] bg-[#0c0c0e] text-center">
+        <div className="p-3 border-t border-white/[0.08] bg-[#09090B] text-center">
           <p className="text-[10px] font-mono text-stone-400 uppercase tracking-wider">
             Confidential Transmission Channel Sealed
           </p>

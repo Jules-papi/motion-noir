@@ -33,6 +33,21 @@ export interface Translations {
   ticketReady: string;
 }
 
+export const SUPPORTED_LANGUAGES: ReadonlyArray<{
+  code: SupportedLanguage;
+  label: string;
+  flag: string;
+}> = [
+  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+];
+
+export const isSupportedLanguage = (value: string): value is SupportedLanguage =>
+  SUPPORTED_LANGUAGES.some(language => language.code === value);
+
 export const DICTIONARY: Record<SupportedLanguage, Translations> = {
   tr: {
     feed: 'Nocturne Günlüğü',
@@ -129,6 +144,70 @@ export const DICTIONARY: Record<SupportedLanguage, Translations> = {
     pendingApproval: 'Vetting in Progress...',
     approvedPay: 'Approved · Confirm Admission',
     ticketReady: 'Encrypted Entry Token (QR)',
+  },
+  de: {
+    feed: 'Die Chronik',
+    discovery: 'Das Verzeichnis',
+    events: 'Exklusive Salons',
+    clubs: 'Kreise & Kapitel',
+    forum: 'Räume & Debatten',
+    chat: 'Verschlüsselte Nachrichten',
+    profile: 'Privates Dossier',
+    adminPanel: 'Kuratorenbereich',
+    wallet: 'Tresor',
+    notifications: 'Mitteilungen & Hinweise',
+    searchPlaceholder: 'Dossiers, Kreise oder private Abende durchsuchen...',
+    createPost: 'Beitrag veröffentlichen',
+    dualVerified: 'Beidseitig verifizierte Partnerschaft',
+    dualVerifiedDesc: 'Beide Partner haben ihre Identität und Beziehung gegenseitig bestätigt.',
+    privateVault: 'Versiegelter privater Tresor',
+    requestKey: 'Zugangsschlüssel anfragen',
+    keyGranted: 'Zugang erteilt',
+    ndaRequired: 'Digitale Vertraulichkeitsvereinbarung (NDA)',
+    signNda: 'Vertraulichkeitsvereinbarung unterzeichnen',
+    viewOnce: 'Einmalig sichtbares Medium',
+    viewOnceOpened: 'Geöffnet und vernichtet',
+    ratioCouples: 'Paare',
+    ratioWomen: 'Alleinstehende Frauen',
+    ratioMen: 'Alleinstehende Männer',
+    ratioTrios: 'Trios',
+    quotaFull: 'Ausgebucht',
+    applyToEvent: 'Aufnahme beantragen',
+    pendingApproval: 'Prüfung läuft...',
+    approvedPay: 'Genehmigt · Eintritt bestätigen',
+    ticketReady: 'Persönlicher QR-Zugang',
+  },
+  fr: {
+    feed: 'La Chronique',
+    discovery: 'Le Registre',
+    events: 'Salons exclusifs',
+    clubs: 'Cercles & Chapitres',
+    forum: 'Salons & Débats',
+    chat: 'Messages chiffrés',
+    profile: 'Dossier privé',
+    adminPanel: 'Espace des curateurs',
+    wallet: 'Trésorerie',
+    notifications: 'Messages & Alertes',
+    searchPlaceholder: 'Rechercher des dossiers, cercles ou soirées privées...',
+    createPost: 'Publier une dépêche',
+    dualVerified: 'Partenariat doublement vérifié',
+    dualVerifiedDesc: 'Les deux partenaires ont confirmé mutuellement leur identité et leur relation.',
+    privateVault: 'Coffre privé scellé',
+    requestKey: "Demander la clé d’accès",
+    keyGranted: 'Accès accordé',
+    ndaRequired: 'Accord numérique de confidentialité (NDA)',
+    signNda: "Signer l’accord de confidentialité",
+    viewOnce: 'Média à consultation unique',
+    viewOnceOpened: 'Ouvert et détruit',
+    ratioCouples: 'Couples',
+    ratioWomen: 'Femmes seules',
+    ratioMen: 'Hommes seuls',
+    ratioTrios: 'Trios',
+    quotaFull: 'Complet',
+    applyToEvent: "Demander l’admission",
+    pendingApproval: 'Examen en cours...',
+    approvedPay: "Approuvé · Confirmer l’entrée",
+    ticketReady: "QR d’accès personnel",
   },
 };
 

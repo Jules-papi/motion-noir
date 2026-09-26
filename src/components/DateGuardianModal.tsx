@@ -120,12 +120,12 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div 
-        className="bg-[#0c0d11] border border-white/[0.12] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col"
+      <div
+        className="bg-[#09090B] border border-white/[0.12] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 px-5 border-b border-white/[0.08] flex items-center justify-between bg-[#121419]">
+        <div className="p-4 px-5 border-b border-white/[0.08] flex items-center justify-between bg-[#111113]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <ShieldCheck className="w-4 h-4" />
@@ -135,7 +135,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
               <p className="text-[10px] text-zinc-400 font-sans">Date Guardian & Discreet Check-in</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             aria-label="Close modal"
             className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
@@ -162,7 +162,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
               </div>
 
               {/* Emergency Contact Summary */}
-              <div className="p-3.5 rounded-xl bg-[#121419] border border-white/[0.06] text-xs space-y-1.5 font-sans">
+              <div className="p-3.5 rounded-xl bg-[#111113] border border-white/[0.06] text-xs space-y-1.5 font-sans">
                 <div className="flex justify-between text-zinc-400">
                   <span>Acil Durum Kontağı:</span>
                   <span className="text-zinc-200 font-medium">{contactName} ({contactPhone})</span>
@@ -174,7 +174,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
               </div>
 
               {/* Safe PIN Input to Complete */}
-              <div className="p-4 rounded-xl bg-[#181B22] border border-white/[0.08] space-y-3">
+              <div className="p-4 rounded-xl bg-[#1A1A1E] border border-white/[0.08] space-y-3">
                 <label className="block text-xs text-zinc-200 font-medium">
                   Randevuyu Güvenle Bitir (PIN Doğrula)
                 </label>
@@ -185,7 +185,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
                     value={enteredPin}
                     onChange={e => setEnteredPin(e.target.value)}
                     placeholder="Güvenlik PIN Kodu"
-                    className="flex-1 px-3 py-2 rounded-lg bg-black/40 border border-white/10 text-center font-mono text-white text-sm tracking-widest focus:outline-none focus:border-[#E5C590]"
+                    className="flex-1 px-3 py-2 rounded-lg bg-black/40 border border-white/10 text-center font-mono text-white text-sm tracking-widest focus:outline-none focus:border-[#C5A880]"
                   />
                   <button
                     onClick={endGuardianSafely}
@@ -229,8 +229,8 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
                       onClick={() => setDurationMinutes(mins)}
                       className={`py-2 rounded-xl text-xs font-mono transition-colors cursor-pointer border ${
                         durationMinutes === mins
-                          ? 'bg-[#E5C590] text-black font-semibold border-[#E5C590]'
-                          : 'bg-[#121419] text-zinc-400 hover:text-white border-white/[0.08]'
+                          ? 'bg-[#C5A880] text-black font-semibold border-[#C5A880]'
+                          : 'bg-[#111113] text-zinc-400 hover:text-white border-white/[0.08]'
                       }`}
                     >
                       {mins < 60 ? `${mins} Dk` : `${mins / 60} Saat`}
@@ -249,7 +249,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
                     type="text"
                     value={contactName}
                     onChange={e => setContactName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#121419] border border-white/[0.08] text-xs text-white focus:outline-none focus:border-[#E5C590]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#111113] border border-white/[0.08] text-xs text-white focus:outline-none focus:border-[#C5A880]"
                   />
                 </div>
                 <div>
@@ -260,7 +260,7 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
                     type="tel"
                     value={contactPhone}
                     onChange={e => setContactPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#121419] border border-white/[0.08] text-xs text-white font-mono focus:outline-none focus:border-[#E5C590]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#111113] border border-white/[0.08] text-xs text-white font-mono focus:outline-none focus:border-[#C5A880]"
                   />
                 </div>
               </div>
@@ -275,23 +275,23 @@ export const DateGuardianModal: React.FC<DateGuardianModalProps> = ({
                   maxLength={4}
                   value={safetyPin}
                   onChange={e => setSafetyPin(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#121419] border border-white/[0.08] text-xs text-white font-mono tracking-widest focus:outline-none focus:border-[#E5C590]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#111113] border border-white/[0.08] text-xs text-white font-mono tracking-widest focus:outline-none focus:border-[#C5A880]"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-[#121419] border border-white/[0.06] flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-[#111113] border border-white/[0.06] flex items-center justify-between">
                 <span className="text-xs text-zinc-300 font-sans">Acil durumda şifreli canlı konum ilet</span>
                 <input
                   type="checkbox"
                   checked={locationShare}
                   onChange={e => setLocationShare(e.target.checked)}
-                  className="w-4 h-4 rounded accent-[#E5C590] cursor-pointer"
+                  className="w-4 h-4 rounded accent-[#C5A880] cursor-pointer"
                 />
               </div>
 
               <button
                 onClick={startGuardian}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#E5C590] to-[#C9A86A] text-black font-serif text-xs font-semibold tracking-wider uppercase hover:opacity-95 transition-opacity cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-[#E5C590]/10"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#C9A86A] text-black font-serif text-xs font-semibold tracking-wider uppercase hover:opacity-95 transition-opacity cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-[#C5A880]/10"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Koruyucuyu Başlat ({durationMinutes} Dk)</span>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Users2, 
-  Sparkles, 
-  Check, 
-  Plus, 
-  Lock, 
-  Globe, 
-  MessageCircle, 
+import {
+  Users2,
+  Sparkles,
+  Check,
+  Plus,
+  Lock,
+  Globe,
+  MessageCircle,
   Search,
   Crown
 } from 'lucide-react';
@@ -46,10 +46,10 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
       {/* Editorial Chapter Header */}
-      <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
+      <div className="bg-[#111113] border border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
         <div className="relative z-10 max-w-xl space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#181B22] border border-white/10 text-[11px] font-sans font-medium text-[#E5C590]">
-            <Crown className="w-3.5 h-3.5 text-[#E5C590]" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A1A1E] border border-white/10 text-[11px] font-sans font-medium text-[#C5A880]">
+            <Crown className="w-3.5 h-3.5 text-[#C5A880]" />
             <span>Cercles & Chapitres Privés</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-serif font-light text-white tracking-wide">
@@ -70,19 +70,19 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
             placeholder="Search chapters or disciplines..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-full text-xs bg-[#121419] border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+            className="w-full pl-9 pr-4 py-2 rounded-full text-xs bg-[#111113] border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
           />
         </div>
 
         {/* Category Capsule Pills */}
-        <div className="inline-flex items-center p-1 rounded-full bg-[#121419] border border-white/[0.08] overflow-x-auto no-scrollbar max-w-full">
+        <div className="inline-flex items-center p-1 rounded-full bg-[#111113] border border-white/[0.08] overflow-x-auto no-scrollbar max-w-full">
           {categories.map(cat => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-sans transition-all whitespace-nowrap cursor-pointer ${
                 selectedCategory === cat.id
-                  ? 'bg-[#222631] text-white font-medium shadow-sm'
+                  ? 'bg-[#1A1A1E] text-white font-medium shadow-sm'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
@@ -94,8 +94,8 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
 
       {/* Clubs Grid or Empty State */}
       {filteredClubs.length === 0 ? (
-        <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-10 text-center space-y-3 shadow-xl">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#181B22] border border-white/10 flex items-center justify-center text-zinc-400">
+        <div className="bg-[#111113] border border-white/[0.08] rounded-2xl p-10 text-center space-y-3 shadow-xl">
+          <div className="w-12 h-12 mx-auto rounded-full bg-[#1A1A1E] border border-white/10 flex items-center justify-center text-zinc-400">
             <Users2 className="w-6 h-6 text-zinc-400" />
           </div>
           <h3 className="font-sans font-medium text-sm text-white">
@@ -119,26 +119,26 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
           {filteredClubs.map(club => (
             <div
               key={club.id}
-              className="bg-[#121419] border border-white/[0.08] rounded-2xl overflow-hidden shadow-xl hover:border-white/15 transition-all flex flex-col"
+              className="bg-[#111113] border border-white/[0.08] rounded-2xl overflow-hidden shadow-xl hover:border-white/15 transition-all flex flex-col"
             >
               {/* Club Cover */}
-              <div className="h-40 relative overflow-hidden bg-[#07080A]">
+              <div className="h-40 relative overflow-hidden bg-[#09090B]">
                 <img
                   src={club.coverImage}
                   alt={club.name}
                   className="w-full h-full object-cover filter contrast-[1.05]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#121419] via-black/40 to-transparent" />
-                
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111113] via-black/40 to-transparent" />
+
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-sans font-medium backdrop-blur-md bg-black/60 border border-white/15 text-white flex items-center gap-1">
-                    {club.isPrivate ? <Lock className="w-3 h-3 text-[#E5C590]" /> : <Globe className="w-3 h-3 text-zinc-400" />}
+                    {club.isPrivate ? <Lock className="w-3 h-3 text-[#C5A880]" /> : <Globe className="w-3 h-3 text-zinc-400" />}
                     <span>{club.isPrivate ? 'Confidential' : 'Open Salon'}</span>
                   </span>
                 </div>
 
                 <div className="absolute bottom-3 left-4 right-4">
-                  <span className="text-[10px] uppercase font-mono tracking-widest text-[#E5C590] block mb-1">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-[#C5A880] block mb-1">
                     {club.category}
                   </span>
                   <h3 className="text-base font-sans font-semibold text-white leading-tight">
@@ -153,7 +153,7 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
                   {club.description}
                 </p>
 
-                <div className="p-2.5 rounded-xl bg-[#181B22] border border-white/[0.06] text-[11px] text-zinc-400 flex items-center gap-2">
+                <div className="p-2.5 rounded-xl bg-[#1A1A1E] border border-white/[0.06] text-[11px] text-zinc-400 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
                   <span className="truncate">Recent Dispatch: {club.recentActivity}</span>
                 </div>
@@ -164,8 +164,8 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
                     <span>Chapter Quota</span>
                     <span className="font-mono text-zinc-300">%{Math.min(96, Math.round((club.membersCount / 1200) * 100))}</span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-[#181B22] overflow-hidden">
-                    <div 
+                  <div className="w-full h-1.5 rounded-full bg-[#1A1A1E] overflow-hidden">
+                    <div
                       className="h-full rounded-full bg-white/70"
                       style={{ width: `${Math.min(96, Math.round((club.membersCount / 1200) * 100))}%` }}
                     />
@@ -182,7 +182,7 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
                     {club.isJoined && (
                       <button
                         onClick={() => onOpenClubChat(club)}
-                        className="px-3.5 py-1.5 rounded-full text-xs font-sans font-medium bg-[#181B22] hover:bg-[#222631] text-white border border-white/10 flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-full text-xs font-sans font-medium bg-[#1A1A1E] hover:bg-[#1A1A1E] text-white border border-white/10 flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <MessageCircle className="w-3.5 h-3.5 text-zinc-400" />
                         <span>Chamber</span>
@@ -193,7 +193,7 @@ export const ClubsView: React.FC<ClubsViewProps> = ({
                       onClick={() => onToggleJoin(club.id)}
                       className={`px-4 py-1.5 rounded-full text-xs font-sans font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
                         club.isJoined
-                          ? 'bg-[#181B22] text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-[#1A1A1E] text-emerald-300 border border-emerald-500/30'
                           : 'bg-white hover:bg-zinc-200 text-black'
                       }`}
                     >

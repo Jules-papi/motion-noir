@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
-import { 
-  Users, 
-  CheckCircle2, 
-  XCircle, 
-  QrCode, 
-  X, 
-  Search, 
-  ShieldCheck, 
-  Clock, 
-  Check, 
-  Filter 
+import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  CheckCircle2,
+  XCircle,
+  QrCode,
+  X,
+  Search,
+  ShieldCheck,
+  Clock,
+  Check,
+  Filter,
+  Ticket
 } from 'lucide-react';
-import { PlatformEvent } from '../types';
-import { EventApplication } from '../types/anlatiTypes';
+import { PlatformEvent, EventAttendee } from '../types';
+import { noirApi } from '../services/noirApi';
 
 interface EventOrganizerModalProps {
   event: PlatformEvent;
@@ -29,278 +30,326 @@ export const EventOrganizerModal: React.FC<EventOrganizerModalProps> = ({
 }) => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'checked_in'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [ticketSearchInput, setTicketSearchInput] = useState('');
+  const [attendees, setAttendees] = useState<EventAttendee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initial mock applications for this event
-  const [applications, setApplications] = useState<EventApplication[]>([
-    {
-      id: 'app-1',
-      eventId: event.id,
-      eventTitle: event.title,
-      userId: 'usr-1',
-      userName: 'Sophie & Mark (Çift)',
-      userAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-      userType: 'couple',
-      status: 'pending',
-      appliedAt: '2 saat önce',
-      notes: 'Amsterdam lifestyle kulübünden geliyoruz, davetiye için teşekkürler.',
-    },
-    {
-      id: 'app-2',
-      eventId: event.id,
-      eventTitle: event.title,
-      userId: 'usr-2',
-      userName: 'Elif Yılmaz (Tekil)',
-      userAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      userType: 'single',
-      status: 'approved',
-      ticketId: 'VIP-AMS-4482',
-      appliedAt: 'Dün',
-    },
-    {
-      id: 'app-3',
-      eventId: event.id,
-      eventTitle: event.title,
-      userId: 'usr-3',
-      userName: 'Deniz & Can (Çift)',
-      userAvatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=200&q=80',
-      userType: 'couple',
-      status: 'checked_in',
-      ticketId: 'VIP-AMS-9912',
-      appliedAt: '3 gün önce',
-    },
-    {
-      id: 'app-4',
-      eventId: event.id,
-      eventTitle: event.title,
-      userId: 'usr-4',
-      userName: 'Lucas V. (Tekil)',
-      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-      userType: 'single',
-      status: 'pending',
-      appliedAt: 'Bugün 10:30',
-      notes: 'Tekil katılım başvurusu.',
-    },
-  ]);
-
-  const handleApprove = (appId: string) => {
-    const targetApp = applications.find(a => a.id === appId);
-    setApplications(prev =>
-      prev.map(a =>
-        a.id === appId
-          ? { ...a, status: 'approved', ticketId: `VIP-AMS-${Math.floor(1000 + Math.random() * 9000)}` }
-          : a
-      )
-    );
-    if (onApproveApplicationForEvent && targetApp) {
-      onApproveApplicationForEvent(event.id, targetApp.userName);
+  // Load real DB attendees
+  const fetchAttendees = async () => {
+    setIsLoading(true);
+    try {
+      const data = await noirApi.getEventAttendees(event.id);
+      setAttendees(data);
+    } catch (err) {
+      console.warn('Could not load attendees:', err);
+    } finally {
+      setIsLoading(false);
     }
-    if (onToast) onToast({ text: `${targetApp ? targetApp.userName : 'Katılımcı'} başvurusu onaylandı ve bildirim gönderildi.`, type: 'success' });
   };
 
-  const handleReject = (appId: string) => {
-    setApplications(prev =>
-      prev.map(a => (a.id === appId ? { ...a, status: 'rejected' } : a))
-    );
-    if (onToast) onToast({ text: 'Başvuru reddedildi.', type: 'info' });
+  useEffect(() => {
+    fetchAttendees();
+  }, [event.id]);
+
+  const handleApprove = async (attendeeId: string) => {
+    const target = attendees.find(a => a.id === attendeeId);
+    try {
+      const ok = await noirApi.approveRegistration(attendeeId);
+      if (ok) {
+        setAttendees(prev => prev.map(a => a.id === attendeeId ? {
+          ...a,
+          status: 'approved',
+        } : a));
+        if (target && onApproveApplicationForEvent) {
+          onApproveApplicationForEvent(event.id, target.userName);
+        }
+        if (onToast) onToast({ text: `${target?.userName || 'Üye'} başvurusu onaylandı.`, type: 'success' });
+      }
+    } catch {
+      if (onToast) onToast({ text: 'Onaylama işlemi başarısız.', type: 'error' });
+    }
   };
 
-  const handleCheckIn = (appId: string) => {
-    setApplications(prev =>
-      prev.map(a => (a.id === appId ? { ...a, status: 'checked_in' } : a))
-    );
-    if (onToast) onToast({ text: 'Giriş QR Kodu onaylandı: Katılımcı içeri alındı!', type: 'success' });
+  const handleReject = async (attendeeId: string) => {
+    try {
+      const ok = await noirApi.rejectRegistration(attendeeId);
+      if (ok) {
+        setAttendees(prev => prev.map(a => a.id === attendeeId ? {
+          ...a,
+          status: 'rejected',
+        } : a));
+        if (onToast) onToast({ text: 'Başvuru reddedildi.', type: 'info' });
+      }
+    } catch {
+      if (onToast) onToast({ text: 'Red işlemi başarısız.', type: 'error' });
+    }
   };
 
-  const simulateQrScan = () => {
-    setIsScanning(true);
-    setScanResult(null);
-    setTimeout(() => {
-      setIsScanning(false);
-      setScanResult('GEÇERLİ BİLET: Elif Yılmaz (VIP-AMS-4482) - Giriş Onaylandı ✅');
-      setApplications(prev =>
-        prev.map(a => (a.id === 'app-2' ? { ...a, status: 'checked_in' } : a))
-      );
-    }, 1200);
+  const handleCheckIn = async (attendeeId: string) => {
+    try {
+      const ok = await noirApi.checkInAttendee(attendeeId);
+      if (ok) {
+        setAttendees(prev => prev.map(a => a.id === attendeeId ? {
+          ...a,
+          isCheckedIn: true,
+          checkedInAt: new Date().toISOString(),
+        } : a));
+        if (onToast) onToast({ text: 'Kapı girişi doğrulandı ve kaydedildi.', type: 'success' });
+      }
+    } catch {
+      if (onToast) onToast({ text: 'Giriş teyidi başarısız.', type: 'error' });
+    }
   };
 
-  const filteredApps = applications.filter(a => {
-    if (filterStatus !== 'all' && a.status !== filterStatus) return false;
-    if (searchQuery && !a.userName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
+  const handleManualTicketCheckIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = ticketSearchInput.trim().toUpperCase();
+    if (!code) return;
+
+    const matched = attendees.find(a => a.ticketCode?.toUpperCase() === code);
+    if (!matched) {
+      if (onToast) onToast({ text: 'Bu bilet koduyla eşleşen davetli bulunamadı.', type: 'error' });
+      return;
+    }
+
+    if (matched.isCheckedIn) {
+      if (onToast) onToast({ text: `${matched.userName} zaten giriş yapmış!`, type: 'info' });
+      return;
+    }
+
+    await handleCheckIn(matched.id);
+    setTicketSearchInput('');
+  };
+
+  const filteredAttendees = attendees.filter(app => {
+    let matchesStatus = true;
+    if (filterStatus === 'pending') matchesStatus = app.status === 'pending';
+    else if (filterStatus === 'approved') matchesStatus = app.status === 'approved' && !app.isCheckedIn;
+    else if (filterStatus === 'checked_in') matchesStatus = app.isCheckedIn;
+
+    const query = searchQuery.toLowerCase().trim();
+    const matchesSearch = !query ||
+      app.userName.toLowerCase().includes(query) ||
+      app.userUsername.toLowerCase().includes(query) ||
+      (app.ticketCode && app.ticketCode.toLowerCase().includes(query)) ||
+      (app.note && app.note.toLowerCase().includes(query));
+
+    return matchesStatus && matchesSearch;
   });
 
+  const pendingCount = attendees.filter(a => a.status === 'pending').length;
+  const approvedCount = attendees.filter(a => a.status === 'approved').length;
+  const checkedInCount = attendees.filter(a => a.isCheckedIn).length;
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-4xl rounded-2xl bg-[#111113] border border-white/[0.08] shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0">
-          <div>
+        <div className="p-5 border-b border-white/[0.08] flex items-center justify-between bg-[#09090B] shrink-0">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-300 font-bold text-[10px] uppercase">
-                Organizatör Kontrol Paneli
+              <span className="w-2 h-2 rounded-full bg-[#C5A880]" />
+              <span className="text-[10px] font-mono tracking-widest text-[#C5A880] uppercase">
+                Concierge & Kapı Yönetimi
               </span>
             </div>
-            <h3 className="text-base font-extrabold text-zinc-900 dark:text-white mt-1 truncate">
+            <h3 className="font-serif text-lg sm:text-xl text-[#F1EFEA] font-light">
               {event.title}
             </h3>
           </div>
+
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="p-2 rounded-full text-[#9A9996] hover:text-[#F1EFEA] hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-2 p-4 bg-zinc-50 dark:bg-zinc-800/40 border-b border-zinc-200 dark:border-zinc-800 text-center shrink-0">
-          <div className="p-2 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200/60 dark:border-zinc-700">
-            <span className="text-[10px] text-zinc-400 block font-medium">Toplam</span>
-            <strong className="text-sm font-bold text-zinc-900 dark:text-white">{applications.length}</strong>
+        {/* Quick Stats & Ticket Code Lookup Bar */}
+        <div className="p-4 sm:p-5 border-b border-white/[0.06] bg-[#1A1A1E] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+          {/* Quick Metrics */}
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <div className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.06]">
+              <span className="text-[#9A9996] block text-[9px]">BEKLEYEN</span>
+              <strong className="text-[#C5A880] text-sm">{pendingCount}</strong>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.06]">
+              <span className="text-[#9A9996] block text-[9px]">ONAYLI</span>
+              <strong className="text-emerald-400 text-sm">{approvedCount}</strong>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.06]">
+              <span className="text-[#9A9996] block text-[9px]">GİRİŞ YAPAN</span>
+              <strong className="text-[#F1EFEA] text-sm">{checkedInCount}</strong>
+            </div>
           </div>
-          <div className="p-2 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200/60 dark:border-zinc-700">
-            <span className="text-[10px] text-amber-500 block font-medium">Bekleyen</span>
-            <strong className="text-sm font-bold text-amber-500">
-              {applications.filter(a => a.status === 'pending').length}
-            </strong>
-          </div>
-          <div className="p-2 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200/60 dark:border-zinc-700">
-            <span className="text-[10px] text-emerald-500 block font-medium">Onaylanan</span>
-            <strong className="text-sm font-bold text-emerald-500">
-              {applications.filter(a => a.status === 'approved').length}
-            </strong>
-          </div>
-          <div className="p-2 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200/60 dark:border-zinc-700">
-            <span className="text-[10px] text-purple-500 block font-medium">İçeride</span>
-            <strong className="text-sm font-bold text-purple-500">
-              {applications.filter(a => a.status === 'checked_in').length}
-            </strong>
-          </div>
+
+          {/* Ticket Code Check-In Fast Input */}
+          <form onSubmit={handleManualTicketCheckIn} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={ticketSearchInput}
+              onChange={e => setTicketSearchInput(e.target.value)}
+              placeholder="Bilet Kodu (Örn: VIP-AMS-1234)"
+              className="px-3 py-2 rounded-xl bg-black/40 border border-white/[0.08] text-xs font-mono text-[#F1EFEA] placeholder-[#66666A] focus:outline-none focus:border-[#C5A880]/50 uppercase"
+            />
+            <button
+              type="submit"
+              className="py-2 px-3.5 rounded-xl bg-[#C5A880] text-[#09090B] font-mono text-xs font-medium hover:bg-[#B89B6E] transition-colors cursor-pointer shrink-0"
+            >
+              Kapı Doğrula
+            </button>
+          </form>
         </div>
 
-        {/* QR Scanner Tool Banner */}
-        <div className="p-3 mx-4 mt-3 rounded-2xl bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border border-purple-500/30 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 text-xs text-purple-200">
-            <QrCode className="w-5 h-5 text-purple-400 shrink-0" />
-            <span>Kapıda Bilet Doğrulama: Katılımcıların QR kodunu taratarak anında onaylayın.</span>
+        {/* Filter Pills & Search */}
+        <div className="p-4 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFilterStatus('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-serif tracking-wider uppercase transition-all cursor-pointer ${
+                filterStatus === 'all'
+                  ? 'bg-[#1A1A1E] text-[#C5A880] border border-[#C5A880]/30 shadow-sm'
+                  : 'text-[#9A9996] hover:text-[#F1EFEA]'
+              }`}
+            >
+              Tümü ({attendees.length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('pending')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-serif tracking-wider uppercase transition-all cursor-pointer ${
+                filterStatus === 'pending'
+                  ? 'bg-[#1A1A1E] text-[#C5A880] border border-[#C5A880]/30 shadow-sm'
+                  : 'text-[#9A9996] hover:text-[#F1EFEA]'
+              }`}
+            >
+              Bekleyen ({pendingCount})
+            </button>
+            <button
+              onClick={() => setFilterStatus('approved')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-serif tracking-wider uppercase transition-all cursor-pointer ${
+                filterStatus === 'approved'
+                  ? 'bg-[#1A1A1E] text-[#C5A880] border border-[#C5A880]/30 shadow-sm'
+                  : 'text-[#9A9996] hover:text-[#F1EFEA]'
+              }`}
+            >
+              Onaylananlar ({approvedCount})
+            </button>
+            <button
+              onClick={() => setFilterStatus('checked_in')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-serif tracking-wider uppercase transition-all cursor-pointer ${
+                filterStatus === 'checked_in'
+                  ? 'bg-[#1A1A1E] text-[#C5A880] border border-[#C5A880]/30 shadow-sm'
+                  : 'text-[#9A9996] hover:text-[#F1EFEA]'
+              }`}
+            >
+              Giriş Yapanlar ({checkedInCount})
+            </button>
           </div>
-          <button
-            onClick={simulateQrScan}
-            disabled={isScanning}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shrink-0 shadow-xs"
-          >
-            {isScanning ? 'Taranıyor...' : 'QR Tara & Doğrula'}
-          </button>
-        </div>
 
-        {scanResult && (
-          <div className="mx-4 mt-2 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold text-center">
-            {scanResult}
-          </div>
-        )}
-
-        {/* Filter and Search Bar */}
-        <div className="p-4 flex flex-col sm:flex-row items-center gap-2 shrink-0">
-          <div className="relative w-full sm:flex-1">
-            <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-[#9A9996] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Katılımcı ismi ara..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-zinc-100 dark:bg-zinc-800 border-none text-zinc-900 dark:text-white outline-hidden"
+              placeholder="Davetli ara..."
+              className="pl-8 pr-3 py-1.5 rounded-lg bg-black/40 border border-white/[0.08] text-xs text-[#F1EFEA] placeholder-[#66666A] focus:outline-none focus:border-[#C5A880]/50"
             />
-          </div>
-
-          <div className="flex items-center gap-1 w-full sm:w-auto overflow-x-auto">
-            {(['all', 'pending', 'approved', 'checked_in'] as const).map(st => (
-              <button
-                key={st}
-                onClick={() => setFilterStatus(st)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
-                  filterStatus === st
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-                }`}
-              >
-                {st === 'all' ? 'Tümü' : st === 'pending' ? 'Bekleyen' : st === 'approved' ? 'Onaylı' : 'Giriş Yapan'}
-              </button>
-            ))}
           </div>
         </div>
 
-        {/* Applications List */}
-        <div className="p-4 pt-0 space-y-2.5 flex-1 overflow-y-auto">
-          {filteredApps.length === 0 ? (
-            <p className="text-xs text-center text-zinc-400 py-8">Kriterlere uygun başvuru bulunamadı.</p>
+        {/* Attendees List */}
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-3 flex-1 no-scrollbar">
+          {isLoading ? (
+            <p className="text-center py-12 text-xs font-mono text-[#9A9996]">Davetli listesi yükleniyor...</p>
+          ) : filteredAttendees.length === 0 ? (
+            <div className="text-center py-12 text-[#9A9996]">
+              <Users className="w-8 h-8 text-[#C5A880] mx-auto mb-2 opacity-50" />
+              <p className="font-serif text-sm text-[#F1EFEA]">Filtreye uygun davetli bulunamadı.</p>
+            </div>
           ) : (
-            filteredApps.map(app => (
+            filteredAttendees.map(att => (
               <div
-                key={app.id}
-                className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/70 flex items-center justify-between gap-3"
+                key={att.id}
+                className="p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/[0.06] hover:border-white/10 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-start gap-3">
                   <img
-                    src={app.userAvatar}
-                    alt={app.userName}
-                    className="w-10 h-10 rounded-xl object-cover ring-2 ring-zinc-300 dark:ring-zinc-700 shrink-0"
+                    src={att.userAvatar}
+                    alt={att.userName}
+                    className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
                   />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <strong className="text-xs font-bold text-zinc-900 dark:text-white truncate">
-                        {app.userName}
-                      </strong>
-                      <span className="text-[10px] text-zinc-400">• {app.appliedAt}</span>
-                    </div>
-                    {app.notes && (
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">{app.notes}</p>
-                    )}
-                    {app.ticketId && (
-                      <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold block">
-                        Bilet No: {app.ticketId}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-serif text-sm text-[#F1EFEA] font-light">{att.userName}</span>
+                      <span className="text-[10px] font-mono text-[#9A9996]">@{att.userUsername}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-white/[0.04] text-[#C5A880] border border-white/[0.06] capitalize">
+                        {att.participationType || 'all'}
                       </span>
+                    </div>
+
+                    {att.note && (
+                      <p className="text-xs text-[#9A9996] font-sans italic line-clamp-2">
+                        "{att.note}"
+                      </p>
                     )}
+
+                    <div className="flex items-center gap-3 text-[10px] font-mono text-[#66666A]">
+                      {att.ticketCode && (
+                        <span className="text-[#C5A880] flex items-center gap-1">
+                          <Ticket className="w-3 h-3" /> {att.ticketCode}
+                        </span>
+                      )}
+                      {att.ndaSigned && (
+                        <span className="text-emerald-400 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> NDA Onaylı
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {app.status === 'pending' && (
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  {att.status === 'pending' && (
                     <>
                       <button
-                        onClick={() => handleApprove(app.id)}
-                        className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-xs"
-                        title="Başvuruyu Onayla & QR Bilet Gönder"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Onayla</span>
-                      </button>
-                      <button
-                        onClick={() => handleReject(app.id)}
-                        className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-bold"
+                        onClick={() => handleReject(att.id)}
+                        className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 transition-colors cursor-pointer"
                         title="Reddet"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleApprove(att.id)}
+                        className="py-1.5 px-3.5 rounded-lg bg-[#C5A880] hover:bg-[#B89B6E] text-[#09090B] font-mono text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-md"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Onayla</span>
                       </button>
                     </>
                   )}
 
-                  {app.status === 'approved' && (
+                  {att.status === 'approved' && !att.isCheckedIn && (
                     <button
-                      onClick={() => handleCheckIn(app.id)}
-                      className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1"
+                      onClick={() => handleCheckIn(att.id)}
+                      className="py-1.5 px-3.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-black font-mono text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-md"
                     >
-                      <QrCode className="w-3.5 h-3.5" />
-                      <span>İçeri Al (Check-in)</span>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Kapıda Giriş Ver</span>
                     </button>
                   )}
 
-                  {app.status === 'checked_in' && (
-                    <span className="px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>İçeride</span>
+                  {att.isCheckedIn && (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> İçeride
+                    </span>
+                  )}
+
+                  {att.status === 'rejected' && (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono text-rose-400 bg-rose-500/10 border border-rose-500/20">
+                      Reddedildi
                     </span>
                   )}
                 </div>

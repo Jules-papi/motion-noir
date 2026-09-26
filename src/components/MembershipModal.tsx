@@ -1,9 +1,9 @@
 import React from 'react';
-import { 
-  Crown, 
-  Check, 
-  X, 
-  Coins 
+import {
+  Crown,
+  Check,
+  X,
+  Coins
 } from 'lucide-react';
 import { MembershipTier } from '../types';
 
@@ -82,7 +82,7 @@ export const MembershipModal: React.FC<MembershipModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#0c0c0e] border border-white/[0.12] rounded-xs p-6 sm:p-8 max-w-3xl w-full space-y-6 shadow-2xl relative">
+      <div className="bg-[#09090B] border border-white/[0.12] rounded-xs p-6 sm:p-8 max-w-3xl w-full space-y-6 shadow-2xl relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -93,7 +93,7 @@ export const MembershipModal: React.FC<MembershipModalProps> = ({
 
         {/* Modal Header */}
         <div className="text-center space-y-2 max-w-md mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xs bg-[#161512] text-amber-200 text-[10px] font-mono uppercase tracking-[0.2em] border border-amber-600/30">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xs bg-[#1A1A1E] text-amber-200 text-[10px] font-mono uppercase tracking-[0.2em] border border-amber-600/30">
             <Crown className="w-3 h-3 text-amber-300" />
             <span>Major Club Society Patronage</span>
           </div>
@@ -106,7 +106,7 @@ export const MembershipModal: React.FC<MembershipModalProps> = ({
         </div>
 
         {/* Ledger Balance Bar */}
-        <div className="bg-[#121215] border border-white/[0.06] p-3.5 rounded-xs flex items-center justify-between text-xs font-mono">
+        <div className="bg-[#111113] border border-white/[0.06] p-3.5 rounded-xs flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2 text-stone-300">
             <Coins className="w-4 h-4 text-amber-300" />
             <span>Member Ledger Balance: <strong className="text-amber-200">{walletBalance} €</strong></span>
@@ -186,7 +186,7 @@ export const MembershipModal: React.FC<MembershipModalProps> = ({
                       ? 'bg-[#18181c] text-stone-400 border border-white/[0.06] cursor-default'
                       : t.popular
                       ? 'bg-[#181613] hover:bg-[#221f1a] text-amber-200 border border-amber-600/50 hover:border-amber-400'
-                      : 'bg-[#141417] hover:bg-[#1a1a20] text-stone-200 border border-white/[0.08]'
+                      : 'bg-[#111113] hover:bg-[#1a1a20] text-stone-200 border border-white/[0.08]'
                   }`}
                 >
                   {isCurrent ? 'Current Tier' : 'Elect Tier'}

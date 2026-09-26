@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Eye, 
-  Ghost, 
-  Crown, 
-  X, 
-  Lock, 
+import {
+  Eye,
+  Ghost,
+  Crown,
+  X,
+  Lock,
   CheckCircle2
 } from 'lucide-react';
 import { ProfileVisitor, UserProfile } from '../types';
@@ -40,15 +40,15 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-60 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-[#0C0D11] border border-white/[0.12] rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] flex flex-col text-zinc-200">
+      <div className="bg-[#09090B] border border-white/[0.12] rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] flex flex-col text-zinc-200">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-full bg-[#181B22] border border-[#E5C590]/30 text-[#E5C590]">
+            <div className="p-2.5 rounded-full bg-[#1A1A1E] border border-[#C5A880]/30 text-[#C5A880]">
               <Eye className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-[#E5C590] block">
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-[#C5A880] block">
                 Discretion Log · 24H Audit
               </span>
               <h3 className="text-base font-serif text-white">
@@ -65,11 +65,11 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
         </div>
 
         {/* Ghost Mode Toggle Banner */}
-        <div className="my-4 p-3.5 rounded-xl bg-[#121419] border border-white/[0.08] flex items-center justify-between">
+        <div className="my-4 p-3.5 rounded-xl bg-[#111113] border border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg transition-colors ${
-              isGhostModeActive 
-                ? 'bg-[#E5C590] text-black font-semibold' 
+              isGhostModeActive
+                ? 'bg-[#C5A880] text-black font-semibold'
                 : 'bg-white/5 text-zinc-400 border border-white/10'
             }`}>
               <Ghost className="w-4 h-4" />
@@ -78,7 +78,7 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
               <div className="text-xs font-serif text-white flex items-center gap-2">
                 <span>Incognito Discretion Protocol</span>
                 {isGhostModeActive && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#E5C590]/20 text-[#E5C590] font-mono border border-[#E5C590]/30">
+                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#C5A880]/20 text-[#C5A880] font-mono border border-[#C5A880]/30">
                     Active
                   </span>
                 )}
@@ -91,7 +91,7 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
           <button
             onClick={() => setIsGhostModeActive(prev => !prev)}
             className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 cursor-pointer ${
-              isGhostModeActive ? 'bg-[#E5C590]' : 'bg-white/10 border border-white/10'
+              isGhostModeActive ? 'bg-[#C5A880]' : 'bg-white/10 border border-white/10'
             }`}
           >
             <div className={`w-5 h-5 rounded-full bg-black transition-transform ${
@@ -108,7 +108,7 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
             return (
               <div
                 key={item.id}
-                className="p-3 rounded-xl bg-[#121419] border border-white/[0.06] flex items-center justify-between relative overflow-hidden"
+                className="p-3 rounded-xl bg-[#111113] border border-white/[0.06] flex items-center justify-between relative overflow-hidden"
               >
                 <div className={`flex items-center gap-3 ${shouldBlur ? 'blur-xs select-none' : ''}`}>
                   <img
@@ -122,10 +122,10 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
                         {item.visitor.name}
                       </span>
                       {item.visitor.isVerified && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#E5C590]" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C5A880]" />
                       )}
                       {item.visitor.membershipTier === 'vip' && (
-                        <Crown className="w-3.5 h-3.5 text-[#E5C590] fill-[#E5C590]" />
+                        <Crown className="w-3.5 h-3.5 text-[#C5A880] fill-[#C5A880]" />
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono">
@@ -137,12 +137,12 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
                 </div>
 
                 {shouldBlur ? (
-                  <div className="absolute inset-0 bg-[#0C0D11]/80 backdrop-blur-xs flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[#09090B]/80 backdrop-blur-xs flex items-center justify-center">
                     <button
                       onClick={onUpgradeToVip}
-                      className="px-3 py-1.5 rounded-full text-[10px] font-serif uppercase tracking-[0.14em] bg-[#181B22] text-[#E5C590] border border-[#E5C590]/40 flex items-center gap-1.5 hover:bg-[#222631] transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-full text-[10px] font-serif uppercase tracking-[0.14em] bg-[#1A1A1E] text-[#C5A880] border border-[#C5A880]/40 flex items-center gap-1.5 hover:bg-[#1A1A1E] transition-colors cursor-pointer"
                     >
-                      <Lock className="w-3 h-3 text-[#E5C590]" />
+                      <Lock className="w-3 h-3 text-[#C5A880]" />
                       <span>Unseal with High Patron</span>
                     </button>
                   </div>
@@ -158,16 +158,16 @@ export const VisitorsModal: React.FC<VisitorsModalProps> = ({
 
         {/* Footer upgrade note if not VIP */}
         {!isVip && (
-          <div className="mt-3 p-3.5 rounded-xl bg-[#181B22] border border-[#E5C590]/30 flex items-center justify-between">
+          <div className="mt-3 p-3.5 rounded-xl bg-[#1A1A1E] border border-[#C5A880]/30 flex items-center justify-between">
             <div className="text-xs">
-              <span className="font-serif text-[#E5C590] block">Unrestricted Dossier Ledger</span>
+              <span className="font-serif text-[#C5A880] block">Unrestricted Dossier Ledger</span>
               <p className="text-[10px] text-zinc-400 font-sans">
                 Patrons of High Standing maintain real-time unsealed registry insight.
               </p>
             </div>
             <button
               onClick={onUpgradeToVip}
-              className="px-3.5 py-1.5 rounded-full bg-[#E5C590] hover:bg-[#d9b880] text-black text-xs font-serif uppercase tracking-[0.12em] font-semibold shrink-0 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-[#C5A880] hover:bg-[#B89B6E] text-black text-xs font-serif uppercase tracking-[0.12em] font-semibold shrink-0 transition-colors cursor-pointer"
             >
               Elevate
             </button>

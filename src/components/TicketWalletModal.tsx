@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  QrCode, 
-  X, 
-  Download, 
-  ShieldCheck, 
-  CheckCircle2, 
-  AlertCircle, 
-  Scan, 
-  Ticket, 
-  Sparkles, 
-  Lock, 
+import {
+  QrCode,
+  X,
+  Download,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Scan,
+  Ticket,
+  Sparkles,
+  Lock,
   RefreshCw,
   Camera,
   MapPin,
@@ -38,7 +38,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'passes' | 'scanner'>('passes');
   const [selectedTicketEvent, setSelectedTicketEvent] = useState<PlatformEvent | null>(null);
-  
+
   // Gate Scanner state
   const [scannerCode, setScannerCode] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -51,7 +51,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
 
   // Dynamic anti-screenshot token rotation
   const [securityToken, setSecurityToken] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       setSecurityToken(Math.random().toString(36).substring(2, 8).toUpperCase());
@@ -71,8 +71,8 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
   if (!isOpen) return null;
 
   const handleSimulateScan = (eventToScan?: PlatformEvent) => {
-    const target = eventToScan || events.find(e => 
-      e.id === scannerCode || 
+    const target = eventToScan || events.find(e =>
+      e.id === scannerCode ||
       `MN-${e.id.slice(0, 4).toUpperCase()}`.includes(scannerCode.toUpperCase()) ||
       (e.ticketCode && e.ticketCode.toUpperCase() === scannerCode.toUpperCase())
     );
@@ -116,9 +116,9 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
       <div className="bg-[#0D0F14] border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative text-[#F4F1EC] flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-white/[0.08] flex items-center justify-between bg-[#121419] shrink-0">
+        <div className="p-4 sm:p-5 border-b border-white/[0.08] flex items-center justify-between bg-[#111113] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#1A1D24] border border-white/10 flex items-center justify-center text-[#E5C590]">
+            <div className="w-9 h-9 rounded-xl bg-[#1A1D24] border border-white/10 flex items-center justify-center text-[#C5A880]">
               <Ticket className="w-5 h-5" />
             </div>
             <div>
@@ -140,12 +140,12 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
         </div>
 
         {/* Capsule Navigation */}
-        <div className="flex items-center gap-2 px-5 pt-4 pb-2 bg-[#121419]/50 border-b border-white/[0.04]">
+        <div className="flex items-center gap-2 px-5 pt-4 pb-2 bg-[#111113]/50 border-b border-white/[0.04]">
           <button
             onClick={() => setActiveTab('passes')}
             className={`px-4 py-1.5 rounded-full text-xs font-serif uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'passes'
-                ? 'bg-[#1E222B] text-[#E5C590] border border-[#E5C590]/40 shadow-sm'
+                ? 'bg-[#1E222B] text-[#C5A880] border border-[#C5A880]/40 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -157,7 +157,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
             onClick={() => setActiveTab('scanner')}
             className={`px-4 py-1.5 rounded-full text-xs font-serif uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'scanner'
-                ? 'bg-[#1E222B] text-[#E5C590] border border-[#E5C590]/40 shadow-sm'
+                ? 'bg-[#1E222B] text-[#C5A880] border border-[#C5A880]/40 shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -172,7 +172,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
             <div>
               {ticketEvents.length === 0 ? (
                 <div className="text-center py-12 px-4 space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-[#181B22] border border-white/10 flex items-center justify-center mx-auto text-zinc-500">
+                  <div className="w-12 h-12 rounded-full bg-[#1A1A1E] border border-white/10 flex items-center justify-center mx-auto text-zinc-500">
                     <Ticket className="w-6 h-6" />
                   </div>
                   <h3 className="font-serif text-base text-zinc-300">Henüz Kayıtlı Biletiniz Yok</h3>
@@ -195,8 +195,8 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                           onClick={() => setSelectedTicketEvent(event)}
                           className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                             isSelected
-                              ? 'bg-[#1A1D24] border-[#E5C590]/60 shadow-md'
-                              : 'bg-[#121419] border-white/[0.06] hover:border-white/20'
+                              ? 'bg-[#1A1D24] border-[#C5A880]/60 shadow-md'
+                              : 'bg-[#111113] border-white/[0.06] hover:border-white/20'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
@@ -208,14 +208,14 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                                 GİRİŞ YAPILDI
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full bg-[#E5C590]/20 text-[#E5C590] text-[9px] font-mono shrink-0">
+                              <span className="px-2 py-0.5 rounded-full bg-[#C5A880]/20 text-[#C5A880] text-[9px] font-mono shrink-0">
                                 GEÇERLİ
                               </span>
                             )}
                           </div>
                           <div className="mt-2 flex items-center gap-3 text-[10px] text-zinc-400 font-mono">
                             <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-[#E5C590]" />
+                              <MapPin className="w-3 h-3 text-[#C5A880]" />
                               {event.city}
                             </span>
                             <span>·</span>
@@ -231,11 +231,11 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                     <div className="md:col-span-7 bg-[#15171E] border border-white/10 rounded-2xl p-5 flex flex-col items-center space-y-4 shadow-xl relative overflow-hidden">
                       {/* Top ribbon */}
                       <div className="w-full flex items-center justify-between pb-3 border-b border-white/[0.06] text-[10px] font-mono">
-                        <span className="text-[#E5C590] tracking-widest uppercase">
+                        <span className="text-[#C5A880] tracking-widest uppercase">
                           MAJOR CLUB VIP PASS
                         </span>
                         <span className="flex items-center gap-1 text-zinc-400">
-                          <RefreshCw className="w-3 h-3 animate-spin text-[#E5C590]" />
+                          <RefreshCw className="w-3 h-3 animate-spin text-[#C5A880]" />
                           Token: {securityToken}
                         </span>
                       </div>
@@ -255,7 +255,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                         <div className="w-36 h-36 bg-white p-2.5 rounded-lg flex items-center justify-center relative shadow-inner">
                           <QrCode className="w-full h-full text-black" />
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="w-7 h-7 rounded-full bg-[#0D0F14] text-[#E5C590] border border-[#E5C590]/40 flex items-center justify-center font-serif text-xs font-bold shadow-md">
+                            <span className="w-7 h-7 rounded-full bg-[#0D0F14] text-[#C5A880] border border-[#C5A880]/40 flex items-center justify-center font-serif text-xs font-bold shadow-md">
                               MN
                             </span>
                           </div>
@@ -278,7 +278,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                         </div>
                         <div>
                           <span className="text-zinc-500 block uppercase">Bilet Kodu</span>
-                          <span className="text-[#E5C590] font-medium block">
+                          <span className="text-[#C5A880] font-medium block">
                             {selectedTicketEvent.ticketCode || `MN-AMS-${selectedTicketEvent.id.slice(0, 4).toUpperCase()}`}
                           </span>
                         </div>
@@ -299,7 +299,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                             setActiveTab('scanner');
                             setScannerCode(selectedTicketEvent.ticketCode || selectedTicketEvent.id);
                           }}
-                          className="flex-1 py-2 px-3 rounded-xl bg-[#1E222B] hover:bg-[#282D39] text-[#E5C590] border border-[#E5C590]/40 text-xs font-serif uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                          className="flex-1 py-2 px-3 rounded-xl bg-[#1E222B] hover:bg-[#282D39] text-[#C5A880] border border-[#C5A880]/40 text-xs font-serif uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
                         >
                           <Scan className="w-3.5 h-3.5" />
                           <span>Kapıda Doğrula</span>
@@ -323,7 +323,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
             /* GATE SCANNER TAB */
             <div className="space-y-6 max-w-lg mx-auto">
               <div className="text-center space-y-1">
-                <span className="text-[10px] font-mono tracking-widest text-[#E5C590] uppercase">
+                <span className="text-[10px] font-mono tracking-widest text-[#C5A880] uppercase">
                   Major Club Gatekeeping Engine
                 </span>
                 <h3 className="font-serif text-xl text-white font-medium">
@@ -354,10 +354,10 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                 )}
 
                 {/* Viewfinder Target Corners */}
-                <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#E5C590]" />
-                <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#E5C590]" />
-                <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#E5C590]" />
-                <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#E5C590]" />
+                <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#C5A880]" />
+                <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#C5A880]" />
+                <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#C5A880]" />
+                <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#C5A880]" />
               </div>
 
               {/* Scan input controls */}
@@ -368,7 +368,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                     value={scannerCode}
                     onChange={e => setScannerCode(e.target.value)}
                     placeholder="Bilet Kodu (Örn: MN-AMS-4029 veya event-1)..."
-                    className="flex-1 bg-[#15171E] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 font-mono focus:outline-hidden focus:border-[#E5C590]"
+                    className="flex-1 bg-[#15171E] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 font-mono focus:outline-hidden focus:border-[#C5A880]"
                   />
                   <button
                     onClick={() => handleSimulateScan()}
@@ -389,7 +389,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                         setScannerCode(ev.ticketCode || ev.id);
                         handleSimulateScan(ev);
                       }}
-                      className="px-2.5 py-1 rounded-full bg-[#181B22] hover:bg-[#202530] text-zinc-300 text-[10px] font-mono border border-white/5 whitespace-nowrap cursor-pointer"
+                      className="px-2.5 py-1 rounded-full bg-[#1A1A1E] hover:bg-[#202530] text-zinc-300 text-[10px] font-mono border border-white/5 whitespace-nowrap cursor-pointer"
                     >
                       {ev.city} ({ev.id})
                     </button>

@@ -1,16 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  Post, 
-  UserProfile, 
-  Conversation, 
-  DiscoveryProfile, 
-  ReportItem, 
-  AppNotification, 
-  ChatMessage 
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Post,
+  UserProfile,
+  Conversation,
+  DiscoveryProfile,
+  ReportItem,
+  AppNotification,
+  ChatMessage,
+  PlatformEvent,
+  EventCategory,
+  EventAttendee,
+  EventFilters,
+  CreateEventPayload,
+  RegistrationPayload
 } from '../types';
 import { ActiveViewType } from '../components/Sidebar';
 import { noirApi } from '../services/noirApi';
 import { supabase } from '../lib/supabase';
+import { DEFAULT_AVATAR_URL, DEFAULT_COVER_URL } from '../constants/profile';
 
 // Default guest patron profile for seamless browsing without auth lock
 const DEFAULT_GUEST_PATRON: UserProfile = {
@@ -18,8 +25,8 @@ const DEFAULT_GUEST_PATRON: UserProfile = {
   name: 'Misafir Patron',
   username: 'misafir',
   isGuest: true,
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
-  coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80',
+  avatar: DEFAULT_AVATAR_URL,
+  coverImage: DEFAULT_COVER_URL,
   bio: 'Major Club portal ziyaretçisi. Özel salon içerikleri ve üye profilleri için giriş yapın.',
   location: 'Avrupa / Türkiye',
   website: '',
@@ -33,9 +40,10 @@ const DEFAULT_GUEST_PATRON: UserProfile = {
   membershipTier: 'standard',
   isSubscribed: false,
   isFollowing: false,
-  age: 26,
-  gender: 'woman',
-  orientation: 'Heterosexual',
+  gender: 'unspecified',
+  interests: [],
+  lookingFor: [],
+  boundaries: [],
 };
 
 export function useSocialPlatform() {
@@ -67,7 +75,17 @@ export function useSocialPlatform() {
   const [activeConversationId, setActiveConversationId] = useState<string>('');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [reports, setReports] = useState<ReportItem[]>([]);
+
+  // Events & Calendar subsystem
+  const [events, setEvents] = useState<PlatformEvent[]>([]);
+  const [eventCategories, setEventCategories] = useState<EventCategory[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<PlatformEvent | null>(null);
+  const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [isLoadingMorePosts, setIsLoadingMorePosts] = useState(false);
 
   const showToast = (text: string, type: 'success' | 'info' | 'error' = 'info') => {
     setToastMessage({ text, type });
@@ -93,16 +111,20 @@ export function useSocialPlatform() {
           username: p.username,
           avatar: p.avatar,
           bio: p.bio,
-          age: p.age || 28,
-          gender: (p.gender as any) || 'woman',
-          city: p.location || 'Amsterdam',
-          distanceKm: Math.floor(2 + Math.random() * 8),
+          coverImage: p.coverImage,
+          age: p.age,
+          gender: p.gender || 'unspecified',
+          orientation: p.orientation,
+          city: p.location || '',
+          distanceKm: undefined,
           isOnline: true,
           isVerified: p.isVerified,
           isPrivate: p.isPrivate,
           membershipTier: p.membershipTier,
-          interests: ['Art', 'Noir', 'Private Salons'],
-          matchRate: 92,
+          interests: p.interests || [],
+          lookingFor: p.lookingFor || [],
+          boundaries: p.boundaries || [],
+          matchRate: 0,
         }));
         setDiscoveryProfiles(mappedDiscovery);
 
@@ -140,6 +162,20 @@ export function useSocialPlatform() {
         setNotifications(notifs);
       }
 
+      // Load events & categories from Supabase
+      try {
+        const [dbEvents, cats, savedEvtIds] = await Promise.all([
+          noirApi.getEvents(undefined, activeUserId),
+          noirApi.getEventCategories(),
+          activeUserId ? noirApi.getSavedEventIds(activeUserId) : Promise.resolve([]),
+        ]);
+        setEvents(dbEvents);
+        setEventCategories(cats);
+        setSavedEventIds(savedEvtIds);
+      } catch (evtErr) {
+        console.warn('Failed to load initial events:', evtErr);
+      }
+
     } catch (err) {
       console.error('Failed to load initial Supabase data:', err);
       showToast('Connecting to Major Club cloud database...', 'info');
@@ -171,6 +207,8 @@ export function useSocialPlatform() {
         setConversations([]);
         setActiveConversationId('');
         setNotifications([]);
+        setSavedEventIds([]);
+        setSelectedEvent(null);
       }
     });
 
@@ -178,6 +216,46 @@ export function useSocialPlatform() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!currentUser.id || currentUser.isGuest) return;
+
+    const unsubscribe = noirApi.subscribeToNotifications(currentUser.id, notification => {
+      setNotifications(previous => {
+        if (previous.some(item => item.id === notification.id)) return previous;
+        return [notification, ...previous];
+      });
+      showToast(notification.title, 'info');
+    });
+
+    return unsubscribe;
+  }, [currentUser.id, currentUser.isGuest]);
+
+  useEffect(() => {
+    if (!isNotificationsOpen || currentUser.isGuest) return;
+    noirApi.getNotifications(currentUser.id).then(setNotifications);
+  }, [isNotificationsOpen, currentUser.id, currentUser.isGuest]);
+
+  const currentUserRef = useRef(currentUser);
+  const currentViewRef = useRef(currentView);
+  const activeConversationIdRef = useRef(activeConversationId);
+  const conversationsRef = useRef(conversations);
+
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
+
+  useEffect(() => {
+    currentViewRef.current = currentView;
+  }, [currentView]);
+
+  useEffect(() => {
+    activeConversationIdRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  useEffect(() => {
+    conversationsRef.current = conversations;
+  }, [conversations]);
 
   // 2. Load conversations when currentUser changes
   useEffect(() => {
@@ -200,13 +278,32 @@ export function useSocialPlatform() {
       showToast('New dispatch posted in The Gazette.', 'info');
     });
 
-    const unsubscribeMessages = noirApi.subscribeToMessages((newMsg: ChatMessage) => {
+    const unsubscribeMessages = noirApi.subscribeToMessages(async (newMsg: ChatMessage) => {
+      if (!conversationsRef.current.some(conversation => conversation.id === newMsg.conversationId)) {
+        const userId = currentUserRef.current.id;
+        if (!currentUserRef.current.isGuest && userId) {
+          const refreshed = await noirApi.getConversations(userId);
+          setConversations(refreshed);
+        }
+        return;
+      }
       setConversations(prev => {
         return prev.map(c => {
           if (c.id === newMsg.conversationId) {
             if (c.messages.some(m => m.id === newMsg.id)) return c;
+
+            const isConversationOpen = currentViewRef.current === 'chat' && activeConversationIdRef.current === c.id;
+            const isFromOtherUser = !currentUserRef.current.isGuest && newMsg.senderId !== currentUserRef.current.id;
+
+            if (isConversationOpen && isFromOtherUser) {
+              noirApi.markConversationAsRead(c.id);
+            }
+
+            const shouldIncrement = isFromOtherUser && !isConversationOpen;
+
             return {
               ...c,
+              unreadCount: shouldIncrement ? (c.unreadCount || 0) + 1 : (isConversationOpen ? 0 : c.unreadCount),
               messages: [...c.messages, newMsg],
               lastMessage: newMsg.text || 'Photo Dispatch',
               lastMessageTime: newMsg.createdAt,
@@ -222,6 +319,14 @@ export function useSocialPlatform() {
       unsubscribeMessages();
     };
   }, []);
+
+  const handleMarkConversationAsRead = useCallback(async (conversationId: string) => {
+    if (!conversationId || currentUser.isGuest) return;
+    setConversations(prev => prev.map(c =>
+      c.id === conversationId ? { ...c, unreadCount: 0 } : c
+    ));
+    await noirApi.markConversationAsRead(conversationId);
+  }, [currentUser.isGuest]);
 
   // Feed interactions (Live in Supabase)
   const handleLike = async (postId: string) => {
@@ -245,6 +350,12 @@ export function useSocialPlatform() {
       await noirApi.toggleLikePost(postId, currentUser.id, currentlyLiked);
     } catch (err) {
       console.error('Error liking post:', err);
+      setPosts(prev => prev.map(p => p.id === postId ? {
+        ...p,
+        isLiked: currentlyLiked,
+        likesCount: currentlyLiked ? p.likesCount + 1 : Math.max(0, p.likesCount - 1),
+      } : p));
+      showToast('Beğeni kaydedilemedi. Lütfen tekrar deneyin.', 'error');
     }
   };
 
@@ -275,18 +386,90 @@ export function useSocialPlatform() {
     }
 
     const isFollowing = followingIds.includes(targetUserId);
-    setFollowingIds(prev => isFollowing ? prev.filter(id => id !== targetUserId) : [...prev, targetUserId]);
 
     try {
       if (isFollowing) {
-        await noirApi.unfollowUser(currentUser.id, targetUserId);
+        const success = await noirApi.unfollowUser(currentUser.id, targetUserId);
+        if (!success) throw new Error('Takip bırakılamadı.');
+        setFollowingIds(prev => prev.filter(id => id !== targetUserId));
         showToast('Takip bırakıldı.', 'info');
       } else {
-        await noirApi.followUser(currentUser.id, targetUserId);
-        showToast('Üye takip ediliyor.', 'success');
+        const status = await noirApi.followUser(currentUser.id, targetUserId);
+        if (!status) throw new Error('Takip işlemi kaydedilemedi.');
+        if (status === 'accepted') {
+          setFollowingIds(prev => prev.includes(targetUserId) ? prev : [...prev, targetUserId]);
+          showToast('Üye takip ediliyor.', 'success');
+        } else {
+          showToast('Takip isteği gönderildi.', 'success');
+        }
       }
     } catch (err) {
       console.error('Error toggling follow:', err);
+      showToast('Takip işlemi tamamlanamadı.', 'error');
+    }
+  };
+
+  const loadMorePosts = async () => {
+    if (isLoadingMorePosts || !hasMorePosts) return;
+    setIsLoadingMorePosts(true);
+    try {
+      const currentCount = posts.length;
+      const nextPosts = await noirApi.getPosts(
+        currentUser.isGuest ? undefined : currentUser.id,
+        20,
+        currentCount
+      );
+      if (nextPosts.length < 20) {
+        setHasMorePosts(false);
+      }
+      setPosts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const unique = nextPosts.filter(p => !existingIds.has(p.id));
+        return [...prev, ...unique];
+      });
+    } catch (err) {
+      console.error('Error loading more posts:', err);
+    } finally {
+      setIsLoadingMorePosts(false);
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const success = await noirApi.deletePost(postId);
+      if (success) {
+        setPosts(prev => prev.filter(p => p.id !== postId));
+        showToast('Gönderi arşivden silindi.', 'success');
+      } else {
+        showToast('Gönderi silinemedi.', 'error');
+      }
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      showToast('Gönderi silinirken hata oluştu.', 'error');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string, postId: string) => {
+    try {
+      const success = await noirApi.deleteComment(commentId);
+      if (success) {
+        setSelectedCommentsPost(prev => {
+          if (!prev || prev.id !== postId) return prev;
+          const updatedComments = (prev.comments || []).filter(c => c.id !== commentId);
+          return {
+            ...prev,
+            comments: updatedComments,
+            commentsCount: Math.max(0, (prev.commentsCount || 1) - 1),
+          };
+        });
+        setPosts(prev => prev.map(p => p.id === postId ? {
+          ...p,
+          commentsCount: Math.max(0, p.commentsCount - 1),
+        } : p));
+        showToast('Yorum silindi.', 'success');
+      }
+    } catch (err) {
+      console.error('Error deleting comment:', err);
     }
   };
 
@@ -316,7 +499,7 @@ export function useSocialPlatform() {
     try {
       showToast(`Establishing encrypted channel with ${profile.name}...`, 'info');
       const convId = await noirApi.getOrCreateConversation(currentUser.id, profile.id);
-      
+
       const updatedConvs = await noirApi.getConversations(currentUser.id);
       setConversations(updatedConvs);
       setActiveConversationId(convId);
@@ -333,6 +516,31 @@ export function useSocialPlatform() {
       await noirApi.markAllNotificationsAsRead(currentUser.id);
     }
     showToast('Tüm bildirimler okundu olarak işaretlendi.', 'info');
+  };
+
+  const handleSelectNotification = async (notification: AppNotification) => {
+    setNotifications(prev => prev.map(item => item.id === notification.id ? { ...item, isRead: true } : item));
+    setIsNotificationsOpen(false);
+    if (!currentUser.isGuest && !notification.isRead) {
+      try {
+        await noirApi.markNotificationAsRead(notification.id, currentUser.id);
+      } catch (err) {
+        console.error('Error marking notification as read:', err);
+      }
+    }
+  };
+
+  const handleRespondToFollowRequest = async (notification: AppNotification, accept: boolean) => {
+    if (!notification.actorId || currentUser.isGuest) return;
+    try {
+      const success = await noirApi.respondToFollowRequest(notification.actorId, accept);
+      if (!success) throw new Error('Takip isteği artık aktif değil.');
+      setNotifications(prev => prev.filter(item => item.id !== notification.id));
+      showToast(accept ? 'Takip isteği kabul edildi.' : 'Takip isteği reddedildi.', 'success');
+    } catch (err) {
+      console.error('Error responding to follow request:', err);
+      showToast('Takip isteği güncellenemedi.', 'error');
+    }
   };
 
   const handleAddComment = async (postId: string, text: string) => {
@@ -387,6 +595,185 @@ export function useSocialPlatform() {
     }
   };
 
+  // -------------------------------------------------------------
+  // EVENT HANDLERS
+  // -------------------------------------------------------------
+  const loadEvents = useCallback(async (filters?: EventFilters) => {
+    setIsLoadingEvents(true);
+    try {
+      const activeUserId = currentUserRef.current.isGuest ? undefined : currentUserRef.current.id;
+      const [fetchedEvents, cats, savedIds] = await Promise.all([
+        noirApi.getEvents(filters, activeUserId),
+        eventCategories.length === 0 ? noirApi.getEventCategories() : Promise.resolve(eventCategories),
+        activeUserId ? noirApi.getSavedEventIds(activeUserId) : Promise.resolve([]),
+      ]);
+      setEvents(fetchedEvents);
+      if (cats.length > 0) setEventCategories(cats);
+      if (savedIds.length > 0) setSavedEventIds(savedIds);
+    } catch (err) {
+      console.error('Error loading events:', err);
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  }, [eventCategories]);
+
+  const handleSaveEvent = async (eventId: string) => {
+    if (currentUser.isGuest) {
+      showToast('Etkinliği kaydetmek için lütfen giriş yapın veya üye olun.', 'info');
+      setIsAuthOpen(true);
+      return;
+    }
+    const isCurrentlySaved = savedEventIds.includes(eventId);
+    // Optimistic toggle
+    setSavedEventIds(prev => isCurrentlySaved ? prev.filter(id => id !== eventId) : [...prev, eventId]);
+    setEvents(prev => prev.map(e => e.id === eventId ? {
+      ...e,
+      isSaved: !isCurrentlySaved,
+      savesCount: (e.savesCount || 0) + (isCurrentlySaved ? -1 : 1),
+    } : e));
+
+    try {
+      await noirApi.toggleSaveEvent(eventId, isCurrentlySaved);
+      showToast(isCurrentlySaved ? 'Etkinlik kaydedilenlerden çıkarıldı.' : 'Etkinlik ajandanıza kaydedildi.', 'success');
+    } catch (err: any) {
+      // Rollback
+      setSavedEventIds(prev => isCurrentlySaved ? [...prev, eventId] : prev.filter(id => id !== eventId));
+      setEvents(prev => prev.map(e => e.id === eventId ? {
+        ...e,
+        isSaved: isCurrentlySaved,
+        savesCount: (e.savesCount || 0) + (isCurrentlySaved ? 1 : -1),
+      } : e));
+      showToast('İşlem başarısız oldu.', 'error');
+    }
+  };
+
+  const handleRegisterForEvent = async (eventId: string, payload: RegistrationPayload) => {
+    if (currentUser.isGuest) {
+      showToast('Etkinliğe katılmak için lütfen giriş yapın veya üye olun.', 'info');
+      setIsAuthOpen(true);
+      return;
+    }
+    try {
+      const attendee = await noirApi.registerForEvent(eventId, payload);
+      if (attendee) {
+        setEvents(prev => prev.map(e => e.id === eventId ? {
+          ...e,
+          isUserRegistered: attendee.status !== 'cancelled',
+          applicationStatus: attendee.status,
+          ticketCode: attendee.ticketCode,
+          attendeesCount: attendee.status === 'approved' ? e.attendeesCount + 1 : e.attendeesCount,
+        } : e));
+        if (selectedEvent && selectedEvent.id === eventId) {
+          setSelectedEvent(prev => prev ? {
+            ...prev,
+            isUserRegistered: attendee.status !== 'cancelled',
+            applicationStatus: attendee.status,
+            ticketCode: attendee.ticketCode,
+          } : null);
+        }
+        showToast(
+          attendee.status === 'approved'
+            ? 'Başvurunuz onaylandı! Giriş kartınız oluşturuldu.'
+            : 'Başvurunuz alındı ve salon küratörlerine iletildi.',
+          'success'
+        );
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Başvuru sırasında hata oluştu.', 'error');
+    }
+  };
+
+  const handleCancelRegistration = async (eventId: string) => {
+    try {
+      const ok = await noirApi.cancelRegistration(eventId);
+      if (ok) {
+        setEvents(prev => prev.map(e => e.id === eventId ? {
+          ...e,
+          isUserRegistered: false,
+          applicationStatus: 'none',
+          ticketCode: undefined,
+          attendeesCount: e.applicationStatus === 'approved' ? Math.max(0, e.attendeesCount - 1) : e.attendeesCount,
+        } : e));
+        showToast('Etkinlik kaydınız iptal edildi.', 'info');
+      }
+    } catch (err: any) {
+      showToast('İptal işlemi başarısız oldu.', 'error');
+    }
+  };
+
+  const handleCreateEvent = async (payload: CreateEventPayload) => {
+    if (currentUser.isGuest) {
+      showToast('Etkinlik oluşturmak için lütfen giriş yapın.', 'info');
+      setIsAuthOpen(true);
+      return;
+    }
+    try {
+      const created = await noirApi.createEvent(payload);
+      if (created) {
+        setEvents(prev => [created, ...prev]);
+        setIsCreateEventOpen(false);
+        showToast('Yeni salon etkinliği başarıyla yayınlandı.', 'success');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Etkinlik oluşturulurken hata oluştu.', 'error');
+    }
+  };
+
+  const handleApproveRegistration = async (attendeeId: string, eventId?: string) => {
+    try {
+      const ok = await noirApi.approveRegistration(attendeeId);
+      if (ok) {
+        if (eventId) {
+          setEvents(prev => prev.map(e => e.id === eventId ? {
+            ...e,
+            attendeesCount: e.attendeesCount + 1,
+          } : e));
+        }
+        showToast('Başvuru onaylandı ve davet kodu üretildi.', 'success');
+      }
+    } catch (err: any) {
+      showToast('Onaylama işlemi başarısız oldu.', 'error');
+    }
+  };
+
+  const handleRejectRegistration = async (attendeeId: string) => {
+    try {
+      const ok = await noirApi.rejectRegistration(attendeeId);
+      if (ok) {
+        showToast('Başvuru reddedildi.', 'info');
+      }
+    } catch (err: any) {
+      showToast('İşlem başarısız oldu.', 'error');
+    }
+  };
+
+  const handleCheckInAttendee = async (attendeeOrEventId: string) => {
+    try {
+      const ok = await noirApi.checkInAttendee(attendeeOrEventId, currentUser.id);
+      if (ok) {
+        setEvents(prev => prev.map(e => e.id === attendeeOrEventId ? { ...e, isCheckedIn: true } : e));
+        showToast('Üye girişi (Check-in) başarıyla kaydedildi.', 'success');
+      }
+    } catch (err: any) {
+      showToast('Giriş teyidi başarısız oldu.', 'error');
+    }
+  };
+
+  const handleSignNda = async (eventId: string) => {
+    try {
+      const ok = await noirApi.signEventNda(eventId);
+      if (ok) {
+        setEvents(prev => prev.map(e => e.id === eventId ? {
+          ...e,
+          isNdaSigned: true,
+        } : e));
+        showToast('Gizlilik Sözleşmesi (NDA) onaylandı.', 'success');
+      }
+    } catch (err: any) {
+      showToast('NDA imzalanamadı.', 'error');
+    }
+  };
+
   const toggleCamouflageMode = () => {
     setIsCamouflageMode(prev => {
       const next = !prev;
@@ -426,8 +813,31 @@ export function useSocialPlatform() {
     effectiveIsSubscribed: true,
     handleLike, handleSave,
     handleAddComment,
+    handleDeleteComment,
+    handleDeletePost,
+    hasMorePosts,
+    isLoadingMorePosts,
+    loadMorePosts,
     handleLogout,
     handleMarkAllNotificationsRead,
+    handleSelectNotification,
+    handleRespondToFollowRequest,
     handleStartConversationWithProfile,
+    handleMarkConversationAsRead,
+    events, setEvents,
+    eventCategories, setEventCategories,
+    selectedEvent, setSelectedEvent,
+    savedEventIds, setSavedEventIds,
+    isCreateEventOpen, setIsCreateEventOpen,
+    isLoadingEvents,
+    loadEvents,
+    handleSaveEvent,
+    handleRegisterForEvent,
+    handleCancelRegistration,
+    handleCreateEvent,
+    handleApproveRegistration,
+    handleRejectRegistration,
+    handleCheckInAttendee,
+    handleSignNda,
   };
 }

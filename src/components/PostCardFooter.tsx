@@ -34,8 +34,8 @@ export const PostCardFooter: React.FC<PostCardFooterProps> = ({
   const isLongCaption = caption.length > 95;
 
   return (
-    <div className="px-4 sm:px-5 pt-3 pb-4 space-y-2 text-zinc-300">
-      {/* 1. INSTAGRAM ACTION BAR (44px+ THUMB ZONE COMPLIANT) */}
+    <div className="px-4 sm:px-5 pt-2.5 pb-4 space-y-2 text-[#F1EFEA]">
+      {/* 1. ACTION BAR (44px+ THUMB ZONE COMPLIANT) */}
       <div className="flex items-center justify-between -mx-2">
         <div className="flex items-center gap-1">
           {/* Like Heart */}
@@ -48,10 +48,10 @@ export const PostCardFooter: React.FC<PostCardFooterProps> = ({
             }`}
           >
             <Heart
-              className={`w-6 h-6 stroke-[1.8] transition-colors ${
-                post.isLiked 
-                  ? 'fill-rose-500 text-rose-500 drop-shadow-[0_0_12px_rgba(244,63,94,0.6)]' 
-                  : 'text-white hover:text-rose-400'
+              className={`w-5 h-5 stroke-[1.8] transition-colors ${
+                post.isLiked
+                  ? 'fill-rose-500 text-rose-500 drop-shadow-[0_0_12px_rgba(244,63,94,0.6)]'
+                  : 'text-[#F1EFEA] hover:text-rose-400'
               }`}
             />
           </button>
@@ -61,9 +61,9 @@ export const PostCardFooter: React.FC<PostCardFooterProps> = ({
             id={`btn-comment-${post.id}`}
             onClick={() => onOpenComments(post)}
             aria-label="Yorum Yap"
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-white hover:text-zinc-300 hover:bg-white/[0.04] transition-all active:scale-75 cursor-pointer"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-[#F1EFEA] hover:text-white hover:bg-white/[0.04] transition-all active:scale-75 cursor-pointer"
           >
-            <MessageCircle className="w-6 h-6 stroke-[1.8]" />
+            <MessageCircle className="w-5 h-5 stroke-[1.8]" />
           </button>
 
           {/* Share / Direct Plane */}
@@ -71,9 +71,9 @@ export const PostCardFooter: React.FC<PostCardFooterProps> = ({
             id={`btn-share-${post.id}`}
             onClick={() => onShare(post)}
             aria-label="Paylaş"
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-white hover:text-zinc-300 hover:bg-white/[0.04] transition-all active:scale-75 cursor-pointer"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-[#F1EFEA] hover:text-white hover:bg-white/[0.04] transition-all active:scale-75 cursor-pointer"
           >
-            <Send className="w-5 h-5 stroke-[1.8] -rotate-12" />
+            <Send className="w-4.5 h-4.5 stroke-[1.8] -rotate-12" />
           </button>
         </div>
 
@@ -82,18 +82,18 @@ export const PostCardFooter: React.FC<PostCardFooterProps> = ({
           id={`btn-save-${post.id}`}
           onClick={() => onSave(post.id)}
           aria-label="Kaydet"
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-white hover:text-[#E5C590] hover:bg-white/[0.04] transition-all active:scale-75 cursor-pointer"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-[#F1EFEA] hover:text-[#C5A880] hover:bg-white/[0.04] transition-all active:scale-75 cursor-pointer"
         >
-          <Bookmark className={`w-5 h-5 stroke-[1.8] ${post.isSaved ? 'fill-[#E5C590] text-[#E5C590]' : ''}`} />
+          <Bookmark className={`w-4.5 h-4.5 stroke-[1.8] ${post.isSaved ? 'fill-[#C5A880] text-[#C5A880]' : ''}`} />
         </button>
       </div>
 
-      {/* 2. LIKES COUNT (INSTAGRAM FORMAT) */}
-      <div className="text-xs font-sans font-semibold text-white pt-0.5">
+      {/* 2. LIKES COUNT */}
+      <div className="text-xs font-sans font-medium text-[#F1EFEA] pt-0.5">
         {post.likesCount > 0 ? (
           <span>{post.likesCount.toLocaleString()} beğenme</span>
         ) : (
-          <span className="font-normal text-zinc-400">İlk beğenen sen ol</span>
+          <span className="font-normal text-[#9A9996]">İlk beğenen sen ol</span>
         )}
       </div>
 

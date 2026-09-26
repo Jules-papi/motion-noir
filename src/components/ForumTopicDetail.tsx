@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  ThumbsUp, 
-  ThumbsDown, 
-  MessageSquare, 
-  Eye, 
-  Crown, 
-  Send, 
-  ShieldAlert 
+import {
+  ArrowLeft,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquare,
+  Eye,
+  Crown,
+  Send,
+  ShieldAlert
 } from 'lucide-react';
 import { ForumTopic, UserProfile } from '../types';
 
@@ -38,7 +38,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
   };
 
   return (
-    <div className="bg-[#121419] border border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xl space-y-6">
+    <div className="bg-[#111113] border border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xl space-y-6">
       {/* Detail Header */}
       <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
         <button
@@ -70,7 +70,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
             <div className="flex items-center gap-1.5 font-sans font-medium text-sm text-white">
               <span>{topic.author.name}</span>
               {topic.author.membershipTier === 'vip' && (
-                <Crown className="w-3.5 h-3.5 text-[#E5C590]" />
+                <Crown className="w-3.5 h-3.5 text-[#C5A880]" />
               )}
             </div>
             <span className="text-[11px] font-mono text-zinc-500">{topic.createdAt}</span>
@@ -90,7 +90,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
           {topic.tags.map(tag => (
             <span
               key={tag}
-              className="text-[11px] px-2.5 py-1 rounded-full bg-[#181B22] border border-white/10 text-zinc-400 font-sans font-medium"
+              className="text-[11px] px-2.5 py-1 rounded-full bg-[#1A1A1E] border border-white/10 text-zinc-400 font-sans font-medium"
             >
               #{tag}
             </span>
@@ -102,7 +102,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onUpvoteTopic(topic.id)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#181B22] hover:bg-[#222631] text-white border border-white/10 font-sans font-medium text-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1A1A1E] hover:bg-[#1A1A1E] text-white border border-white/10 font-sans font-medium text-xs transition-colors cursor-pointer"
             >
               <ThumbsUp className="w-3.5 h-3.5 text-zinc-300" />
               <span>{topic.upvotes} Affirm</span>
@@ -119,7 +119,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
       {/* Replies Section */}
       <div className="space-y-4 pt-4 border-t border-white/[0.06]">
         <h4 className="font-sans font-medium text-sm text-white flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#E5C590]" />
+          <MessageSquare className="w-4 h-4 text-[#C5A880]" />
           <span>Chamber Discussions ({topic.replies.length})</span>
         </h4>
 
@@ -130,7 +130,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
             value={replyText}
             onChange={e => setReplyText(e.target.value)}
             placeholder="Contribute discreet perspective..."
-            className="flex-1 py-2.5 px-4 text-xs rounded-full bg-[#181B22] border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-white/20"
+            className="flex-1 py-2.5 px-4 text-xs rounded-full bg-[#1A1A1E] border border-white/[0.08] text-white placeholder-zinc-500 focus:outline-none focus:border-white/20"
           />
           <button
             type="submit"
@@ -147,7 +147,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
           {topic.replies.map(reply => (
             <div
               key={reply.id}
-              className="p-3.5 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-2"
+              className="p-3.5 rounded-xl bg-[#1A1A1E] border border-white/[0.06] space-y-2"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export const ForumTopicDetail: React.FC<ForumTopicDetailProps> = ({
                     {reply.author.name}
                   </span>
                   {reply.author.membershipTier === 'vip' && (
-                    <Crown className="w-3 h-3 text-[#E5C590]" />
+                    <Crown className="w-3 h-3 text-[#C5A880]" />
                   )}
                 </div>
                 <span className="text-[10px] font-mono text-zinc-500">{reply.createdAt}</span>

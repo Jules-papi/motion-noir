@@ -6,7 +6,7 @@
 * framework: React 18 + Vite + Tailwind CSS
 * browser: Chromium / Google Chrome
 * viewport: 1440x900
-* timestamp: 2026-09-20T00:21:59.432Z
+* timestamp: 2026-09-25T22:02:55.600Z
 
 ## Functional
 
@@ -14,7 +14,7 @@ PASS
 
 ## Visual
 
-PASS
+FAIL
 
 ## Responsive
 
@@ -49,14 +49,20 @@ PASS
 * None
 
 ### MEDIUM
-* None
+* **[Visual]** [InteractiveCollision] Interactive elements overlap significantly by 576px²
 
 ### LOW
 * None
 
 ## Evidence
 
-All automated checks passed with no blocking issues detected.
+### Case 1: [InteractiveCollision] Interactive elements overlap significantly by 576px²
+* **route**: /
+* **viewport**: 1440x900
+* **element**: `input & button`
+* **problem**: [InteractiveCollision] Interactive elements overlap significantly by 576px²
+* **screenshot**: visual-1790373784238.png
+* **probable cause**: CSS styling conflict
 
 ## Final Status
 

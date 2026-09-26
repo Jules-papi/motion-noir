@@ -19,19 +19,19 @@ export const PostLockedOverlay: React.FC<PostLockedOverlayProps> = ({
   return (
     <div className="relative mx-4 sm:mx-5 mb-4 rounded-xs overflow-hidden bg-[#09090b] border border-white/[0.08] min-h-[360px] flex items-center justify-center group">
       {/* Blurred Background Preview - Secure Generic Silhouette Placeholder (inspect-safe) */}
-      <img 
-        src={SECURE_LOCKED_BLUR_PLACEHOLDER} 
-        alt="Confidential plate preview" 
+      <img
+        src={SECURE_LOCKED_BLUR_PLACEHOLDER}
+        alt="Confidential plate preview"
         className="absolute inset-0 w-full h-full object-cover filter blur-3xl scale-110 opacity-45 select-none pointer-events-none"
       />
-      
+
       <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/85 to-[#09090b]/50" />
 
       {/* Locked Overlay Content */}
       <div className="relative z-10 max-w-sm p-6 text-center text-stone-200 flex flex-col items-center">
         {post.isPPV ? (
           <>
-            <div className="w-12 h-12 rounded-xs bg-[#161512] border border-amber-600/40 flex items-center justify-center mb-4 text-amber-200 shadow-lg">
+            <div className="w-12 h-12 rounded-xs bg-[#1A1A1E] border border-amber-600/40 flex items-center justify-center mb-4 text-amber-200 shadow-lg">
               <KeyRound className="w-5 h-5 stroke-[1.5]" />
             </div>
             <span className="text-[10px] font-mono tracking-[0.22em] uppercase text-amber-300/90 mb-1">
@@ -45,7 +45,7 @@ export const PostLockedOverlay: React.FC<PostLockedOverlayProps> = ({
             </p>
 
             {post.exclusivePerks && (
-              <div className="w-full bg-[#121215] border border-white/[0.06] rounded-xs p-3 mb-5 text-left text-xs space-y-1.5">
+              <div className="w-full bg-[#111113] border border-white/[0.06] rounded-xs p-3 mb-5 text-left text-xs space-y-1.5">
                 {post.exclusivePerks.map((perk, i) => (
                   <div key={i} className="flex items-center gap-2 text-stone-300 text-[11px] font-sans">
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-400/80 shrink-0" />
@@ -68,7 +68,7 @@ export const PostLockedOverlay: React.FC<PostLockedOverlayProps> = ({
           </>
         ) : (
           <>
-            <div className="w-12 h-12 rounded-xs bg-[#161512] border border-amber-600/40 flex items-center justify-center mb-4 text-amber-200 shadow-lg">
+            <div className="w-12 h-12 rounded-xs bg-[#1A1A1E] border border-amber-600/40 flex items-center justify-center mb-4 text-amber-200 shadow-lg">
               <Crown className="w-5 h-5 stroke-[1.5]" />
             </div>
             <span className="text-[10px] font-mono tracking-[0.22em] uppercase text-amber-300/90 mb-1">

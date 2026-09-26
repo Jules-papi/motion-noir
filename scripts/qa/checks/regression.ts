@@ -6,7 +6,7 @@ import pixelmatch from 'pixelmatch';
 import { QAIssue } from '../types';
 import { BASELINES_DIR, SCREENSHOTS_DIR } from '../utils';
 
-export async function runRegressionCheck(page: Page, route: string = '/'): Promise<QAIssue[]> {
+export async function runRegressionCheck(page: Page, targetUrl: string, route: string = '/'): Promise<QAIssue[]> {
   const issues: QAIssue[] = [];
 
   const baselinePath = path.join(BASELINES_DIR, 'baseline-desktop.png');
@@ -15,7 +15,7 @@ export async function runRegressionCheck(page: Page, route: string = '/'): Promi
 
   // Set fixed viewport for deterministic regression check
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(page.url(), { waitUntil: 'networkidle' });
+  await page.goto(targetUrl, { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
 
   // Capture current screenshot

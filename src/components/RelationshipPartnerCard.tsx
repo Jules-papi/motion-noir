@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  Heart, 
-  ShieldCheck, 
-  Key, 
-  Check, 
+import {
+  Heart,
+  ShieldCheck,
+  Key,
+  Check,
   ExternalLink,
   Users
 } from 'lucide-react';
@@ -57,11 +57,11 @@ export const RelationshipPartnerCard: React.FC<RelationshipPartnerCardProps> = (
   };
 
   return (
-    <div className="rounded-2xl bg-[#121419] border border-white/[0.08] p-6 sm:p-8 space-y-6 shadow-xl">
+    <div className="rounded-2xl bg-[#111113] border border-white/[0.08] p-6 sm:p-8 space-y-6 shadow-xl">
       {/* Editorial Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
         <div className="space-y-1">
-          <span className="text-[10px] font-mono tracking-[0.25em] text-[#E5C590] uppercase block">
+          <span className="text-[10px] font-mono tracking-[0.25em] text-[#C5A880] uppercase block">
             Duo Dossier & Attestation
           </span>
           <h3 className="font-serif text-xl sm:text-2xl text-white font-normal tracking-tight">
@@ -80,7 +80,7 @@ export const RelationshipPartnerCard: React.FC<RelationshipPartnerCardProps> = (
       {/* Duo Photography & Personas Split */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* Partner A */}
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-[#181B22] border border-white/[0.06]">
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-[#1A1A1E] border border-white/[0.06]">
           <img
             src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
             alt="Alexander"
@@ -94,7 +94,7 @@ export const RelationshipPartnerCard: React.FC<RelationshipPartnerCardProps> = (
         </div>
 
         {/* Partner B */}
-        <div className="flex items-center justify-between p-4 rounded-xl bg-[#181B22] border border-white/[0.06]">
+        <div className="flex items-center justify-between p-4 rounded-xl bg-[#1A1A1E] border border-white/[0.06]">
           <div className="flex items-center gap-4">
             <img
               src={partner?.partnerAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
@@ -121,12 +121,12 @@ export const RelationshipPartnerCard: React.FC<RelationshipPartnerCardProps> = (
       </div>
 
       {/* Shared Ethos & Joint Preferences */}
-      <div className="p-4 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-3">
+      <div className="p-4 rounded-xl bg-[#1A1A1E] border border-white/[0.06] space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-xs text-white font-medium font-serif">
             Joint Salon Participation & Protocol
           </span>
-          <span className="text-[11px] font-mono text-[#E5C590]">
+          <span className="text-[11px] font-mono text-[#C5A880]">
             Shared RSVP & Dual Check-In Enabled
           </span>
         </div>

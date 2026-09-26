@@ -4,21 +4,24 @@ import { MediaModal } from './MediaModal';
 import { CommentsModal } from './CommentsModal';
 import { ReportModal } from './ReportModal';
 import { NotificationsDrawer } from './NotificationsDrawer';
-import { AuthModal } from './AuthModal';
+import { AuthModal, type AuthMode } from './AuthModal';
 import { Post, Comment } from '../types';
 import { useSocialPlatform } from '../hooks/useSocialPlatform';
 import { noirApi } from '../services/noirApi';
 
 interface AppModalsProps {
   p: ReturnType<typeof useSocialPlatform>;
+  authMode?: AuthMode;
+  onRequestAuth: () => void;
   onSubmitPost: (postData: Partial<Post>) => void;
 }
 
-export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
+export const AppModals: React.FC<AppModalsProps> = ({ p, authMode = 'signin', onRequestAuth, onSubmitPost }) => {
   return (
     <>
       <AuthModal
         isOpen={p.isAuthOpen}
+        initialMode={authMode}
         onClose={() => p.setIsAuthOpen(false)}
         onAuthSuccess={(user) => {
           p.setCurrentUser({ ...user, isGuest: false });
@@ -62,7 +65,7 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
         onAddComment={async (postId, text) => {
           if (p.currentUser.isGuest) {
             p.showToast('Yorum yapmak için lütfen giriş yapın veya üye olun.', 'info');
-            p.setIsAuthOpen(true);
+            onRequestAuth();
             return;
           }
           try {
@@ -85,6 +88,12 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
             p.showToast('Yorum iletilirken bir hata oluştu.', 'error');
           }
         }}
+        onDeleteComment={(commentId) => {
+          if (p.selectedCommentsPost) {
+            p.handleDeleteComment(commentId, p.selectedCommentsPost.id);
+          }
+        }}
+        onOpenAuth={onRequestAuth}
       />
 
       {p.reportingTarget && (
@@ -117,7 +126,8 @@ export const AppModals: React.FC<AppModalsProps> = ({ p, onSubmitPost }) => {
         onClose={() => p.setIsNotificationsOpen(false)}
         notifications={p.notifications}
         onMarkAllAsRead={p.handleMarkAllNotificationsRead}
-        onSelectNotification={() => p.setIsNotificationsOpen(false)}
+        onSelectNotification={p.handleSelectNotification}
+        onRespondToFollowRequest={p.handleRespondToFollowRequest}
       />
     </>
   );
